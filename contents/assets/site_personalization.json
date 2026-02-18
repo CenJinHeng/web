@@ -1,0 +1,15 @@
+{
+  "navBrandTextZh": "劲衡的空间",
+  "navBrandTextEn": "Jinheng's Web",
+  "footerEnabled": true,
+  "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\">由劲衡设计和开发</p><p style=\"text-align: center;\">Designed and developed by Jinheng</p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
+  "footerHtmlEn": "",
+  "footerBgRangesZh": [
+    {
+      "start": 1,
+      "end": 5,
+      "color": "#f5f2ed"
+    }
+  ],
+  "footerBgRangesEn": []
+}

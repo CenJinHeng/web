@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>项目目录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="core/styles.css">
+</head>
+<body data-page="projects">
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-label" id="site-brand-text">XXX的个人空间</span>
+      </div>
+      <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
+        <a class="nav-btn is-active" aria-current="page" href="index.html" data-i18n="nav.projects">项目</a>
+        <a class="nav-btn" href="contents/aboutme/index.html" data-i18n="nav.about">关于我</a>
+        <button class="lang-toggle" type="button" data-lang-toggle data-i18n-attr="aria-label:nav.langToggleAria">EN</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="sr-only" data-i18n="page.title">项目目录</h1>
+    <section class="filters">
+      <div id="filter-buttons" class="filter-buttons" role="group" data-i18n-attr="aria-label:filters.ariaLabel">
+      </div>
+    </section>
+
+    <section class="projects">
+      <div id="project-grid" class="masonry" aria-live="polite"></div>
+      <div id="empty-state" class="empty-state" hidden data-i18n="projects.empty">暂无项目</div>
+    </section>
+
+    <section id="site-footer-copy" class="site-footer-copy" hidden></section>
+  </main>
+
+  <div id="local-open-modal" class="local-open-modal" hidden>
+    <div class="local-open-dialog" role="dialog" aria-modal="true" aria-labelledby="local-open-title">
+      <h2 id="local-open-title">请选择 `contents` 文件夹</h2>
+      <p class="local-open-intro">
+        你现在是直接打开 HTML 文件。为了读取你的项目内容，需要你手动授权一次 `contents` 文件夹。
+      </p>
+      <div class="local-open-actions">
+        <button id="local-open-pick" class="editor-primary" type="button">选择 `contents` 文件夹</button>
+        <button id="local-open-later" class="editor-secondary" type="button">稍后再说</button>
+      </div>
+      <p id="local-open-status" class="local-open-status" role="status" aria-live="polite"></p>
+      <details class="local-open-help">
+        <summary>为什么会这样？（点击展开）</summary>
+        <div class="local-open-help-body">
+          <p>直接双击 HTML 打开时，浏览器会默认保护你的本地文件，不允许网页自动读取整个文件夹。</p>
+          <p>这不是你操作的问题，是浏览器的安全规则。</p>
+          <p>上线到网站后（例如部署到 Netlify、Vercel、GitHub Pages），页面会通过正常网址访问，就不需要这一步了。</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script src="core/script.js" defer></script>
+</body>
+</html>
