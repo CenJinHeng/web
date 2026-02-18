@@ -399,11 +399,6 @@ button {
   will-change: transform, opacity;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  z-index: 2;
-}
-
 .card-media {
   background: #f0ede8;
 }
@@ -604,9 +599,22 @@ button {
     align-items: center;
   }
 
+  .top-nav {
+    align-self: stretch;
+  }
+
   .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
     font-size: 0.95rem;
     line-height: 1;
+  }
+
+  .nav-btn::after {
+    bottom: 0;
   }
 
   .brand-label {
@@ -691,6 +699,36 @@ button {
 
   .top-nav {
     gap: 18px;
+  }
+
+  .card-meta {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 2px;
+    column-gap: 8px;
+  }
+
+  .card-meta.is-stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: 2px;
+    column-gap: 0;
+  }
+
+  .card-meta > :first-child {
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-meta time {
+    white-space: nowrap;
+  }
+
+  .card-meta.is-stacked .meta-dot {
+    display: none;
   }
 
   .site-footer-copy {

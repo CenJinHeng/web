@@ -989,6 +989,10 @@ function setupOutline() {
   } else if (!outline.id) {
     outline.id = "detail-outline-panel";
   }
+  if (!outline.classList.contains("is-open")) {
+    outline.setAttribute("aria-hidden", "true");
+    outline.setAttribute("inert", "");
+  }
 
   let toggle = detailMain.querySelector(".detail-outline-toggle");
   if (!toggle) {
@@ -998,8 +1002,27 @@ function setupOutline() {
     toggle.setAttribute("aria-controls", outline.id);
     toggle.setAttribute("aria-expanded", "false");
     toggle.dataset.i18nAttr = "aria-label:detail.outlineToggle,title:detail.outlineToggle";
-    toggle.innerHTML = '<span aria-hidden="true">☰</span>';
     detailMain.appendChild(toggle);
+  }
+  if (!toggle.querySelector(".detail-outline-toggle-icon") || !toggle.querySelector(".detail-outline-toggle-label")) {
+    toggle.innerHTML = "";
+    const toggleIcon = document.createElement("span");
+    toggleIcon.className = "detail-outline-toggle-icon";
+    toggleIcon.setAttribute("aria-hidden", "true");
+    const toggleLabel = document.createElement("span");
+    toggleLabel.className = "detail-outline-toggle-label";
+    toggleLabel.dataset.i18n = "detail.outlineToggle";
+    toggleLabel.textContent = "提纲";
+    toggle.appendChild(toggleIcon);
+    toggle.appendChild(toggleLabel);
+  } else {
+    const toggleLabel = toggle.querySelector(".detail-outline-toggle-label");
+    if (toggleLabel) {
+      toggleLabel.dataset.i18n = "detail.outlineToggle";
+      if (!String(toggleLabel.textContent || "").trim()) {
+        toggleLabel.textContent = "提纲";
+      }
+    }
   }
 
   let backdrop = detailMain.querySelector(".detail-outline-backdrop");
@@ -1032,10 +1055,11 @@ function setupOutline() {
       if (currentOutline.contains(event.target) || currentToggle.contains(event.target)) return;
       closeOutlineMobile();
     });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeOutlineMobile();
+    });
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 720) {
-        closeOutlineMobile();
-      }
       refreshDetailRangeHorizontalLayout();
       refreshDetailTopFillByCurrentState();
       queueOutlineContrastUpdate();
@@ -1281,6 +1305,8 @@ function closeOutlineMobile() {
   const backdrop = document.querySelector(".detail-outline-backdrop");
   if (!outline || !toggle) return;
   outline.classList.remove("is-open");
+  outline.setAttribute("aria-hidden", "true");
+  outline.setAttribute("inert", "");
   toggle.classList.remove("is-active");
   if (backdrop) {
     backdrop.classList.remove("is-active");
@@ -1296,11 +1322,17 @@ function toggleOutlineMobile() {
   if (!outline || !toggle) return;
   const shouldOpen = !outline.classList.contains("is-open");
   outline.classList.toggle("is-open", shouldOpen);
+  outline.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+  if (shouldOpen) {
+    outline.removeAttribute("inert");
+  } else {
+    outline.setAttribute("inert", "");
+  }
   toggle.classList.toggle("is-active", shouldOpen);
   if (backdrop) {
     backdrop.classList.toggle("is-active", shouldOpen);
   }
-  document.body.classList.toggle("detail-outline-open", shouldOpen && window.innerWidth <= 720);
+  document.body.classList.toggle("detail-outline-open", shouldOpen);
   toggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
 }
 

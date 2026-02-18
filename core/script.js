@@ -1168,9 +1168,11 @@ function layoutMasonry() {
     ? containerWidth
     : (containerWidth - gap * (columnCount - 1)) / columnCount;
   const heights = new Array(columnCount).fill(0);
+  const shouldCheckMetaWrap = window.matchMedia("(max-width: 520px)").matches;
 
   cards.forEach((card) => {
     card.style.width = `${columnWidth}px`;
+    updateCardMetaLayout(card, shouldCheckMetaWrap);
 
     let targetColumn = 0;
     for (let i = 1; i < columnCount; i += 1) {
@@ -1191,6 +1193,31 @@ function layoutMasonry() {
   const tallest = Math.max(...heights);
   grid.style.height = `${Math.max(tallest - gap, 0)}px`;
   updateFooterBackgroundExtent();
+}
+
+function updateCardMetaLayout(card, shouldCheckMetaWrap) {
+  const meta = card.querySelector(".card-meta");
+  if (!meta) return;
+  if (!shouldCheckMetaWrap) {
+    meta.classList.remove("is-stacked");
+    return;
+  }
+
+  const dot = meta.querySelector(".meta-dot");
+  const time = meta.querySelector("time");
+  if (!dot || !time) {
+    meta.classList.remove("is-stacked");
+    return;
+  }
+
+  meta.classList.remove("is-stacked");
+
+  const children = Array.from(meta.children).filter((child) => child instanceof HTMLElement);
+  if (children.length < 2) return;
+
+  const firstTop = children[0].offsetTop;
+  const wrapped = children.some((child) => child.offsetTop > firstTop + 1);
+  meta.classList.toggle("is-stacked", wrapped);
 }
 
 function buildCard(project, index) {
