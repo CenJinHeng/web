@@ -589,23 +589,19 @@ button {
 
 @media (max-width: 720px) {
   :root {
-    --nav-height: 88px;
+    --nav-height: 44px;
     --card-width: 200px;
     --card-gap: 18px;
   }
 
-  .site-header {
-    padding-top: env(safe-area-inset-top);
-  }
-
   .header-inner {
-    align-items: flex-end;
+    align-items: center;
     min-height: var(--nav-height);
-    padding-bottom: 4px;
+    padding-bottom: 0;
   }
 
   .brand {
-    align-items: flex-end;
+    align-items: center;
   }
 
   .nav-btn {

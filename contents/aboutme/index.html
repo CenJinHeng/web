@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>关于我</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../core/styles.css">
+  <link rel="stylesheet" href="../../aboutme/about.css">
+</head>
+<body data-page="about" data-title-zh="关于我" data-title-en="About" data-notice-zh="暂无内容，请先导入 contents 文件夹。" data-notice-en="No content found. Please import the contents folder first.">
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-label" id="site-brand-text">XXX的个人空间</span>
+      </div>
+      <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
+        <a class="nav-btn" href="../../index.html" data-i18n="nav.projects">项目</a>
+        <a class="nav-btn is-active" aria-current="page" href="index.html" data-i18n="nav.about">关于我</a>
+        <button class="lang-toggle" type="button" data-lang-toggle data-i18n-attr="aria-label:nav.langToggleAria">EN</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container about-main">
+    <section class="about-status">
+      <article id="about-content" class="about-content" hidden></article>
+      <p id="about-notice" class="about-notice" data-i18n="about.notice">暂无内容，请先导入 contents 文件夹。</p>
+    </section>
+    <section id="site-footer-copy" class="site-footer-copy" hidden></section>
+  </main>
+
+  <template id="about-content-zh-template"><p><br></p><p><br></p><p style="text-align: center;"><font size="5">页面开发中，敬请期待～</font></p></template>
+  <template id="about-content-en-template">No content found. Please import the contents folder first.</template>
+  <template id="about-bg-ranges-zh-template">[]</template>
+  <template id="about-bg-ranges-en-template">[]</template>
+  <script src="../../aboutme/about.js" defer></script>
+</body>
+</html>

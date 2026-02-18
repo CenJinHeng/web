@@ -1,4 +1,5 @@
 const PERSONALIZATION_FILE = "../assets/site_personalization.json";
+const ABOUT_DATA_FILE = "./about-data.js";
 const DEFAULT_PERSONALIZATION = Object.freeze({
   navBrandTextZh: "XXX的个人空间",
   navBrandTextEn: "XXX's Space",
@@ -19,7 +20,7 @@ const aboutBgRangesEnTemplate = document.getElementById("about-bg-ranges-en-temp
 const siteBrandText = document.getElementById("site-brand-text");
 const projectsNavLink = document.querySelector(".top-nav .nav-btn[data-i18n='nav.projects']");
 const siteFooterCopy = document.getElementById("site-footer-copy");
-const hasTemplateContent = Boolean(aboutZhTemplate || aboutEnTemplate);
+let hasTemplateContent = Boolean(aboutZhTemplate || aboutEnTemplate);
 
 const DEFAULT_ABOUT_I18N = {
   zh: {
@@ -52,13 +53,18 @@ const DEFAULT_ABOUT_I18N = {
 
 const state = {
   lang: detectLanguage(),
-  personalization: cloneDefaultPersonalization()
+  personalization: cloneDefaultPersonalization(),
+  aboutDataLoaded: Boolean(window.ABOUT_I18N && typeof window.ABOUT_I18N === "object")
 };
 
-const aboutBgRangesByLang = {
+let aboutBgRangesByLang = {
   zh: parseLineRangesTemplate(aboutBgRangesZhTemplate ? aboutBgRangesZhTemplate.innerHTML : ""),
   en: parseLineRangesTemplate(aboutBgRangesEnTemplate ? aboutBgRangesEnTemplate.innerHTML : "")
 };
+
+if (state.aboutDataLoaded) {
+  applyAboutDataFromWindow();
+}
 
 applyI18n(state.lang);
 updateLangToggle();
@@ -103,7 +109,7 @@ function getLocaleStrings(lang) {
 }
 
 function getPageTitle(lang, strings) {
-  if (hasTemplateContent) {
+  if (hasTemplateContent && !state.aboutDataLoaded) {
     const custom = lang === "zh" ? document.body?.dataset.titleZh : document.body?.dataset.titleEn;
     const text = String(custom || "").trim();
     if (text) return text;
@@ -112,7 +118,7 @@ function getPageTitle(lang, strings) {
 }
 
 function getNoticeText(lang, strings) {
-  if (hasTemplateContent) {
+  if (hasTemplateContent && !state.aboutDataLoaded) {
     const custom = lang === "zh" ? document.body?.dataset.noticeZh : document.body?.dataset.noticeEn;
     const text = String(custom || "").trim();
     if (text) return text;
@@ -222,7 +228,7 @@ function renderAboutContent(lang, strings) {
 
   let html = "";
   let ranges = [];
-  if (hasTemplateContent) {
+  if (hasTemplateContent && !state.aboutDataLoaded) {
     const payload = getTemplatePayload(lang);
     html = payload.html;
     ranges = payload.ranges;
@@ -231,7 +237,10 @@ function renderAboutContent(lang, strings) {
     const fallbackStrings = getLocaleStrings(fallbackLang);
     const primaryHtml = sanitizeAboutHtml(strings?.about?.content_html || "");
     const fallbackHtml = sanitizeAboutHtml(fallbackStrings?.about?.content_html || "");
+    const primaryRanges = normalizeLineRanges(strings?.about?.bg_ranges ?? strings?.about?.bgRanges ?? []);
+    const fallbackRanges = normalizeLineRanges(fallbackStrings?.about?.bg_ranges ?? fallbackStrings?.about?.bgRanges ?? []);
     html = primaryHtml || fallbackHtml;
+    ranges = primaryRanges.length ? primaryRanges : fallbackRanges;
   }
 
   const notice = getNoticeText(lang, strings);
@@ -300,8 +309,44 @@ function parsePersonalizationText(text) {
 }
 
 async function bootstrap() {
+  await loadAboutData();
   await loadPersonalization();
+  applyI18n(state.lang);
+  updateLangToggle();
   applyPersonalization();
+}
+
+async function loadAboutData() {
+  if (state.aboutDataLoaded) {
+    applyAboutDataFromWindow();
+    return;
+  }
+  try {
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `${ABOUT_DATA_FILE}?v=${Date.now()}`;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => resolve();
+      document.head.appendChild(script);
+    });
+    state.aboutDataLoaded = Boolean(window.ABOUT_I18N && typeof window.ABOUT_I18N === "object");
+    if (state.aboutDataLoaded) {
+      applyAboutDataFromWindow();
+    }
+  } catch (error) {
+    state.aboutDataLoaded = false;
+  }
+}
+
+function applyAboutDataFromWindow() {
+  const source = (window.ABOUT_I18N && typeof window.ABOUT_I18N === "object") ? window.ABOUT_I18N : null;
+  if (!source) return;
+  hasTemplateContent = false;
+  aboutBgRangesByLang = {
+    zh: normalizeLineRanges(source?.zh?.about?.bg_ranges ?? source?.zh?.about?.bgRanges ?? []),
+    en: normalizeLineRanges(source?.en?.about?.bg_ranges ?? source?.en?.about?.bgRanges ?? [])
+  };
 }
 
 async function loadPersonalization() {
