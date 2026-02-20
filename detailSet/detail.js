@@ -170,7 +170,7 @@ function applyI18n(lang) {
   }
 
   if (typeEl) {
-    typeEl.textContent = getTypeLabel(type);
+    renderDetailType(typeEl, type);
   }
 
   if (meta) {
@@ -181,6 +181,23 @@ function applyI18n(lang) {
   document.title = (lang === "zh" ? titleZh : titleEn) || document.title;
   renderPrevNext();
   renderOutline();
+}
+
+function renderDetailType(typeEl, typeId) {
+  if (!(typeEl instanceof HTMLElement)) return;
+  const label = getTypeLabel(typeId);
+  typeEl.innerHTML = "";
+  typeEl.hidden = !label;
+  if (!label) return;
+  if (!typeId) {
+    typeEl.textContent = label;
+    return;
+  }
+  const link = document.createElement("a");
+  link.className = "detail-type-link";
+  link.href = getTypeFilterHref(typeId);
+  link.textContent = label;
+  typeEl.appendChild(link);
 }
 
 function getDetailMeta() {
@@ -270,16 +287,62 @@ function getWebPreviewSourceFromWrapper(wrapper) {
   return "";
 }
 
-function applyResponsiveWebPreviewWrapperStyle(wrapper) {
+function parseInlinePx(value) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (!raw) return null;
+  const pxMatch = raw.match(/([0-9]+(?:\.[0-9]+)?)px/);
+  if (pxMatch) {
+    const numeric = Number.parseFloat(pxMatch[1]);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  }
+  if (raw.endsWith("px")) {
+    const numeric = Number.parseFloat(raw);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  }
+  if (/^\d+(\.\d+)?$/.test(raw)) {
+    const numeric = Number.parseFloat(raw);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  }
+  return null;
+}
+
+function applyResponsiveImageWrapperStyle(wrapper) {
   if (!(wrapper instanceof HTMLElement)) return;
-  const rawWidth = Number.parseFloat(wrapper.style.width || "");
-  const rawHeight = Number.parseFloat(wrapper.style.height || "");
-  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : 480;
-  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : 300;
-  wrapper.style.width = `min(100%, ${Math.round(width)}px)`;
+  const widthPx = parseInlinePx(wrapper.style.width);
+  const heightPx = parseInlinePx(wrapper.style.height);
+  const ratioData = Number.parseFloat(String(wrapper.dataset.ratio || ""));
+
+  if (Number.isFinite(widthPx) && widthPx > 0) {
+    wrapper.style.width = `min(100%, ${Math.round(widthPx)}px)`;
+  } else {
+    wrapper.style.width = "100%";
+  }
   wrapper.style.maxWidth = "100%";
+
   wrapper.style.height = "auto";
-  wrapper.style.aspectRatio = `${Math.max(1, Math.round(width))} / ${Math.max(1, Math.round(height))}`;
+
+  if (Number.isFinite(widthPx) && widthPx > 0 && Number.isFinite(heightPx) && heightPx > 0) {
+    wrapper.style.aspectRatio = `${Math.max(1, Math.round(widthPx))} / ${Math.max(1, Math.round(heightPx))}`;
+    return;
+  }
+
+  if (Number.isFinite(ratioData) && ratioData > 0) {
+    wrapper.style.aspectRatio = `${1 / ratioData}`;
+    return;
+  }
+
+  wrapper.style.removeProperty("aspect-ratio");
+}
+
+function applyResponsiveWebPreviewWrapperStyle(wrapper) {
+  applyResponsiveImageWrapperStyle(wrapper);
+}
+
+function applyResponsiveImageWrappers(container) {
+  if (!(container instanceof HTMLElement)) return;
+  container.querySelectorAll(".image-wrapper").forEach((wrapper) => {
+    applyResponsiveImageWrapperStyle(wrapper);
+  });
 }
 
 function renderWebPreviewWrappers(container) {
@@ -307,6 +370,7 @@ function renderDetailContent(lang) {
   if (!detailContent || !hasTemplateContent) return;
   const payload = getTemplateDetailPayload(lang);
   detailContent.innerHTML = payload.html;
+  applyResponsiveImageWrappers(detailContent);
   renderWebPreviewWrappers(detailContent);
   applyLineDecorations(detailContent, payload.ranges);
   queueNavThemeUpdate();
@@ -916,15 +980,11 @@ function compareProjectsByDisplayOrder(a, b) {
 function updateBackLink() {
   if (!backLink) return;
   const { type } = getDetailMeta();
-  const url = new URL("../../../index.html", window.location.href);
-
   if (backToAll) {
-    url.searchParams.set("filter", "all");
-  } else if (type) {
-    url.searchParams.set("filter", type);
+    backLink.href = getTypeFilterHref("all");
+    return;
   }
-
-  backLink.href = url.pathname + url.search;
+  backLink.href = type ? getTypeFilterHref(type) : getTypeFilterHref("");
 }
 
 function getDetailLink(project) {
@@ -933,6 +993,15 @@ function getDetailLink(project) {
     return `${base}?from=all`;
   }
   return base;
+}
+
+function getTypeFilterHref(typeId) {
+  const url = new URL("../../../index.html", window.location.href);
+  const normalized = String(typeId || "").trim();
+  if (normalized) {
+    url.searchParams.set("filter", normalized);
+  }
+  return url.pathname + url.search;
 }
 
 function getTypeLabel(typeId) {
@@ -1115,13 +1184,48 @@ function renderOutline() {
     const link = document.createElement("a");
     link.href = `#${id}`;
     link.textContent = String(heading.textContent || "").trim();
-    link.addEventListener("click", () => closeOutlineMobile());
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeOutlineMobile();
+      scrollToHeadingWithNavOffset(id);
+    });
 
     item.appendChild(link);
     list.appendChild(item);
   });
 
   queueOutlineContrastUpdate();
+}
+
+function getNavOffsetHeight() {
+  if (siteHeader instanceof HTMLElement) {
+    const rect = siteHeader.getBoundingClientRect();
+    if (Number.isFinite(rect.height) && rect.height > 0) {
+      return rect.height;
+    }
+  }
+  const fallback = Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--nav-height")
+  );
+  return Number.isFinite(fallback) && fallback > 0 ? fallback : 44;
+}
+
+function scrollToHeadingWithNavOffset(id) {
+  const target = document.getElementById(id);
+  if (!(target instanceof HTMLElement)) return;
+
+  const navOffset = getNavOffsetHeight() + 12;
+  const targetTop = window.scrollY + target.getBoundingClientRect().top - navOffset;
+  const top = Math.max(0, Math.round(targetTop));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({
+    top,
+    behavior: reduceMotion ? "auto" : "smooth"
+  });
+
+  const nextUrl = new URL(window.location.href);
+  nextUrl.hash = id;
+  window.history.replaceState(null, "", nextUrl.toString());
 }
 
 function isDarkColor(color) {

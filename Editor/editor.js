@@ -133,6 +133,7 @@ const i18n = {
       columnsApply: "插入分栏",
       columnsMoveUp: "移动到上一行",
       columnsMoveDown: "移动到下一行",
+      columnsDelete: "删除分栏",
       columnsExitEdit: "退出分栏编辑",
       columnsCountInvalid: "请输入 2-6 的分栏数",
       bgRangeTitle: "按行设置背景",
@@ -375,6 +376,7 @@ const i18n = {
       columnsApply: "Insert Columns",
       columnsMoveUp: "Move Up",
       columnsMoveDown: "Move Down",
+      columnsDelete: "Delete Columns",
       columnsExitEdit: "Exit Column Edit",
       columnsCountInvalid: "Please enter a column count between 2 and 6",
       bgRangeTitle: "Set Background By Line",
@@ -966,6 +968,7 @@ const elements = {
   columnsCancel: document.getElementById("columns-cancel"),
   columnsEditMoveUp: document.getElementById("columns-edit-move-up"),
   columnsEditMoveDown: document.getElementById("columns-edit-move-down"),
+  columnsEditDelete: document.getElementById("columns-edit-delete"),
   insertButtonPopover: document.getElementById("insert-button-popover"),
   insertButtonText: document.getElementById("insert-button-text"),
   insertButtonLinkType: document.getElementById("insert-button-link-type"),
@@ -1669,6 +1672,11 @@ if (elements.columnsEditMoveDown) {
     moveColumnsEditBlock("down");
   });
 }
+if (elements.columnsEditDelete) {
+  elements.columnsEditDelete.addEventListener("click", () => {
+    deleteColumnsEditBlock();
+  });
+}
 if (elements.insertButtonLinkType) {
   elements.insertButtonLinkType.addEventListener("change", () => {
     updateInsertButtonTargetField();
@@ -1689,6 +1697,9 @@ if (elements.insertButtonPopover) {
     if (event.key === "Escape") {
       event.preventDefault();
       hideInsertButtonPopover();
+      return;
+    }
+    if (event.isComposing || event.key === "Process" || event.keyCode === 229) {
       return;
     }
     if (event.key === "Enter" && event.target instanceof HTMLElement && event.target.tagName !== "SELECT") {
@@ -2261,6 +2272,16 @@ if (elements.detailLineGutter) {
 elements.toggleCrop.addEventListener("click", () => toggleCrop());
 elements.imageWidth.addEventListener("input", () => updateSelectedImage("width"));
 elements.imageHeight.addEventListener("input", () => updateSelectedImage("height"));
+elements.imageWidth.addEventListener("blur", () => {
+  if (state.selectedImage instanceof HTMLElement) {
+    syncImageInputs(state.selectedImage);
+  }
+});
+elements.imageHeight.addEventListener("blur", () => {
+  if (state.selectedImage instanceof HTMLElement) {
+    syncImageInputs(state.selectedImage);
+  }
+});
 if (elements.imageAlignLeft) {
   elements.imageAlignLeft.addEventListener("click", () => setSelectedImageAlignment("left"));
 }
@@ -3892,6 +3913,50 @@ function moveColumnsEditBlock(direction) {
   positionColumnsEditFloat();
 }
 
+function deleteColumnsEditBlock() {
+  const context = state.columnsEditContext;
+  const editor = getEditorElementForContext(context);
+  const block = state.columnsEditBlock;
+  if (!(editor instanceof HTMLElement) || !(block instanceof HTMLElement)) return;
+  if (!editor.contains(block)) return;
+
+  const parent = block.parentNode;
+  if (!(parent instanceof Node)) return;
+
+  const nextSibling = getMovableColumnsSibling(block, "down");
+  const prevSibling = getMovableColumnsSibling(block, "up");
+  block.remove();
+
+  if (parent instanceof HTMLElement && parent.classList.contains("detail-columns-cell")) {
+    ensureColumnsCellPlaceholder(parent);
+  }
+
+  exitColumnsEditMode();
+
+  const selection = window.getSelection();
+  if (selection) {
+    const range = document.createRange();
+    const caretTarget = nextSibling || prevSibling;
+    if (caretTarget instanceof HTMLElement && editor.contains(caretTarget)) {
+      range.selectNodeContents(caretTarget);
+      range.collapse(false);
+    } else if (parent instanceof HTMLElement && editor.contains(parent)) {
+      range.selectNodeContents(parent);
+      range.collapse(false);
+    } else {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  editor.focus();
+  saveSelectionForContext(context);
+  persistDraftForContext(context);
+  queueLineNumberRefresh();
+}
+
 function isRangeInsideNode(range, node) {
   if (!(range instanceof Range) || !(node instanceof Node)) return false;
   return node.contains(range.startContainer) && node.contains(range.endContainer);
@@ -4482,6 +4547,96 @@ function parseDimensionPx(value, { allowZero = false } = {}) {
   return Math.round(numeric);
 }
 
+function parseLineNumberFromButtonAnchorTarget(rawTarget) {
+  const normalized = String(rawTarget || "").replace(/^#+/, "").trim();
+  if (!normalized) return null;
+  const directMatch = normalized.match(/^\d+$/);
+  if (directMatch) {
+    const line = Number.parseInt(directMatch[0], 10);
+    return Number.isFinite(line) && line >= 1 ? line : null;
+  }
+  const prefixedMatch = normalized.match(/^(?:line|footer-line)-(\d+)$/i);
+  if (!prefixedMatch) return null;
+  const line = Number.parseInt(prefixedMatch[1], 10);
+  return Number.isFinite(line) && line >= 1 ? line : null;
+}
+
+function createDynamicButtonAnchorId(doc) {
+  const ownerDocument = doc instanceof Document ? doc : document;
+  for (let index = 0; index < 20; index += 1) {
+    const id = `jump-anchor-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    if (!ownerDocument.getElementById(id)) {
+      return id;
+    }
+  }
+  return `jump-anchor-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
+}
+
+function getDynamicAnchorIdFromTextLineNeighbor(node) {
+  if (!(node instanceof Text)) return "";
+  let sibling = node.previousSibling;
+  while (sibling) {
+    if (sibling instanceof Text) {
+      if (String(sibling.textContent || "").trim()) {
+        return "";
+      }
+      sibling = sibling.previousSibling;
+      continue;
+    }
+    if (
+      sibling instanceof HTMLElement
+      && sibling.dataset.lineJumpAnchorMarker === "true"
+    ) {
+      return String(sibling.id || "").trim();
+    }
+    return "";
+  }
+  return "";
+}
+
+function ensureDynamicButtonAnchorForLine(context, lineNumber) {
+  const { editor } = getEditorAndGutterByContext(context);
+  if (!(editor instanceof HTMLElement)) return "";
+
+  const lineEntries = getLineEntriesForEditor(context, editor);
+  if (!lineEntries.length) return "";
+
+  const lineIndex = Math.max(0, Math.min(lineEntries.length - 1, Number(lineNumber) - 1));
+  const lineNode = lineEntries[lineIndex]?.anchorNode;
+  if (!(lineNode instanceof Node)) return "";
+
+  if (lineNode instanceof HTMLElement) {
+    const existingId = String(lineNode.id || "").trim();
+    if (existingId && !/^(line|footer-line)-\d+$/i.test(existingId)) {
+      return existingId;
+    }
+    const managedId = String(lineNode.dataset.lineJumpAnchorId || "").trim();
+    if (managedId && lineNode.id === managedId) {
+      return managedId;
+    }
+    const nextId = createDynamicButtonAnchorId(lineNode.ownerDocument || document);
+    lineNode.id = nextId;
+    lineNode.dataset.lineJumpAnchorId = nextId;
+    return nextId;
+  }
+
+  if (lineNode instanceof Text) {
+    const existingId = getDynamicAnchorIdFromTextLineNeighbor(lineNode);
+    if (existingId) return existingId;
+    const parent = lineNode.parentNode;
+    if (!parent) return "";
+    const marker = document.createElement("span");
+    const nextId = createDynamicButtonAnchorId(lineNode.ownerDocument || document);
+    marker.id = nextId;
+    marker.dataset.lineJumpAnchorMarker = "true";
+    marker.setAttribute("aria-hidden", "true");
+    parent.insertBefore(marker, lineNode);
+    return nextId;
+  }
+
+  return "";
+}
+
 function normalizeButtonHref(linkType, rawTarget, context = "") {
   const value = String(rawTarget || "").trim();
   if (!value) return "";
@@ -4508,6 +4663,20 @@ function normalizeButtonHref(linkType, rawTarget, context = "") {
   }
 
   return value;
+}
+
+function resolveInsertButtonHref(linkType, rawTarget, context = "") {
+  if (linkType !== "anchor") {
+    return normalizeButtonHref(linkType, rawTarget, context);
+  }
+  const lineNumber = parseLineNumberFromButtonAnchorTarget(rawTarget);
+  if (lineNumber !== null) {
+    const anchorId = ensureDynamicButtonAnchorForLine(context, lineNumber);
+    if (anchorId) {
+      return `#${anchorId}`;
+    }
+  }
+  return normalizeButtonHref(linkType, rawTarget, context);
 }
 
 function isExternalHref(href) {
@@ -4625,7 +4794,7 @@ function applyInsertButtonFromPopover() {
     return;
   }
 
-  const href = normalizeButtonHref(linkType, targetRaw, state.insertButtonContext);
+  const href = resolveInsertButtonHref(linkType, targetRaw, state.insertButtonContext);
   if (!href) {
     setStatus(t("status.error").replace("{message}", t("detail.buttonTargetRequired")), "error");
     elements.insertButtonLinkTarget.focus();
@@ -8358,12 +8527,19 @@ function positionFloat(wrapper) {
   float.style.transform = "none";
 }
 
-function syncImageInputs(wrapper) {
+function syncImageInputs(wrapper, options = {}) {
   const rect = wrapper.getBoundingClientRect();
   const width = Math.round(rect.width);
   const height = Math.round(rect.height);
-  elements.imageWidth.value = width > 0 ? width : "";
-  elements.imageHeight.value = height > 0 ? height : "";
+  const preserveField = String(options.preserveField || "");
+  const keepWidthValue = preserveField === "width" && document.activeElement === elements.imageWidth;
+  const keepHeightValue = preserveField === "height" && document.activeElement === elements.imageHeight;
+  if (!keepWidthValue) {
+    elements.imageWidth.value = width > 0 ? width : "";
+  }
+  if (!keepHeightValue) {
+    elements.imageHeight.value = height > 0 ? height : "";
+  }
 }
 
 function getImageAspectRatio(wrapper) {
@@ -8848,17 +9024,25 @@ function updateSelectedImage(source) {
   if (wrapper.classList.contains("is-cropping")) return;
   const ratio = getImageAspectRatio(wrapper);
   const lockRatio = wrapper.dataset.lockRatio !== "false";
-  const width = parseInt(elements.imageWidth.value, 10);
-  const height = parseInt(elements.imageHeight.value, 10);
-
-  if (source === "width" && !Number.isNaN(width) && width > 0) {
+  if (source === "width") {
+    const rawWidth = String(elements.imageWidth?.value || "").trim();
+    if (!rawWidth) return;
+    const width = Number.parseInt(rawWidth, 10);
+    if (!Number.isFinite(width) || width <= 0) return;
     setWrapperSizeByWidth(wrapper, width);
     if (lockRatio) {
       elements.imageHeight.value = Math.round(clampImageWidth(wrapper, width) * ratio);
     }
+    syncImageInputs(wrapper, { preserveField: "width" });
+    positionFloat(wrapper);
+    return;
   }
 
-  if (source === "height" && !Number.isNaN(height) && height > 0) {
+  if (source === "height") {
+    const rawHeight = String(elements.imageHeight?.value || "").trim();
+    if (!rawHeight) return;
+    const height = Number.parseInt(rawHeight, 10);
+    if (!Number.isFinite(height) || height <= 0) return;
     const nextWidth = lockRatio
       ? Math.max(IMAGE_MIN_WIDTH, Math.round(height / ratio))
       : Math.max(IMAGE_MIN_WIDTH, Math.round((wrapper.getBoundingClientRect().width || IMAGE_MIN_WIDTH)));
@@ -8866,9 +9050,9 @@ function updateSelectedImage(source) {
     if (lockRatio) {
       elements.imageWidth.value = Math.round(clampImageWidth(wrapper, nextWidth));
     }
+    syncImageInputs(wrapper, { preserveField: "height" });
+    positionFloat(wrapper);
   }
-  syncImageInputs(wrapper);
-  positionFloat(wrapper);
 }
 
 function toggleCrop() {
@@ -9126,6 +9310,14 @@ async function openDetailPreview() {
   const typeLabel = previewLang === "zh"
     ? (typeRecord?.name_zh || typeRecord?.name_en || "")
     : (typeRecord?.name_en || typeRecord?.name_zh || "");
+  const typeFilterHref = project.type
+    ? escapeHtmlAttribute(`../index.html?filter=${encodeURIComponent(project.type)}`)
+    : "";
+  const typeMarkup = typeLabel
+    ? (project.type
+      ? `<a class="detail-type-link" href="${typeFilterHref}">${escapeHtml(typeLabel)}</a>`
+      : escapeHtml(typeLabel))
+    : "";
   const outlineTitle = previewLang === "zh" ? "提纲" : "Outline";
   const outlineEmpty = previewLang === "zh" ? "暂无小节" : "No sections";
   const previewHtml = `<!doctype html>
@@ -9151,7 +9343,7 @@ async function openDetailPreview() {
   </header>
   <main class="container detail-main">
     <section class="detail-hero">
-      <p class="detail-type">${escapeHtml(typeLabel)}</p>
+      <p class="detail-type">${typeMarkup}</p>
       <h1 class="detail-title">${title}</h1>
       <p class="detail-meta">${escapeHtml(project.date || "")}</p>
     </section>

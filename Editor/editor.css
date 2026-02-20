@@ -906,6 +906,7 @@
   max-width: calc(100vw - 24px);
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
