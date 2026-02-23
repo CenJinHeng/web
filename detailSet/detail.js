@@ -7,11 +7,14 @@ const detailI18n = {
       langToggleAria: "切换语言"
     },
     detail: {
+      back: "返回",
       prev: "上一个项目",
       next: "下一个项目",
       outline: "提纲",
+      outlineStats: "共计{count}字，预计阅读时间{minutes}min",
       outlineEmpty: "暂无小节",
-      outlineToggle: "提纲"
+      outlineToggle: "提纲",
+      outlineToggleShort: "提纲"
     }
   },
   en: {
@@ -22,16 +25,20 @@ const detailI18n = {
       langToggleAria: "Switch language"
     },
     detail: {
+      back: "Exit",
       prev: "Previous Project",
       next: "Next Project",
       outline: "Outline",
+      outlineStats: "{count} words, {minutes} min read",
       outlineEmpty: "No sections",
-      outlineToggle: "Outline"
+      outlineToggle: "Outline",
+      outlineToggleShort: "TOC"
     }
   }
 };
 
 const PERSONALIZATION_FILE = "../../assets/site_personalization.json";
+const DETAIL_STATS_FILE = "./detail-stats.json";
 const DEFAULT_PERSONALIZATION = Object.freeze({
   navBrandTextZh: "XXX的个人空间",
   navBrandTextEn: "XXX's Space"
@@ -60,7 +67,11 @@ const state = {
   prevProject: null,
   nextProject: null,
   types: [],
-  personalization: cloneDefaultPersonalization()
+  personalization: cloneDefaultPersonalization(),
+  detailReadingStats: {
+    zh: null,
+    en: null
+  }
 };
 
 const detailBgRangesByLang = {
@@ -92,7 +103,8 @@ async function init() {
   updateBackLink();
   await Promise.all([
     loadTypes(),
-    loadPersonalization()
+    loadPersonalization(),
+    loadDetailReadingStats()
   ]);
   await initPrevNext();
   applyI18n(state.lang);
@@ -177,10 +189,15 @@ function applyI18n(lang) {
     meta.textContent = date;
   }
 
+  if (backLink) {
+    backLink.textContent = strings.detail?.back || "Back";
+  }
+
   renderDetailContent(lang);
   document.title = (lang === "zh" ? titleZh : titleEn) || document.title;
   renderPrevNext();
   renderOutline();
+  renderOutlineStatsMeta();
 }
 
 function renderDetailType(typeEl, typeId) {
@@ -221,6 +238,19 @@ function sanitizeDetailHtml(html) {
   const probe = document.createElement("div");
   probe.innerHTML = source;
   probe.querySelectorAll("script, style").forEach((node) => node.remove());
+  probe.querySelectorAll("[style]").forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+    // Strip pasted font family overrides (e.g. `-webkit-standard`) so detail pages
+    // always follow the site font stack.
+    node.style.removeProperty("font-family");
+    if (!node.getAttribute("style")?.trim()) {
+      node.removeAttribute("style");
+    }
+  });
+  probe.querySelectorAll("[face]").forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+    node.removeAttribute("face");
+  });
   return probe.innerHTML.trim();
 }
 
@@ -436,6 +466,13 @@ function hasStructuredLineDescendant(node) {
   return Boolean(node.querySelector("h1,h2,h3,h4,h5,h6,p,li,blockquote,pre,table,hr,figure,.image-wrapper"));
 }
 
+function hasNestedColumnsLineDescendant(node) {
+  if (!(node instanceof Element)) return false;
+  return Boolean(
+    node.querySelector("h1,h2,h3,h4,h5,h6,p,li,blockquote,pre,table,hr,figure,.image-wrapper,div,section,article,.detail-columns-block,.detail-columns-cell")
+  );
+}
+
 function isLineTargetElement(node, container) {
   if (!(node instanceof HTMLElement)) return false;
   if (node === container) return false;
@@ -456,12 +493,18 @@ function isLineTargetElement(node, container) {
   if (tag === "DIV") {
     if (node.classList.contains("detail-note-text")) return true;
     if (node.classList.contains("detail-columns-cell")) {
-      return !hasStructuredLineDescendant(node);
+      return !hasNestedColumnsLineDescendant(node);
+    }
+    if (node.parentElement instanceof HTMLElement && node.parentElement.classList.contains("detail-columns-cell")) {
+      return !hasNestedColumnsLineDescendant(node);
     }
     if (node.parentElement !== container) return false;
     return !hasStructuredLineDescendant(node);
   }
   if (tag === "SECTION" || tag === "ARTICLE") {
+    if (node.parentElement instanceof HTMLElement && node.parentElement.classList.contains("detail-columns-cell")) {
+      return !hasNestedColumnsLineDescendant(node);
+    }
     if (node.parentElement !== container) return false;
     return !hasStructuredLineDescendant(node);
   }
@@ -471,20 +514,88 @@ function isLineTargetElement(node, container) {
   return false;
 }
 
-function getLineTargets(container) {
+function isTopLevelTextLineNode(node, container) {
+  if (!(node instanceof Text)) return false;
+  if (node.parentNode !== container) return false;
+  const text = String(node.textContent || "").replace(/\u200b/g, "").trim();
+  return Boolean(text);
+}
+
+function getLineNodeRect(node) {
+  if (node instanceof HTMLElement) {
+    return node.getBoundingClientRect();
+  }
+  if (node instanceof Text) {
+    const text = String(node.textContent || "").replace(/\u200b/g, "").trim();
+    if (!text) return null;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rect = range.getBoundingClientRect();
+    if (rect && (rect.width > 0 || rect.height > 0)) {
+      return rect;
+    }
+  }
+  return null;
+}
+
+function getLineEntries(container) {
   if (!container) return [];
-  const targets = [];
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT);
+  const rawNodes = [];
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
   let current = walker.nextNode();
   while (current) {
-    if (isLineTargetElement(current, container)) {
-      targets.push(current);
+    if (isLineTargetElement(current, container) || isTopLevelTextLineNode(current, container)) {
+      rawNodes.push(current);
     }
     current = walker.nextNode();
   }
-  if (targets.length) return targets;
-  return Array.from(container.children)
-    .filter((node) => node instanceof HTMLElement && !node.classList.contains("page-line-anchor"));
+  if (!rawNodes.length) {
+    rawNodes.push(...Array.from(container.children)
+      .filter((node) => node instanceof HTMLElement && !node.classList.contains("page-line-anchor")));
+  }
+  if (!rawNodes.length) return [];
+
+  const measured = [];
+  rawNodes.forEach((node) => {
+    const rect = getLineNodeRect(node);
+    if (!rect) return;
+    const top = Number.isFinite(rect.top) ? rect.top : NaN;
+    const bottom = Number.isFinite(rect.bottom) ? rect.bottom : NaN;
+    const left = Number.isFinite(rect.left) ? rect.left : NaN;
+    if (!Number.isFinite(top) || !Number.isFinite(bottom) || !Number.isFinite(left)) return;
+    if (bottom <= top) return;
+    measured.push({ node, top, bottom, left });
+  });
+  if (!measured.length) return [];
+
+  measured.sort((a, b) => {
+    if (a.top !== b.top) return a.top - b.top;
+    return a.left - b.left;
+  });
+
+  const entries = [];
+  const sameLineThreshold = 4;
+  measured.forEach((item) => {
+    const last = entries[entries.length - 1];
+    if (last && Math.abs(item.top - last.top) <= sameLineThreshold) {
+      last.bottom = Math.max(last.bottom, item.bottom);
+      last.nodes.push(item.node);
+      if (item.left < last.left) {
+        last.left = item.left;
+        last.anchorNode = item.node;
+      }
+      return;
+    }
+    entries.push({
+      top: item.top,
+      bottom: item.bottom,
+      left: item.left,
+      anchorNode: item.node,
+      nodes: [item.node]
+    });
+  });
+
+  return entries;
 }
 
 function applyLineDecorations(container, ranges) {
@@ -502,29 +613,31 @@ function applyLineDecorations(container, ranges) {
   if (existingLayer) {
     existingLayer.remove();
   }
-  const lineElements = getLineTargets(container);
+  const lineEntries = getLineEntries(container);
 
   const normalizedRanges = normalizeLineRanges(ranges);
-  lineElements.forEach((element, index) => {
+  lineEntries.forEach((entry, index) => {
+    const anchorTarget = entry && entry.anchorNode;
+    if (!(anchorTarget instanceof Node)) return;
     const lineNumber = index + 1;
     const anchor = document.createElement("span");
     anchor.className = "page-line-anchor";
     anchor.id = `line-${lineNumber}`;
-    const parent = element.parentNode;
+    const parent = anchorTarget.parentNode;
     if (parent) {
-      parent.insertBefore(anchor, element);
+      parent.insertBefore(anchor, anchorTarget);
     }
   });
 
-  renderRangeLayer(rangeHost, container, lineElements, normalizedRanges);
+  renderRangeLayer(rangeHost, container, lineEntries, normalizedRanges);
   updateDetailTopFill(container, normalizedRanges);
   queueOutlineContrastUpdate();
   queueNavThemeUpdate();
 }
 
-function renderRangeLayer(host, referenceContainer, lineElements, ranges) {
+function renderRangeLayer(host, referenceContainer, lineEntries, ranges) {
   if (!host || !referenceContainer) return;
-  if (!lineElements.length || !ranges.length) return;
+  if (!lineEntries.length || !ranges.length) return;
 
   if (!host.dataset.rangeHostStyled) {
     const computed = window.getComputedStyle(host);
@@ -559,23 +672,20 @@ function renderRangeLayer(host, referenceContainer, lineElements, ranges) {
   const fragment = document.createDocumentFragment();
 
   ranges.forEach((range) => {
-    const startLine = Math.min(Math.max(range.start, 1), lineElements.length);
-    const endLine = Math.min(Math.max(range.end, startLine), lineElements.length);
-    const startElement = lineElements[startLine - 1];
-    const endElement = lineElements[endLine - 1];
-    if (!(startElement instanceof HTMLElement) || !(endElement instanceof HTMLElement)) return;
+    const startLine = Math.min(Math.max(range.start, 1), lineEntries.length);
+    const endLine = Math.min(Math.max(range.end, startLine), lineEntries.length);
+    const startEntry = lineEntries[startLine - 1];
+    const endEntry = lineEntries[endLine - 1];
+    if (!startEntry || !endEntry) return;
 
-    const startRect = startElement.getBoundingClientRect();
-    const endRect = endElement.getBoundingClientRect();
-    const topRaw = Math.round(startRect.top - hostRect.top);
-    const bottomRaw = Math.round(endRect.bottom - hostRect.top);
+    const topRaw = Math.round(startEntry.top - hostRect.top);
+    const bottomRaw = Math.round(endEntry.bottom - hostRect.top);
     const top = startLine === 1 ? 0 : Math.max(0, topRaw);
     let bottom = Math.min(maxBottom, Math.max(top, bottomRaw));
-    if (endLine < lineElements.length) {
-      const nextElement = lineElements[endLine];
-      if (nextElement instanceof HTMLElement) {
-        const nextRect = nextElement.getBoundingClientRect();
-        const nextTopRaw = Math.round(nextRect.top - hostRect.top);
+    if (endLine < lineEntries.length) {
+      const nextEntry = lineEntries[endLine];
+      if (nextEntry) {
+        const nextTopRaw = Math.round(nextEntry.top - hostRect.top);
         const nextTop = Math.max(top, nextTopRaw);
         bottom = Math.min(bottom, nextTop);
       }
@@ -823,6 +933,38 @@ async function initPrevNext() {
   }
 }
 
+function normalizeDetailReadingStats(raw) {
+  const normalized = {
+    zh: null,
+    en: null
+  };
+  if (!raw || typeof raw !== "object") return normalized;
+
+  ["zh", "en"].forEach((lang) => {
+    const item = raw[lang];
+    if (!item || typeof item !== "object") return;
+    const count = Number.parseInt(item.count, 10);
+    const minutes = Number.parseInt(item.minutes, 10);
+    if (!Number.isFinite(count) || count <= 0) return;
+    if (!Number.isFinite(minutes) || minutes <= 0) return;
+    normalized[lang] = { count, minutes };
+  });
+
+  return normalized;
+}
+
+async function loadDetailReadingStats() {
+  state.detailReadingStats = { zh: null, en: null };
+  try {
+    const response = await fetch(DETAIL_STATS_FILE, { cache: "no-store" });
+    if (!response.ok) return;
+    const data = await response.json();
+    state.detailReadingStats = normalizeDetailReadingStats(data);
+  } catch (error) {
+    state.detailReadingStats = { zh: null, en: null };
+  }
+}
+
 function renderPrevNext() {
   if (!prevCard && !nextCard && !pagination) return;
   const strings = detailI18n[state.lang] || detailI18n.en;
@@ -1037,6 +1179,10 @@ function setupOutline() {
     title.dataset.i18n = "detail.outline";
     title.textContent = "提纲";
 
+    const meta = document.createElement("p");
+    meta.className = "detail-outline-meta";
+    meta.hidden = true;
+
     const nav = document.createElement("nav");
     nav.className = "detail-outline-nav";
     nav.dataset.i18nAttr = "aria-label:detail.outline";
@@ -1052,11 +1198,23 @@ function setupOutline() {
     empty.hidden = true;
 
     outline.appendChild(title);
+    outline.appendChild(meta);
     outline.appendChild(nav);
     outline.appendChild(empty);
     body.appendChild(outline);
   } else if (!outline.id) {
     outline.id = "detail-outline-panel";
+  }
+  if (!outline.querySelector(".detail-outline-meta")) {
+    const title = outline.querySelector(".detail-outline-title");
+    const meta = document.createElement("p");
+    meta.className = "detail-outline-meta";
+    meta.hidden = true;
+    if (title && title.nextSibling) {
+      outline.insertBefore(meta, title.nextSibling);
+    } else {
+      outline.appendChild(meta);
+    }
   }
   if (!outline.classList.contains("is-open")) {
     outline.setAttribute("aria-hidden", "true");
@@ -1080,14 +1238,14 @@ function setupOutline() {
     toggleIcon.setAttribute("aria-hidden", "true");
     const toggleLabel = document.createElement("span");
     toggleLabel.className = "detail-outline-toggle-label";
-    toggleLabel.dataset.i18n = "detail.outlineToggle";
+    toggleLabel.dataset.i18n = "detail.outlineToggleShort";
     toggleLabel.textContent = "提纲";
     toggle.appendChild(toggleIcon);
     toggle.appendChild(toggleLabel);
   } else {
     const toggleLabel = toggle.querySelector(".detail-outline-toggle-label");
     if (toggleLabel) {
-      toggleLabel.dataset.i18n = "detail.outlineToggle";
+      toggleLabel.dataset.i18n = "detail.outlineToggleShort";
       if (!String(toggleLabel.textContent || "").trim()) {
         toggleLabel.textContent = "提纲";
       }
@@ -1195,6 +1353,25 @@ function renderOutline() {
   });
 
   queueOutlineContrastUpdate();
+}
+
+function renderOutlineStatsMeta() {
+  const outlineMeta = document.querySelector(".detail-outline-meta");
+  if (!(outlineMeta instanceof HTMLElement)) return;
+
+  const strings = detailI18n[state.lang] || detailI18n.en;
+  const stats = state.detailReadingStats?.[state.lang] || null;
+  if (!stats || !Number.isFinite(stats.count) || !Number.isFinite(stats.minutes) || stats.count <= 0 || stats.minutes <= 0) {
+    outlineMeta.hidden = true;
+    outlineMeta.textContent = "";
+    return;
+  }
+
+  const pattern = String(strings.detail?.outlineStats || "");
+  outlineMeta.textContent = pattern
+    .replace("{count}", String(stats.count))
+    .replace("{minutes}", String(stats.minutes));
+  outlineMeta.hidden = false;
 }
 
 function getNavOffsetHeight() {

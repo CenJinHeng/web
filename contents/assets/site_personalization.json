@@ -3,7 +3,7 @@
   "navBrandTextEn": "Jinheng's portfolio",
   "footerEnabled": true,
   "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\">由劲衡设计和开发</p><p style=\"text-align: center;\">Designed and developed by Jinheng</p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
-  "footerHtmlEn": "",
+  "footerHtmlEn": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\">Designed and developed by Jinheng (劲衡)</p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
   "footerBgRangesZh": [
     {
       "start": 1,

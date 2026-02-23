@@ -663,6 +663,7 @@ const state = {
   draggingImageWrapper: null,
   insertButtonContext: "",
   insertButtonTrigger: null,
+  insertButtonEditNode: null,
   webEmbedContext: "",
   webEmbedTrigger: null,
   lineNumberRaf: 0
@@ -1040,9 +1041,42 @@ if (!supportsFileSystem()) {
   if (elements.localPick) {
     elements.localPick.disabled = true;
   }
-  if (IS_FILE_PROTOCOL) {
+if (IS_FILE_PROTOCOL) {
     showEditorLocalOpenModal("当前浏览器不支持“选择文件夹”，请使用 Chrome 或 Edge。", "error");
   }
+}
+
+function placeColorInputNearTrigger(input, trigger) {
+  if (!(input instanceof HTMLInputElement)) return;
+
+  let left = Math.round(window.innerWidth / 2);
+  let top = Math.round(window.innerHeight / 2);
+  if (trigger instanceof HTMLElement) {
+    const rect = trigger.getBoundingClientRect();
+    if (Number.isFinite(rect.left) && Number.isFinite(rect.top)) {
+      left = Math.round(rect.left + Math.max(2, rect.width / 2));
+      top = Math.round(rect.bottom - 2);
+    }
+  }
+
+  const maxLeft = Math.max(2, window.innerWidth - 2);
+  const maxTop = Math.max(2, window.innerHeight - 2);
+  input.style.left = `${Math.min(maxLeft, Math.max(2, left))}px`;
+  input.style.top = `${Math.min(maxTop, Math.max(2, top))}px`;
+}
+
+function openHiddenColorPicker(input, trigger) {
+  if (!(input instanceof HTMLInputElement)) return;
+  placeColorInputNearTrigger(input, trigger);
+  try {
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+  } catch (error) {
+    // Fall back to click when showPicker is unavailable or blocked.
+  }
+  input.click();
 }
 
 if (elements.langToggle) {
@@ -1185,13 +1219,13 @@ if (elements.personalizeAlignRight) {
 if (elements.personalizeTextColorBtn) {
   elements.personalizeTextColorBtn.addEventListener("click", () => {
     savePersonalizeSelectionRange();
-    elements.personalizeTextColor?.click();
+    openHiddenColorPicker(elements.personalizeTextColor, elements.personalizeTextColorBtn);
   });
 }
 if (elements.personalizeHighlightBtn) {
   elements.personalizeHighlightBtn.addEventListener("click", () => {
     savePersonalizeSelectionRange();
-    elements.personalizeHighlightColor?.click();
+    openHiddenColorPicker(elements.personalizeHighlightColor, elements.personalizeHighlightBtn);
   });
 }
 if (elements.personalizeHighlightColor) {
@@ -1292,6 +1326,13 @@ if (elements.personalizeFooterEditor) {
   elements.personalizeFooterEditor.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : null;
     if (!target) return;
+    const inlineButton = target.closest(".detail-inline-button");
+    if (inlineButton instanceof HTMLAnchorElement && elements.personalizeFooterEditor.contains(inlineButton)) {
+      event.preventDefault();
+      event.stopPropagation();
+      openInlineButtonEditor("personalize", inlineButton);
+      return;
+    }
     const columnsBlock = target.closest(".detail-columns-block");
     if (columnsBlock instanceof HTMLElement && elements.personalizeFooterEditor.contains(columnsBlock)) {
       const columnsCell = target.closest(".detail-columns-cell");
@@ -1429,13 +1470,13 @@ if (elements.aboutAlignRight) {
 if (elements.aboutTextColorBtn) {
   elements.aboutTextColorBtn.addEventListener("click", () => {
     saveAboutSelectionRange();
-    elements.aboutTextColor.click();
+    openHiddenColorPicker(elements.aboutTextColor, elements.aboutTextColorBtn);
   });
 }
 if (elements.aboutHighlightBtn) {
   elements.aboutHighlightBtn.addEventListener("click", () => {
     saveAboutSelectionRange();
-    elements.aboutHighlightColor.click();
+    openHiddenColorPicker(elements.aboutHighlightColor, elements.aboutHighlightBtn);
   });
 }
 if (elements.aboutTextColor) {
@@ -1542,6 +1583,13 @@ if (elements.aboutEditor) {
   elements.aboutEditor.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : null;
     if (!target) return;
+    const inlineButton = target.closest(".detail-inline-button");
+    if (inlineButton instanceof HTMLAnchorElement && elements.aboutEditor.contains(inlineButton)) {
+      event.preventDefault();
+      event.stopPropagation();
+      openInlineButtonEditor("about", inlineButton);
+      return;
+    }
     const columnsBlock = target.closest(".detail-columns-block");
     if (columnsBlock instanceof HTMLElement && elements.aboutEditor.contains(columnsBlock)) {
       const columnsCell = target.closest(".detail-columns-cell");
@@ -1873,11 +1921,11 @@ elements.detailAlignCenter.addEventListener("click", () => runExecCommand("justi
 elements.detailAlignRight.addEventListener("click", () => runExecCommand("justifyRight"));
 elements.detailTextColorBtn.addEventListener("click", () => {
   saveSelectionRange();
-  elements.detailTextColor.click();
+  openHiddenColorPicker(elements.detailTextColor, elements.detailTextColorBtn);
 });
 elements.detailHighlightBtn.addEventListener("click", () => {
   saveSelectionRange();
-  elements.detailHighlightColor.click();
+  openHiddenColorPicker(elements.detailHighlightColor, elements.detailHighlightBtn);
 });
 elements.detailTextColor.addEventListener("input", (event) => {
   const value = event.target.value || "#1d1c1a";
@@ -2093,6 +2141,13 @@ elements.detailFileUpload.addEventListener("change", (event) => {
 elements.detailEditor.addEventListener("click", (event) => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
+  const inlineButton = target.closest(".detail-inline-button");
+  if (inlineButton instanceof HTMLAnchorElement && elements.detailEditor.contains(inlineButton)) {
+    event.preventDefault();
+    event.stopPropagation();
+    openInlineButtonEditor("detail", inlineButton);
+    return;
+  }
   if (target.closest(".web-preview-wrapper a")) {
     event.preventDefault();
   }
@@ -2826,6 +2881,68 @@ function normalizeDetailLikeHtml(html) {
     return "";
   }
   return probe.innerHTML;
+}
+
+function extractDetailReadableTextForStats(html) {
+  const probe = document.createElement("div");
+  probe.innerHTML = String(html || "");
+  probe.querySelectorAll("script, style, noscript, template").forEach((node) => node.remove());
+  return String(probe.textContent || "")
+    .replace(/\u00a0/g, " ")
+    .replace(/\u200b/g, "")
+    .trim();
+}
+
+function countZhReadableChars(text) {
+  return String(text || "").replace(/\s+/g, "").length;
+}
+
+function countEnReadableWords(text) {
+  const source = String(text || "").trim();
+  if (!source) return 0;
+  try {
+    const matches = source.match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu);
+    return matches ? matches.length : 0;
+  } catch (error) {
+    const fallback = source.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g);
+    return fallback ? fallback.length : 0;
+  }
+}
+
+function estimateReadingMinutes(count, lang) {
+  const safeCount = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+  if (safeCount <= 0) return 0;
+  const speedPerMinute = lang === "zh" ? 300 : 220;
+  return Math.max(1, Math.ceil(safeCount / speedPerMinute));
+}
+
+function buildDetailReadingStatsForLang(html, lang) {
+  const text = extractDetailReadableTextForStats(html);
+  const count = lang === "zh" ? countZhReadableChars(text) : countEnReadableWords(text);
+  if (!Number.isFinite(count) || count <= 0) {
+    return null;
+  }
+  return {
+    count,
+    minutes: estimateReadingMinutes(count, lang),
+    unit: lang === "zh" ? "char" : "word"
+  };
+}
+
+function buildDetailReadingStats(contentByLang) {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    zh: buildDetailReadingStatsForLang(contentByLang?.zh || "", "zh"),
+    en: buildDetailReadingStatsForLang(contentByLang?.en || "", "en")
+  };
+}
+
+async function writeDetailReadingStatsFile(project, contentByLang) {
+  if (!project?.id) return;
+  const path = [...getDetailFolder(project), "detail-stats.json"];
+  const payload = buildDetailReadingStats(contentByLang);
+  await writeFileByPath(path, `${JSON.stringify(payload, null, 2)}\n`);
 }
 
 function normalizeHexColor(value, fallback = "#f5f2ed") {
@@ -3572,6 +3689,203 @@ function getEditorElementForContext(context) {
   return editor instanceof HTMLElement ? editor : null;
 }
 
+function getUsableRangeForContext(context, selection = null) {
+  const editor = getEditorElementForContext(context);
+  if (!(editor instanceof HTMLElement)) return null;
+
+  const currentSelection = selection || window.getSelection();
+  if (currentSelection && currentSelection.rangeCount > 0) {
+    const range = currentSelection.getRangeAt(0);
+    if (editor.contains(range.startContainer) && editor.contains(range.endContainer)) {
+      return range;
+    }
+  }
+
+  if (context === "detail") {
+    return state.savedRange && editor.contains(state.savedRange.startContainer) ? state.savedRange : null;
+  }
+  if (context === "about") {
+    return state.aboutSavedRange && editor.contains(state.aboutSavedRange.startContainer) ? state.aboutSavedRange : null;
+  }
+  if (context === "personalize") {
+    return state.personalizeSavedRange && editor.contains(state.personalizeSavedRange.startContainer) ? state.personalizeSavedRange : null;
+  }
+  return null;
+}
+
+function runCommandForContext(context, command, value = null) {
+  if (context === "detail") return runExecCommand(command, value);
+  if (context === "about") return runAboutExecCommand(command, value);
+  if (context === "personalize") return runPersonalizeCommand(command, value);
+  return false;
+}
+
+function runFormatBlockForContext(context, tag) {
+  const normalizedTag = String(tag || "").trim().toLowerCase();
+  if (!normalizedTag) return false;
+
+  let ok = runCommandForContext(context, "formatBlock", normalizedTag);
+  if (!ok) {
+    ok = runCommandForContext(context, "formatBlock", `<${normalizedTag}>`);
+  }
+  if (!ok) {
+    ok = runCommandForContext(context, "formatBlock", normalizedTag.toUpperCase());
+  }
+  return ok;
+}
+
+function getCurrentEditorBlockByContext(context) {
+  if (context === "detail") return getCurrentEditorBlock();
+  if (context === "about") return getCurrentAboutEditorBlock();
+  if (context === "personalize") return getCurrentPersonalizeEditorBlock();
+  return null;
+}
+
+function getParagraphBlocksInRange(editor, range) {
+  if (!(editor instanceof HTMLElement) || !(range instanceof Range)) return [];
+
+  const blocks = [];
+  editor.querySelectorAll("p").forEach((node) => {
+    if (!(node instanceof HTMLParagraphElement)) return;
+    try {
+      if (range.intersectsNode(node)) {
+        blocks.push(node);
+      }
+    } catch (error) {
+      // Ignore browser edge cases around detached ranges/nodes.
+    }
+  });
+  return blocks;
+}
+
+function getTargetParagraphBlocksForContext(context, rangeHint = null) {
+  const editor = getEditorElementForContext(context);
+  if (!(editor instanceof HTMLElement)) return [];
+
+  const selection = window.getSelection();
+  const range = rangeHint instanceof Range ? rangeHint : getUsableRangeForContext(context, selection);
+  if (!(range instanceof Range)) {
+    const block = getCurrentEditorBlockByContext(context);
+    return block instanceof HTMLParagraphElement ? [block] : [];
+  }
+
+  const targets = getParagraphBlocksInRange(editor, range);
+  if (targets.length) return targets;
+
+  const fallbackBlock = getCurrentEditorBlockByContext(context);
+  return fallbackBlock instanceof HTMLParagraphElement ? [fallbackBlock] : [];
+}
+
+function getTargetBlockFormatNodesForContext(context, rangeHint = null) {
+  const editor = getEditorElementForContext(context);
+  if (!(editor instanceof HTMLElement)) return [];
+
+  const blockSelector = "p, h1, h2, h3, h4, h5, h6, blockquote, li, td, th, div";
+  const selection = window.getSelection();
+  const range = rangeHint instanceof Range ? rangeHint : getUsableRangeForContext(context, selection);
+
+  if (!(range instanceof Range)) {
+    const fallbackBlock = getCurrentEditorBlockByContext(context);
+    return fallbackBlock instanceof HTMLElement ? [fallbackBlock] : [];
+  }
+
+  const targets = [];
+  editor.querySelectorAll(blockSelector).forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+    try {
+      if (range.intersectsNode(node)) {
+        targets.push(node);
+      }
+    } catch (error) {
+      // Ignore detached-range edge cases.
+    }
+  });
+
+  if (targets.length) return targets;
+  const fallbackBlock = getCurrentEditorBlockByContext(context);
+  return fallbackBlock instanceof HTMLElement ? [fallbackBlock] : [];
+}
+
+function stripTypographyInlineStylesInNode(node) {
+  if (!(node instanceof HTMLElement)) return false;
+  if (node.closest(".detail-inline-button")) return false;
+  if (node.closest(".image-wrapper")) return false;
+  if (node.closest(".web-preview-wrapper")) return false;
+
+  let changed = false;
+  const style = node.style;
+  if (style) {
+    const props = [
+      "font-size",
+      "color",
+      "background-color",
+      "font-family",
+      "line-height",
+      "caret-color"
+    ];
+    props.forEach((prop) => {
+      const before = style.getPropertyValue(prop);
+      if (before) {
+        style.removeProperty(prop);
+        changed = true;
+      }
+    });
+    if (!String(node.getAttribute("style") || "").trim()) {
+      if (node.hasAttribute("style")) {
+        node.removeAttribute("style");
+        changed = true;
+      }
+    }
+  }
+
+  if (node.tagName === "FONT") {
+    ["size", "color", "face"].forEach((attr) => {
+      if (node.hasAttribute(attr)) {
+        node.removeAttribute(attr);
+        changed = true;
+      }
+    });
+  }
+
+  return changed;
+}
+
+function resetInlineTypographyStylesForContext(context, rangeHint = null) {
+  const targets = getTargetBlockFormatNodesForContext(context, rangeHint);
+  if (!targets.length) return;
+
+  let changed = false;
+  targets.forEach((block) => {
+    changed = stripTypographyInlineStylesInNode(block) || changed;
+    block.querySelectorAll("*").forEach((node) => {
+      changed = stripTypographyInlineStylesInNode(node) || changed;
+    });
+  });
+
+  if (!changed) return;
+  saveSelectionForContext(context);
+  persistDraftForContext(context);
+  queueLineNumberRefresh();
+}
+
+function updateParagraphNoteClassForContext(context, isNote, rangeHint = null) {
+  const targets = getTargetParagraphBlocksForContext(context, rangeHint);
+  if (!targets.length) return;
+
+  targets.forEach((block) => {
+    if (!(block instanceof HTMLParagraphElement)) return;
+    if (isNote) {
+      block.classList.add("detail-note-text");
+    } else {
+      block.classList.remove("detail-note-text");
+    }
+  });
+
+  saveSelectionForContext(context);
+  persistDraftForContext(context);
+  queueLineNumberRefresh();
+}
+
 function saveSelectionForContext(context) {
   if (context === "detail") {
     saveSelectionRange();
@@ -4033,9 +4347,7 @@ function handlePersonalizeToolbarClick(event) {
   const action = button.dataset.personalizeAction;
   if (action === "text-color") {
     savePersonalizeSelectionRange();
-    if (elements.personalizeTextColor) {
-      elements.personalizeTextColor.click();
-    }
+    openHiddenColorPicker(elements.personalizeTextColor, button);
     return;
   }
   if (action === "link") {
@@ -4098,23 +4410,20 @@ function getCurrentPersonalizeEditorBlock() {
 }
 
 function applyPersonalizeFormatBlock(tag) {
-  runPersonalizeCommand("formatBlock", tag);
+  const rangeSnapshot = getUsableRangeForContext("personalize")?.cloneRange() || null;
+  runFormatBlockForContext("personalize", tag);
+  resetInlineTypographyStylesForContext("personalize", rangeSnapshot);
+  return rangeSnapshot;
 }
 
 function applyPersonalizeParagraphFormat() {
-  applyPersonalizeFormatBlock("p");
-  const block = getCurrentPersonalizeEditorBlock();
-  if (block && block.classList && block.classList.contains("detail-note-text")) {
-    block.classList.remove("detail-note-text");
-  }
+  const rangeSnapshot = applyPersonalizeFormatBlock("p");
+  updateParagraphNoteClassForContext("personalize", false, rangeSnapshot);
 }
 
 function applyPersonalizeNoteFormat() {
-  applyPersonalizeFormatBlock("p");
-  const block = getCurrentPersonalizeEditorBlock();
-  if (block && block.tagName === "P") {
-    block.classList.add("detail-note-text");
-  }
+  const rangeSnapshot = applyPersonalizeFormatBlock("p");
+  updateParagraphNoteClassForContext("personalize", true, rangeSnapshot);
 }
 
 function ensurePersonalizeParagraphAfterEnter() {
@@ -4129,7 +4438,7 @@ function ensurePersonalizeParagraphAfterEnter() {
     node = node.parentElement;
   }
   if (!(node instanceof Element)) return;
-  if (node.closest("li, td, th")) return;
+  if (node.closest("li, td, th, .detail-columns-cell")) return;
   if (node.closest("p")) {
     savePersonalizeSelectionRange();
     queueLineNumberRefresh();
@@ -4458,7 +4767,7 @@ function applyWebEmbedFromPopover() {
   hideWebEmbedPopover();
 }
 
-function openInsertButtonPopover(context, triggerButton) {
+function openInsertButtonPopover(context, triggerButton, options = null) {
   if (!elements.insertButtonPopover || !triggerButton) return;
   if (context === "detail" && state.detailImportedMode) {
     setStatus(t("status.importedDetailReadonly"), "error");
@@ -4484,17 +4793,22 @@ function openInsertButtonPopover(context, triggerButton) {
 
   state.insertButtonContext = context;
   state.insertButtonTrigger = triggerButton;
-  elements.insertButtonText.value = t("detail.buttonDefaultText");
-  elements.insertButtonLinkType.value = "anchor";
-  elements.insertButtonLinkTarget.value = String(getSelectionLineNumber(context));
-  elements.insertButtonHasBorder.checked = true;
-  elements.insertButtonBold.checked = false;
-  elements.insertButtonRadius.value = "12";
-  elements.insertButtonWidth.value = "";
-  elements.insertButtonHeight.value = "";
-  elements.insertButtonBorderColor.value = "#1d1c1a";
-  elements.insertButtonFillColor.value = "#ffffff";
-  elements.insertButtonTextColor.value = "#1d1c1a";
+  state.insertButtonEditNode = options?.editNode instanceof HTMLAnchorElement ? options.editNode : null;
+  if (options?.initialConfig) {
+    fillInsertButtonPopoverFields(options.initialConfig);
+  } else {
+    elements.insertButtonText.value = t("detail.buttonDefaultText");
+    elements.insertButtonLinkType.value = "anchor";
+    elements.insertButtonLinkTarget.value = String(getSelectionLineNumber(context));
+    elements.insertButtonHasBorder.checked = true;
+    elements.insertButtonBold.checked = false;
+    elements.insertButtonRadius.value = "12";
+    elements.insertButtonWidth.value = "";
+    elements.insertButtonHeight.value = "";
+    elements.insertButtonBorderColor.value = "#1d1c1a";
+    elements.insertButtonFillColor.value = "#ffffff";
+    elements.insertButtonTextColor.value = "#1d1c1a";
+  }
 
   updateInsertButtonTargetField();
 
@@ -4534,6 +4848,7 @@ function hideInsertButtonPopover() {
   elements.insertButtonPopover.hidden = true;
   state.insertButtonContext = "";
   state.insertButtonTrigger = null;
+  state.insertButtonEditNode = null;
 }
 
 function parseDimensionPx(value, { allowZero = false } = {}) {
@@ -4683,12 +4998,129 @@ function isExternalHref(href) {
   return /^(https?:)?\/\//i.test(String(href || ""));
 }
 
+function parsePxFromInlineStyleValue(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const match = raw.match(/^(-?\d+(?:\.\d+)?)px$/i);
+  if (!match) return null;
+  const numeric = Number.parseFloat(match[1]);
+  return Number.isFinite(numeric) ? Math.round(numeric) : null;
+}
+
+function inferInsertButtonLinkTypeFromHref(href) {
+  const value = String(href || "").trim();
+  if (!value || value.startsWith("#")) return "anchor";
+  if (isExternalHref(value) || /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(value)) return "external";
+  return "internal";
+}
+
+function inferInsertButtonTargetFromHref(href, context = "") {
+  const value = String(href || "").trim();
+  if (!value) return "";
+  if (!value.startsWith("#")) return value;
+  const anchor = value.replace(/^#+/, "").trim();
+  const lineNo = parseLineNumberFromButtonAnchorTarget(anchor);
+  if (lineNo !== null) return String(lineNo);
+  const expectedPrefix = context === "personalize" ? "footer-line-" : "line-";
+  if (anchor.toLowerCase().startsWith(expectedPrefix)) {
+    return anchor.slice(expectedPrefix.length);
+  }
+  return anchor;
+}
+
+function parseInlineButtonConfigFromNode(node, context = "") {
+  if (!(node instanceof HTMLAnchorElement) || !node.classList.contains("detail-inline-button")) return null;
+  const href = String(node.getAttribute("href") || "").trim();
+  const linkType = String(node.dataset.buttonLinkType || "").trim() || inferInsertButtonLinkTypeFromHref(href);
+  const targetRaw = String(node.dataset.buttonTarget || "").trim() || inferInsertButtonTargetFromHref(href, context);
+
+  const fontWeightRaw = String(node.style.fontWeight || "").trim().toLowerCase();
+  const fontWeightNumber = Number.parseInt(fontWeightRaw, 10);
+  const boldFallback = Number.isFinite(fontWeightNumber)
+    ? fontWeightNumber >= 600
+    : (fontWeightRaw === "bold" || fontWeightRaw === "bolder");
+  const borderStyle = String(node.style.border || "").trim().toLowerCase();
+
+  return {
+    text: String(node.textContent || "").trim() || t("detail.buttonDefaultText"),
+    linkType,
+    targetRaw,
+    hasBorder: node.dataset.buttonHasBorder
+      ? node.dataset.buttonHasBorder === "1"
+      : borderStyle !== "none",
+    bold: node.dataset.buttonBold
+      ? node.dataset.buttonBold === "1"
+      : boldFallback,
+    radius: Number.parseInt(node.dataset.buttonRadius || "", 10)
+      || parsePxFromInlineStyleValue(node.style.borderRadius)
+      || 12,
+    width: Number.parseInt(node.dataset.buttonWidth || "", 10)
+      || parsePxFromInlineStyleValue(node.style.width)
+      || null,
+    height: Number.parseInt(node.dataset.buttonHeight || "", 10)
+      || parsePxFromInlineStyleValue(node.style.height)
+      || null,
+    borderColor: String(node.dataset.buttonBorderColor || node.style.borderColor || "#1d1c1a"),
+    fillColor: String(node.dataset.buttonFillColor || node.style.background || "#ffffff"),
+    textColor: String(node.dataset.buttonTextColor || node.style.color || "#1d1c1a")
+  };
+}
+
+function fillInsertButtonPopoverFields(config) {
+  if (!config) return;
+  if (elements.insertButtonText) {
+    elements.insertButtonText.value = String(config.text || t("detail.buttonDefaultText"));
+  }
+  if (elements.insertButtonLinkType) {
+    elements.insertButtonLinkType.value = String(config.linkType || "anchor");
+  }
+  if (elements.insertButtonLinkTarget) {
+    elements.insertButtonLinkTarget.value = String(config.targetRaw || "");
+  }
+  if (elements.insertButtonHasBorder) {
+    elements.insertButtonHasBorder.checked = Boolean(config.hasBorder);
+  }
+  if (elements.insertButtonBold) {
+    elements.insertButtonBold.checked = Boolean(config.bold);
+  }
+  if (elements.insertButtonRadius) {
+    elements.insertButtonRadius.value = String(Number.isFinite(config.radius) ? config.radius : 12);
+  }
+  if (elements.insertButtonWidth) {
+    elements.insertButtonWidth.value = Number.isFinite(config.width) ? String(config.width) : "";
+  }
+  if (elements.insertButtonHeight) {
+    elements.insertButtonHeight.value = Number.isFinite(config.height) ? String(config.height) : "";
+  }
+  if (elements.insertButtonBorderColor) {
+    elements.insertButtonBorderColor.value = String(config.borderColor || "#1d1c1a");
+  }
+  if (elements.insertButtonFillColor) {
+    elements.insertButtonFillColor.value = String(config.fillColor || "#ffffff");
+  }
+  if (elements.insertButtonTextColor) {
+    elements.insertButtonTextColor.value = String(config.textColor || "#1d1c1a");
+  }
+}
+
+function openInlineButtonEditor(context, buttonNode) {
+  if (!(buttonNode instanceof HTMLAnchorElement)) return;
+  const config = parseInlineButtonConfigFromNode(buttonNode, context);
+  if (!config) return;
+  openInsertButtonPopover(context, buttonNode, {
+    editNode: buttonNode,
+    initialConfig: config
+  });
+}
+
 function createInlineButtonLink(config) {
   const link = document.createElement("a");
   link.className = "detail-inline-link detail-inline-button";
   link.setAttribute("role", "button");
   link.href = config.href;
   link.textContent = config.text;
+  link.dataset.buttonLinkType = String(config.linkType || "");
+  link.dataset.buttonTarget = String(config.targetRaw || "");
 
   link.style.display = "inline-flex";
   link.style.alignItems = "center";
@@ -4701,6 +5133,12 @@ function createInlineButtonLink(config) {
   link.style.color = config.textColor;
   link.style.background = config.fillColor;
   link.style.borderRadius = `${config.radius}px`;
+  link.dataset.buttonHasBorder = config.hasBorder ? "1" : "0";
+  link.dataset.buttonBold = config.bold ? "1" : "0";
+  link.dataset.buttonRadius = String(config.radius);
+  link.dataset.buttonBorderColor = String(config.borderColor);
+  link.dataset.buttonFillColor = String(config.fillColor);
+  link.dataset.buttonTextColor = String(config.textColor);
 
   if (config.hasBorder) {
     link.style.border = `1px solid ${config.borderColor}`;
@@ -4710,9 +5148,15 @@ function createInlineButtonLink(config) {
 
   if (config.width) {
     link.style.width = `${config.width}px`;
+    link.dataset.buttonWidth = String(config.width);
+  } else {
+    delete link.dataset.buttonWidth;
   }
   if (config.height) {
     link.style.height = `${config.height}px`;
+    link.dataset.buttonHeight = String(config.height);
+  } else {
+    delete link.dataset.buttonHeight;
   }
 
   if (config.width && config.height) {
@@ -4803,6 +5247,8 @@ function applyInsertButtonFromPopover() {
 
   const buttonNode = createInlineButtonLink({
     text,
+    linkType,
+    targetRaw,
     href,
     hasBorder: Boolean(elements.insertButtonHasBorder?.checked),
     bold: Boolean(elements.insertButtonBold?.checked),
@@ -4814,7 +5260,26 @@ function applyInsertButtonFromPopover() {
     textColor: elements.insertButtonTextColor?.value || "#1d1c1a"
   });
 
-  if (state.insertButtonContext === "detail") {
+  const editNode = state.insertButtonEditNode;
+  const editor = getEditorElementForContext(state.insertButtonContext);
+  const canReplace = editNode instanceof HTMLAnchorElement
+    && editNode.isConnected
+    && editor instanceof HTMLElement
+    && editor.contains(editNode);
+
+  if (canReplace) {
+    editNode.replaceWith(buttonNode);
+    if (state.insertButtonContext === "detail") {
+      saveSelectionRange();
+      persistDetailDraftFromEditor();
+    } else if (state.insertButtonContext === "about") {
+      saveAboutSelectionRange();
+      persistAboutDraftFromEditor();
+    } else if (state.insertButtonContext === "personalize") {
+      savePersonalizeSelectionRange();
+      persistPersonalizationDraftFromEditor();
+    }
+  } else if (state.insertButtonContext === "detail") {
     insertNodeAtCursor(buttonNode);
     saveSelectionRange();
     persistDetailDraftFromEditor();
@@ -5289,23 +5754,20 @@ function getCurrentAboutEditorBlock() {
 }
 
 function applyAboutFormatBlock(tag) {
-  runAboutExecCommand("formatBlock", tag);
+  const rangeSnapshot = getUsableRangeForContext("about")?.cloneRange() || null;
+  runFormatBlockForContext("about", tag);
+  resetInlineTypographyStylesForContext("about", rangeSnapshot);
+  return rangeSnapshot;
 }
 
 function applyAboutParagraphFormat() {
-  applyAboutFormatBlock("p");
-  const block = getCurrentAboutEditorBlock();
-  if (block && block.classList && block.classList.contains("detail-note-text")) {
-    block.classList.remove("detail-note-text");
-  }
+  const rangeSnapshot = applyAboutFormatBlock("p");
+  updateParagraphNoteClassForContext("about", false, rangeSnapshot);
 }
 
 function applyAboutNoteFormat() {
-  applyAboutFormatBlock("p");
-  const block = getCurrentAboutEditorBlock();
-  if (block && block.tagName === "P") {
-    block.classList.add("detail-note-text");
-  }
+  const rangeSnapshot = applyAboutFormatBlock("p");
+  updateParagraphNoteClassForContext("about", true, rangeSnapshot);
 }
 
 function ensureAboutParagraphAfterEnter() {
@@ -5320,7 +5782,7 @@ function ensureAboutParagraphAfterEnter() {
     node = node.parentElement;
   }
   if (!(node instanceof Element)) return;
-  if (node.closest("li, td, th")) return;
+  if (node.closest("li, td, th, .detail-columns-cell")) return;
   if (node.closest("p")) {
     saveAboutSelectionRange();
     queueLineNumberRefresh();
@@ -7080,6 +7542,10 @@ async function saveDetailHtml(project, contentInput) {
     navInitialTheme,
     bgRanges: rangeByLang
   }));
+  await writeDetailReadingStatsFile(project, {
+    zh: fixedZh,
+    en: fixedEn
+  });
 
   state.detailNavInitialTheme = navInitialTheme;
   state.detailDraftHtml.zh = fixedZh;
@@ -7908,23 +8374,20 @@ function collectPendingIdsFromHtml(contentHtml, attributeName) {
 }
 
 function applyFormatBlock(tag) {
-  runExecCommand("formatBlock", tag);
+  const rangeSnapshot = getUsableRangeForContext("detail")?.cloneRange() || null;
+  runFormatBlockForContext("detail", tag);
+  resetInlineTypographyStylesForContext("detail", rangeSnapshot);
+  return rangeSnapshot;
 }
 
 function applyParagraphFormat() {
-  applyFormatBlock("p");
-  const block = getCurrentEditorBlock();
-  if (block && block.classList && block.classList.contains("detail-note-text")) {
-    block.classList.remove("detail-note-text");
-  }
+  const rangeSnapshot = applyFormatBlock("p");
+  updateParagraphNoteClassForContext("detail", false, rangeSnapshot);
 }
 
 function applyNoteFormat() {
-  applyFormatBlock("p");
-  const block = getCurrentEditorBlock();
-  if (block && block.tagName === "P") {
-    block.classList.add("detail-note-text");
-  }
+  const rangeSnapshot = applyFormatBlock("p");
+  updateParagraphNoteClassForContext("detail", true, rangeSnapshot);
 }
 
 function getCurrentEditorBlock() {
@@ -7950,7 +8413,7 @@ function ensureParagraphAfterEnter() {
     node = node.parentElement;
   }
   if (!(node instanceof Element)) return;
-  if (node.closest("li, td, th")) return;
+  if (node.closest("li, td, th, .detail-columns-cell")) return;
   if (node.closest("p")) {
     saveSelectionRange();
     queueLineNumberRefresh();
@@ -9453,6 +9916,13 @@ async function openDetailPreview() {
         return Boolean(node.querySelector("h1,h2,h3,h4,h5,h6,p,li,blockquote,pre,table,hr,figure,.image-wrapper"));
       }
 
+      function hasNestedColumnsLineDescendant(node) {
+        if (!(node instanceof Element)) return false;
+        return Boolean(
+          node.querySelector("h1,h2,h3,h4,h5,h6,p,li,blockquote,pre,table,hr,figure,.image-wrapper,div,section,article,.detail-columns-block,.detail-columns-cell")
+        );
+      }
+
       function isLineTargetElement(node, container) {
         if (!(node instanceof HTMLElement)) return false;
         if (node === container) return false;
@@ -9473,12 +9943,18 @@ async function openDetailPreview() {
         if (tag === "DIV") {
           if (node.classList.contains("detail-note-text")) return true;
           if (node.classList.contains("detail-columns-cell")) {
-            return !hasStructuredLineDescendant(node);
+            return !hasNestedColumnsLineDescendant(node);
+          }
+          if (node.parentElement instanceof HTMLElement && node.parentElement.classList.contains("detail-columns-cell")) {
+            return !hasNestedColumnsLineDescendant(node);
           }
           if (node.parentElement !== container) return false;
           return !hasStructuredLineDescendant(node);
         }
         if (tag === "SECTION" || tag === "ARTICLE") {
+          if (node.parentElement instanceof HTMLElement && node.parentElement.classList.contains("detail-columns-cell")) {
+            return !hasNestedColumnsLineDescendant(node);
+          }
           if (node.parentElement !== container) return false;
           return !hasStructuredLineDescendant(node);
         }
@@ -9512,19 +9988,64 @@ async function openDetailPreview() {
         return null;
       }
 
-      function getLineTargets(container) {
+      function getLineEntries(container) {
         if (!container) return [];
-        const targets = [];
+        const rawNodes = [];
         const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
         let current = walker.nextNode();
         while (current) {
           if (isLineTargetElement(current, container) || isTopLevelTextLineNode(current, container)) {
-            targets.push(current);
+            rawNodes.push(current);
           }
           current = walker.nextNode();
         }
-        if (targets.length) return targets;
-        return Array.from(container.children).filter((node) => node instanceof HTMLElement && !node.classList.contains("page-line-anchor"));
+        if (!rawNodes.length) {
+          rawNodes.push(...Array.from(container.children)
+            .filter((node) => node instanceof HTMLElement && !node.classList.contains("page-line-anchor")));
+        }
+        if (!rawNodes.length) return [];
+
+        const measured = [];
+        rawNodes.forEach((node) => {
+          const rect = getLineNodeRect(node);
+          if (!rect) return;
+          const top = Number.isFinite(rect.top) ? rect.top : NaN;
+          const bottom = Number.isFinite(rect.bottom) ? rect.bottom : NaN;
+          const left = Number.isFinite(rect.left) ? rect.left : NaN;
+          if (!Number.isFinite(top) || !Number.isFinite(bottom) || !Number.isFinite(left)) return;
+          if (bottom <= top) return;
+          measured.push({ node, top, bottom, left });
+        });
+        if (!measured.length) return [];
+
+        measured.sort((a, b) => {
+          if (a.top !== b.top) return a.top - b.top;
+          return a.left - b.left;
+        });
+
+        const entries = [];
+        const sameLineThreshold = 4;
+        measured.forEach((item) => {
+          const last = entries[entries.length - 1];
+          if (last && Math.abs(item.top - last.top) <= sameLineThreshold) {
+            last.bottom = Math.max(last.bottom, item.bottom);
+            last.nodes.push(item.node);
+            if (item.left < last.left) {
+              last.left = item.left;
+              last.anchorNode = item.node;
+            }
+            return;
+          }
+          entries.push({
+            top: item.top,
+            bottom: item.bottom,
+            left: item.left,
+            anchorNode: item.node,
+            nodes: [item.node]
+          });
+        });
+
+        return entries;
       }
 
       function getViewportContentWidth() {
@@ -9597,20 +10118,22 @@ async function openDetailPreview() {
         if (existingLayer) {
           existingLayer.remove();
         }
-        const lineElements = getLineTargets(container);
+        const lineEntries = getLineEntries(container);
         const normalizedRanges = normalizeLineRanges(rawRanges);
-        lineElements.forEach((element, index) => {
+        lineEntries.forEach((entry, index) => {
+          const anchorTarget = entry && entry.anchorNode;
+          if (!(anchorTarget instanceof Node)) return;
           const lineNumber = index + 1;
           const anchor = document.createElement("span");
           anchor.className = "page-line-anchor";
           anchor.id = "line-" + lineNumber;
-          const parent = element.parentNode;
+          const parent = anchorTarget.parentNode;
           if (parent) {
-            parent.insertBefore(anchor, element);
+            parent.insertBefore(anchor, anchorTarget);
           }
         });
 
-        if (!normalizedRanges.length || !lineElements.length) {
+        if (!normalizedRanges.length || !lineEntries.length) {
           updateDetailTopFill(host, container, normalizedRanges);
           return;
         }
@@ -9645,22 +10168,19 @@ async function openDetailPreview() {
         const hostRect = host.getBoundingClientRect();
         const viewportWidth = getViewportContentWidth();
         normalizedRanges.forEach((range) => {
-          const startLine = Math.min(Math.max(range.start, 1), lineElements.length);
-          const endLine = Math.min(Math.max(range.end, startLine), lineElements.length);
-          const startElement = lineElements[startLine - 1];
-          const endElement = lineElements[endLine - 1];
-          const startRect = getLineNodeRect(startElement);
-          const endRect = getLineNodeRect(endElement);
-          if (!startRect || !endRect) return;
-          const topRaw = Math.round(startRect.top - hostRect.top);
-          const bottomRaw = Math.round(endRect.bottom - hostRect.top);
+          const startLine = Math.min(Math.max(range.start, 1), lineEntries.length);
+          const endLine = Math.min(Math.max(range.end, startLine), lineEntries.length);
+          const startEntry = lineEntries[startLine - 1];
+          const endEntry = lineEntries[endLine - 1];
+          if (!startEntry || !endEntry) return;
+          const topRaw = Math.round(startEntry.top - hostRect.top);
+          const bottomRaw = Math.round(endEntry.bottom - hostRect.top);
           const top = startLine === 1 ? 0 : Math.max(0, topRaw);
           let bottom = Math.min(maxBottom, Math.max(top, bottomRaw));
-          if (endLine < lineElements.length) {
-            const nextElement = lineElements[endLine];
-            const nextRect = getLineNodeRect(nextElement);
-            if (nextRect) {
-              const nextTopRaw = Math.round(nextRect.top - hostRect.top);
+          if (endLine < lineEntries.length) {
+            const nextEntry = lineEntries[endLine];
+            if (nextEntry) {
+              const nextTopRaw = Math.round(nextEntry.top - hostRect.top);
               const nextTop = Math.max(top, nextTopRaw);
               bottom = Math.min(bottom, nextTop);
             }

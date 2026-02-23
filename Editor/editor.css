@@ -538,7 +538,9 @@
 }
 
 .detail-color-input {
-  position: absolute;
+  position: fixed;
+  left: 50vw;
+  top: 50vh;
   width: 1px;
   height: 1px;
   opacity: 0;
@@ -893,6 +895,10 @@
 
 .detail-editor .detail-columns-cell > :last-child {
   margin-bottom: 0 !important;
+}
+
+.detail-editor .detail-columns-block[data-columns-color] .detail-columns-cell {
+  background: var(--columns-bg, var(--columns-guide-bg, #f1efea));
 }
 
 .detail-editor .detail-columns-block:hover .detail-columns-cell,

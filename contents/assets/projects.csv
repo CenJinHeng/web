@@ -1,8 +1,8 @@
 id,name_zh,name_en,type,date,rank,tags,image,hidden
-p01,面向居民的洪水风险决策工具,Flood Risk Dashboard for Residents,t1,2025-09,,Vibe coding|demo,contents/project_details/p01/assets/cover.jpg,
+p01,面向居民的洪水风险决策工具,Flood Risk Dashboard for Residents,t1,2025-09,3,Vibe coding|demo,contents/project_details/p01/assets/cover.jpg,
 p02,宾大选课系统优化,Path@Penn Redesign,t1,2025-10,1,,contents/project_details/p02/assets/cover.jpg,
-p03,Petpet: “工具-社区-线下”驱动的宠物社区App设计,Petpet—Pet Comunity App Design,t1,2025-12,,,contents/project_details/p03/assets/cover.jpg,
-p04,“场景+游戏化”的社区参与画板,Engagement Dashboard for Trail Planning,t1,2026-01,,Vibe coding|demo,contents/project_details/p04/assets/cover.jpg,
+p03,Petpet: “工具-社区-线下”驱动的宠物社区App设计,Petpet—Pet Comunity App Design,t1,2025-12,4,,contents/project_details/p03/assets/cover.jpg,
+p04,“场景+游戏化”的社区参与画板,Engagement Dashboard for Trail Planning,t1,2026-01,2,Vibe coding|demo,contents/project_details/p04/assets/cover.jpg,
 p05,深圳创新空间支持要素研究,Research on Support Factors for Innovation Spaces in Shenzhen,t2,2024-04,,,contents/project_details/p05/assets/cover.png,
 p06,社交媒体的舆情分析,Can we measure public perception during disasters using tweet data?,t2,2023-11,,,contents/project_details/p06/assets/cover.jpg,
 p07,基于大众点评数据的美食街道分析,Discover the Authenic Food,t2,2023-11,,,contents/project_details/p07/assets/cover.png,
