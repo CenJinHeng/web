@@ -39,6 +39,10 @@ const detailI18n = {
 
 const PERSONALIZATION_FILE = "../../assets/site_personalization.json";
 const DETAIL_STATS_FILE = "./detail-stats.json";
+const LIGHTBOX_DEFAULT_SCALE = 1;
+const LIGHTBOX_MIN_SCALE = 0.25;
+const LIGHTBOX_MAX_SCALE = 4;
+const OUTLINE_OVERFLOW_TOLERANCE_PX = 8;
 const DEFAULT_PERSONALIZATION = Object.freeze({
   navBrandTextZh: "XXX的个人空间",
   navBrandTextEn: "XXX's Space"
@@ -79,13 +83,27 @@ const detailBgRangesByLang = {
   en: parseLineRangesTemplate(detailBgRangesEnTemplate ? detailBgRangesEnTemplate.innerHTML : "")
 };
 let outlineContrastRaf = 0;
+let outlineLayoutRaf = 0;
 let navThemeRaf = 0;
+let detailRangeLayoutRaf = 0;
 let navThemeFollowBackground = false;
 let detailTopFillColor = "";
+const outlineManualExpanded = new Map();
+let lightboxOverlay = null;
+let lightboxImage = null;
+let lightboxScale = LIGHTBOX_DEFAULT_SCALE;
+let lightboxTranslateX = 0;
+let lightboxTranslateY = 0;
+let lightboxDragSession = null;
+let lightboxSuppressCloseClickUntil = 0;
+let lightboxPrevBodyOverflow = "";
+let lightboxPrevBodyTouchAction = "";
+let lightboxPrevHtmlOverflow = "";
 
 normalizeNavTemplate();
 setupBrandNavigation();
 setupOutline();
+setupImageLightbox();
 applyI18n(state.lang);
 updateLangToggle();
 applyPersonalization();
@@ -406,6 +424,212 @@ function renderDetailContent(lang) {
   queueNavThemeUpdate();
 }
 
+function setupImageLightbox() {
+  if (!(detailContent instanceof HTMLElement)) return;
+  ensureImageLightboxElements();
+
+  detailContent.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target.closest("img") : null;
+    if (!(target instanceof HTMLImageElement)) return;
+    if (!detailContent.contains(target)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openImageLightbox(target);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (!isImageLightboxOpen()) return;
+    event.preventDefault();
+    closeImageLightbox();
+  });
+}
+
+function ensureImageLightboxElements() {
+  if (lightboxOverlay instanceof HTMLElement && lightboxImage instanceof HTMLImageElement) return;
+  const overlay = document.createElement("div");
+  overlay.className = "detail-lightbox";
+  overlay.hidden = true;
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+
+  const image = document.createElement("img");
+  image.className = "detail-lightbox-image";
+  image.alt = "";
+  image.draggable = false;
+  overlay.appendChild(image);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (event) => {
+    if (Date.now() < lightboxSuppressCloseClickUntil) return;
+    closeImageLightbox();
+  });
+
+  overlay.addEventListener("wheel", (event) => {
+    if (!isImageLightboxOpen()) return;
+    event.preventDefault();
+    const currentScale = lightboxScale;
+    const wheelFactor = Math.exp(-event.deltaY * 0.0018);
+    const nextScale = clampImageLightboxScale(currentScale * wheelFactor);
+    if (nextScale === currentScale) return;
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const ratio = nextScale / currentScale;
+    lightboxTranslateX = ratio * lightboxTranslateX + (1 - ratio) * (event.clientX - centerX);
+    lightboxTranslateY = ratio * lightboxTranslateY + (1 - ratio) * (event.clientY - centerY);
+    lightboxScale = nextScale;
+    if (lightboxScale <= LIGHTBOX_MIN_SCALE + 0.0001) {
+      lightboxTranslateX = 0;
+      lightboxTranslateY = 0;
+    }
+    applyImageLightboxTransform();
+  }, { passive: false });
+
+  const lightboxDownEvent = window.PointerEvent ? "pointerdown" : "mousedown";
+  image.addEventListener(lightboxDownEvent, (event) => {
+    if (!isImageLightboxOpen()) return;
+    if (window.PointerEvent && event instanceof PointerEvent) {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      lightboxDragSession = {
+        usesPointer: true,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        moved: false,
+        startTranslateX: lightboxTranslateX,
+        startTranslateY: lightboxTranslateY
+      };
+    } else if (event instanceof MouseEvent) {
+      if (event.button !== 0) return;
+      lightboxDragSession = {
+        usesPointer: false,
+        pointerId: null,
+        startX: event.clientX,
+        startY: event.clientY,
+        moved: false,
+        startTranslateX: lightboxTranslateX,
+        startTranslateY: lightboxTranslateY
+      };
+    } else {
+      return;
+    }
+    overlay.classList.add("is-dragging");
+    if (event.cancelable) event.preventDefault();
+    event.stopPropagation();
+  });
+
+  const handleDragMove = (event) => {
+    if (!lightboxDragSession) return;
+    if (lightboxDragSession.usesPointer) {
+      if (!(window.PointerEvent && event instanceof PointerEvent)) return;
+      if (event.pointerId !== lightboxDragSession.pointerId) return;
+    }
+    if (event.cancelable) event.preventDefault();
+    const deltaX = event.clientX - lightboxDragSession.startX;
+    const deltaY = event.clientY - lightboxDragSession.startY;
+    if (!lightboxDragSession.moved && (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2)) {
+      lightboxDragSession.moved = true;
+      lightboxSuppressCloseClickUntil = Date.now() + 260;
+    }
+    lightboxTranslateX = lightboxDragSession.startTranslateX + deltaX;
+    lightboxTranslateY = lightboxDragSession.startTranslateY + deltaY;
+    applyImageLightboxTransform();
+  };
+
+  const finishDrag = () => {
+    if (!lightboxDragSession) return;
+    lightboxDragSession = null;
+    overlay.classList.remove("is-dragging");
+  };
+
+  if (window.PointerEvent) {
+    window.addEventListener("pointermove", handleDragMove, { capture: true });
+    window.addEventListener("pointerup", finishDrag, { capture: true });
+    window.addEventListener("pointercancel", finishDrag, { capture: true });
+  }
+  window.addEventListener("mousemove", handleDragMove, { capture: true });
+  window.addEventListener("mouseup", finishDrag, { capture: true });
+  window.addEventListener("blur", finishDrag, true);
+
+  lightboxOverlay = overlay;
+  lightboxImage = image;
+}
+
+function isImageLightboxOpen() {
+  return Boolean(lightboxOverlay && !lightboxOverlay.hidden);
+}
+
+function clampImageLightboxScale(scale) {
+  if (!Number.isFinite(scale)) return LIGHTBOX_MIN_SCALE;
+  return Math.min(LIGHTBOX_MAX_SCALE, Math.max(LIGHTBOX_MIN_SCALE, scale));
+}
+
+function applyImageLightboxTransform() {
+  if (!(lightboxImage instanceof HTMLImageElement)) return;
+  lightboxImage.style.transform = `translate(${Math.round(lightboxTranslateX)}px, ${Math.round(lightboxTranslateY)}px) scale(${lightboxScale})`;
+}
+
+function lockPageForImageLightbox() {
+  lightboxPrevBodyOverflow = document.body.style.overflow;
+  lightboxPrevBodyTouchAction = document.body.style.touchAction;
+  lightboxPrevHtmlOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function unlockPageForImageLightbox() {
+  document.body.style.overflow = lightboxPrevBodyOverflow;
+  document.body.style.touchAction = lightboxPrevBodyTouchAction;
+  document.documentElement.style.overflow = lightboxPrevHtmlOverflow;
+}
+
+function openImageLightbox(sourceImage) {
+  if (!(sourceImage instanceof HTMLImageElement)) return;
+  ensureImageLightboxElements();
+  if (!(lightboxOverlay instanceof HTMLElement) || !(lightboxImage instanceof HTMLImageElement)) return;
+  const source = String(sourceImage.currentSrc || sourceImage.getAttribute("src") || "").trim();
+  if (!source) return;
+
+  const wasOpen = isImageLightboxOpen();
+  lightboxScale = LIGHTBOX_DEFAULT_SCALE;
+  lightboxTranslateX = 0;
+  lightboxTranslateY = 0;
+  lightboxDragSession = null;
+  lightboxSuppressCloseClickUntil = 0;
+  lightboxOverlay.classList.remove("is-dragging");
+  lightboxImage.src = source;
+  lightboxImage.alt = sourceImage.alt || "";
+  applyImageLightboxTransform();
+
+  if (!wasOpen) {
+    lockPageForImageLightbox();
+  }
+  lightboxOverlay.hidden = false;
+  lightboxOverlay.classList.add("is-open");
+  lightboxOverlay.setAttribute("aria-hidden", "false");
+}
+
+function closeImageLightbox() {
+  if (!(lightboxOverlay instanceof HTMLElement) || !(lightboxImage instanceof HTMLImageElement)) return;
+  if (!isImageLightboxOpen()) return;
+
+  lightboxOverlay.hidden = true;
+  lightboxOverlay.classList.remove("is-open", "is-dragging");
+  lightboxOverlay.setAttribute("aria-hidden", "true");
+  lightboxImage.removeAttribute("src");
+  lightboxImage.alt = "";
+  lightboxDragSession = null;
+  lightboxScale = LIGHTBOX_DEFAULT_SCALE;
+  lightboxTranslateX = 0;
+  lightboxTranslateY = 0;
+  lightboxSuppressCloseClickUntil = 0;
+  applyImageLightboxTransform();
+  unlockPageForImageLightbox();
+}
+
 function parseLineRangesTemplate(text) {
   const source = String(text || "").trim();
   if (!source) return [];
@@ -538,6 +762,19 @@ function getLineNodeRect(node) {
   return null;
 }
 
+function getColumnsLineContext(node, container) {
+  if (!container || !node) return null;
+  const element = node instanceof HTMLElement
+    ? node
+    : (node.parentElement instanceof HTMLElement ? node.parentElement : null);
+  if (!(element instanceof HTMLElement)) return null;
+  const cell = element.closest(".detail-columns-cell");
+  if (!(cell instanceof HTMLElement) || !container.contains(cell)) return null;
+  const block = cell.closest(".detail-columns-block");
+  if (!(block instanceof HTMLElement) || !container.contains(block)) return null;
+  return { cell, block };
+}
+
 function getLineEntries(container) {
   if (!container) return [];
   const rawNodes = [];
@@ -556,6 +793,10 @@ function getLineEntries(container) {
   if (!rawNodes.length) return [];
 
   const measured = [];
+  const columnBlockIds = new WeakMap();
+  const columnCellLineIndexes = new WeakMap();
+  const logicalRowTopByKey = new Map();
+  let nextColumnBlockId = 1;
   rawNodes.forEach((node) => {
     const rect = getLineNodeRect(node);
     if (!rect) return;
@@ -564,7 +805,27 @@ function getLineEntries(container) {
     const left = Number.isFinite(rect.left) ? rect.left : NaN;
     if (!Number.isFinite(top) || !Number.isFinite(bottom) || !Number.isFinite(left)) return;
     if (bottom <= top) return;
-    measured.push({ node, top, bottom, left });
+    const item = { node, top, bottom, left };
+    const columnsContext = getColumnsLineContext(node, container);
+    if (columnsContext) {
+      const { cell, block } = columnsContext;
+      let blockId = columnBlockIds.get(block);
+      if (!blockId) {
+        blockId = nextColumnBlockId;
+        nextColumnBlockId += 1;
+        columnBlockIds.set(block, blockId);
+      }
+      const lineIndex = columnCellLineIndexes.get(cell) || 0;
+      columnCellLineIndexes.set(cell, lineIndex + 1);
+      const logicalRowKey = `${blockId}:${lineIndex}`;
+      // Keep line numbering stable when columns stack to 1fr on small screens.
+      if (logicalRowTopByKey.has(logicalRowKey)) {
+        item.top = logicalRowTopByKey.get(logicalRowKey);
+      } else {
+        logicalRowTopByKey.set(logicalRowKey, top);
+      }
+    }
+    measured.push(item);
   });
   if (!measured.length) return [];
 
@@ -770,33 +1031,30 @@ function updateDetailTopFill(container, ranges) {
   queueNavThemeUpdate();
 }
 
-function refreshDetailTopFillByCurrentState() {
-  if (!detailContent) return;
-  if (!detailTopFillColor) return;
-  const currentRanges = getDetailRangesForLang(state.lang);
-  updateDetailTopFill(detailContent, currentRanges);
-}
-
 function getViewportContentWidth() {
   return document.documentElement.clientWidth || window.innerWidth || 0;
 }
 
 function refreshDetailRangeHorizontalLayout() {
-  const host = detailMain || detailContent;
-  if (!host) return;
-  const hostRect = host.getBoundingClientRect();
-  const viewportWidth = getViewportContentWidth();
-  host.querySelectorAll(".page-range-layer[data-scope='detail-content'] .page-range-block").forEach((block) => {
-    if (!(block instanceof HTMLElement)) return;
-    block.style.left = `${-hostRect.left}px`;
-    block.style.width = `${viewportWidth}px`;
+  if (!detailContent) return;
+  const currentRanges = getDetailRangesForLang(state.lang);
+  applyLineDecorations(detailContent, currentRanges);
+}
+
+function scheduleDetailRangeLayoutRefresh() {
+  if (detailRangeLayoutRaf) return;
+  detailRangeLayoutRaf = window.requestAnimationFrame(() => {
+    detailRangeLayoutRaf = 0;
+    refreshDetailRangeHorizontalLayout();
   });
-  const fill = host.querySelector(".detail-top-fill");
-  if (fill instanceof HTMLElement && !fill.hidden) {
-    fill.style.left = `${-hostRect.left}px`;
-    fill.style.width = `${viewportWidth}px`;
-  }
-  queueNavThemeUpdate();
+}
+
+function scheduleOutlineLayoutRefresh() {
+  if (outlineLayoutRaf) return;
+  outlineLayoutRaf = window.requestAnimationFrame(() => {
+    outlineLayoutRaf = 0;
+    renderOutline();
+  });
 }
 
 function setupBrandNavigation() {
@@ -1287,8 +1545,8 @@ function setupOutline() {
       closeOutlineMobile();
     });
     window.addEventListener("resize", () => {
-      refreshDetailRangeHorizontalLayout();
-      refreshDetailTopFillByCurrentState();
+      scheduleDetailRangeLayoutRefresh();
+      scheduleOutlineLayoutRefresh();
       queueOutlineContrastUpdate();
       queueNavThemeUpdate();
     });
@@ -1312,12 +1570,10 @@ function renderOutline() {
   const empty = document.querySelector(".detail-outline-empty");
   if (!outline || !list || !empty) return;
 
-  const headings = Array.from(detailContent.querySelectorAll("h1, h2, h3, h4"))
-    .filter((heading) => String(heading.textContent || "").trim());
-
-  list.innerHTML = "";
-
+  const headings = collectOutlineHeadings();
   if (!headings.length) {
+    outlineManualExpanded.clear();
+    list.innerHTML = "";
     outline.hidden = false;
     empty.hidden = false;
     queueOutlineContrastUpdate();
@@ -1333,26 +1589,192 @@ function renderOutline() {
       .filter(Boolean)
   );
 
-  headings.forEach((heading, index) => {
-    const id = ensureHeadingId(heading, index, usedIds);
-    const level = Number(heading.tagName.replace("H", ""));
-    const item = document.createElement("li");
-    item.className = `detail-outline-item is-level-${Number.isNaN(level) ? 2 : level}`;
+  const tree = buildOutlineTree(headings, usedIds);
+  const validIds = new Set();
+  walkOutlineNodes(tree, (node) => validIds.add(node.id));
+  pruneOutlineManualState(validIds);
 
-    const link = document.createElement("a");
-    link.href = `#${id}`;
-    link.textContent = String(heading.textContent || "").trim();
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-      closeOutlineMobile();
-      scrollToHeadingWithNavOffset(id);
-    });
-
-    item.appendChild(link);
-    list.appendChild(item);
+  const autoExpandDepth = resolveOutlineAutoExpandDepth(outline, list, tree);
+  renderOutlineTree(list, tree, {
+    autoExpandDepth,
+    interactive: true,
+    respectManual: true
   });
 
   queueOutlineContrastUpdate();
+}
+
+function collectOutlineHeadings() {
+  if (!detailContent) return [];
+  return Array.from(detailContent.querySelectorAll("h1, h2, h3"))
+    .filter((heading) => String(heading.textContent || "").trim());
+}
+
+function buildOutlineTree(headings, usedIds) {
+  const root = { level: 0, children: [] };
+  const stack = [root];
+
+  headings.forEach((heading, index) => {
+    const id = ensureHeadingId(heading, index, usedIds);
+    const rawLevel = Number(heading.tagName.replace("H", ""));
+    const level = Number.isFinite(rawLevel) ? Math.max(1, Math.min(3, rawLevel)) : 1;
+    const node = {
+      id,
+      level,
+      title: String(heading.textContent || "").trim(),
+      children: []
+    };
+
+    while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+      stack.pop();
+    }
+    stack[stack.length - 1].children.push(node);
+    stack.push(node);
+  });
+
+  return root.children;
+}
+
+function walkOutlineNodes(nodes, callback) {
+  nodes.forEach((node) => {
+    callback(node);
+    if (node.children?.length) {
+      walkOutlineNodes(node.children, callback);
+    }
+  });
+}
+
+function pruneOutlineManualState(validIds) {
+  Array.from(outlineManualExpanded.keys()).forEach((id) => {
+    if (!validIds.has(id)) {
+      outlineManualExpanded.delete(id);
+    }
+  });
+}
+
+function resolveOutlineAutoExpandDepth(outline, list, tree) {
+  const depths = [3, 2, 1];
+  for (const depth of depths) {
+    renderOutlineTree(list, tree, {
+      autoExpandDepth: depth,
+      interactive: false,
+      respectManual: false
+    });
+    if (!isOutlineOverflowing(outline)) {
+      return depth;
+    }
+  }
+  return 1;
+}
+
+function isOutlineOverflowing(outline) {
+  if (!(outline instanceof HTMLElement)) return false;
+  return outline.scrollHeight - outline.clientHeight > OUTLINE_OVERFLOW_TOLERANCE_PX;
+}
+
+function renderOutlineTree(list, tree, options = {}) {
+  if (!(list instanceof HTMLElement)) return;
+  const autoExpandDepth = Number.isFinite(options.autoExpandDepth) ? options.autoExpandDepth : 3;
+  const interactive = options.interactive !== false;
+  const respectManual = options.respectManual !== false;
+  list.innerHTML = "";
+
+  const fragment = document.createDocumentFragment();
+  tree.forEach((node) => {
+    fragment.appendChild(
+      createOutlineItem(node, {
+        autoExpandDepth,
+        interactive,
+        respectManual
+      })
+    );
+  });
+  list.appendChild(fragment);
+}
+
+function createOutlineItem(node, options) {
+  const item = document.createElement("li");
+  item.className = `detail-outline-item is-level-${node.level}`;
+  item.dataset.outlineId = node.id;
+
+  const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+  const defaultExpanded = hasChildren && node.level < options.autoExpandDepth;
+  const manualExpanded = options.respectManual && outlineManualExpanded.has(node.id)
+    ? outlineManualExpanded.get(node.id)
+    : null;
+  const expanded = hasChildren && typeof manualExpanded === "boolean" ? manualExpanded : defaultExpanded;
+
+  let children = null;
+  if (hasChildren) {
+    item.classList.add("has-children", expanded ? "is-expanded" : "is-collapsed");
+  }
+
+  const row = document.createElement("div");
+  row.className = "detail-outline-row";
+  let toggleButton = null;
+  const link = document.createElement("a");
+  link.className = "detail-outline-link";
+  link.href = `#${node.id}`;
+
+  if (hasChildren) {
+    toggleButton = document.createElement("button");
+    toggleButton.type = "button";
+    toggleButton.className = "detail-outline-toggle-btn";
+    toggleButton.setAttribute("aria-expanded", expanded ? "true" : "false");
+    const caret = document.createElement("span");
+    caret.className = "detail-outline-caret";
+    caret.setAttribute("aria-hidden", "true");
+    toggleButton.appendChild(caret);
+    row.appendChild(toggleButton);
+  } else {
+    const spacer = document.createElement("span");
+    spacer.className = "detail-outline-caret-spacer";
+    spacer.setAttribute("aria-hidden", "true");
+    row.appendChild(spacer);
+  }
+
+  const label = document.createElement("span");
+  label.className = "detail-outline-label";
+  label.textContent = node.title;
+  link.appendChild(label);
+  row.appendChild(link);
+  item.appendChild(row);
+
+  if (hasChildren) {
+    children = document.createElement("ul");
+    children.className = "detail-outline-children";
+    if (!expanded) {
+      children.hidden = true;
+    }
+    node.children.forEach((child) => {
+      children.appendChild(createOutlineItem(child, options));
+    });
+    item.appendChild(children);
+  }
+
+  if (options.interactive) {
+    if (hasChildren && toggleButton) {
+      toggleButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!(children instanceof HTMLElement)) return;
+        const shouldExpand = children.hidden;
+        children.hidden = !shouldExpand;
+        item.classList.toggle("is-expanded", shouldExpand);
+        item.classList.toggle("is-collapsed", !shouldExpand);
+        toggleButton.setAttribute("aria-expanded", shouldExpand ? "true" : "false");
+        outlineManualExpanded.set(node.id, shouldExpand);
+        queueOutlineContrastUpdate();
+      });
+    }
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      closeOutlineMobile();
+      scrollToHeadingWithNavOffset(node.id);
+    });
+  }
+
+  return item;
 }
 
 function renderOutlineStatsMeta() {
@@ -1510,9 +1932,9 @@ function updateOutlineContrastByBackground() {
     outline.classList.toggle("is-on-dark", isDarkColor(resolveColorAtPoint(outlineCenterX, outlineCenterY)));
 
     Array.from(list.querySelectorAll(".detail-outline-item")).forEach((item) => {
-      const link = item.querySelector("a");
-      if (!(link instanceof HTMLElement)) return;
-      const rect = link.getBoundingClientRect();
+      const row = item.firstElementChild;
+      if (!(row instanceof HTMLElement) || !row.classList.contains("detail-outline-row")) return;
+      const rect = row.getBoundingClientRect();
       const centerX = rect.left + (rect.width / 2);
       const centerY = rect.top + (rect.height / 2);
       item.classList.toggle("is-on-dark", isDarkColor(resolveColorAtPoint(centerX, centerY)));
@@ -1606,6 +2028,7 @@ function toggleOutlineMobile() {
   outline.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
   if (shouldOpen) {
     outline.removeAttribute("inert");
+    scheduleOutlineLayoutRefresh();
   } else {
     outline.setAttribute("inert", "");
   }

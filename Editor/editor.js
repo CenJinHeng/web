@@ -553,6 +553,28 @@ const IMAGE_MIN_WIDTH = 120;
 const IMAGE_MIN_HEIGHT = 80;
 const IMAGE_MIN_CROP_WIDTH = 36;
 const IMAGE_MIN_CROP_HEIGHT = 36;
+const TABLE_MIN_COLUMN_WIDTH = 84;
+const TABLE_RESIZE_HANDLE_CLASS = "table-col-resize-handle";
+const EDITOR_LIST_MAX_DEPTH = 3;
+const TEXT_COLOR_PALETTE_ROWS = Object.freeze([
+  Object.freeze(["#dbe5f1", "#cfe2f3", "#d9ead3", "#d0e0e3", "#d9d2e9", "#fce5cd", "#f4cccc", "#f9cb9c", "#d9d9d9", "#eeeeee"]),
+  Object.freeze(["#b4c7e7", "#9fc5e8", "#b6d7a8", "#a2c4c9", "#b4a7d6", "#f9cb9c", "#ea9999", "#f6b26b", "#b7b7b7", "#cccccc"]),
+  Object.freeze(["#8eaadb", "#6fa8dc", "#93c47d", "#76a5af", "#8e7cc3", "#f6b26b", "#e06666", "#e69138", "#7f7f7f", "#999999"]),
+  Object.freeze(["#2f5597", "#3d85c6", "#38761d", "#134f5c", "#674ea7", "#b45f06", "#cc0000", "#bf9000", "#444444", "#666666"])
+]);
+const HIGHLIGHT_COLOR_PRESETS = Object.freeze([
+  "#cfd3d8",
+  "#a9aeb4",
+  "#ef6d68",
+  "#f3a23a",
+  "#ffdd00",
+  "#b2e679",
+  "#becdf0",
+  "#dfcdf0"
+]);
+
+let textColorPresetsPopover = null;
+let highlightColorPresetsPopover = null;
 
 function getDetailFolder(project) {
   return [...state.contentPrefix, "project_details", project.id];
@@ -615,6 +637,8 @@ const state = {
   imageResizeRaf: 0,
   imageCropSession: null,
   imageCropRaf: 0,
+  tableResizeSession: null,
+  tableResizeRaf: 0,
   savedRange: null,
   personalizeSavedRange: null,
   aboutSavedRange: null,
@@ -660,6 +684,12 @@ const state = {
   columnsEditContext: "",
   columnsEditBlock: null,
   columnsEditCell: null,
+  textColorPopoverContext: "",
+  textColorPopoverTrigger: null,
+  textColorPopoverSourceInput: null,
+  highlightColorPopoverContext: "",
+  highlightColorPopoverTrigger: null,
+  highlightColorPopoverSourceInput: null,
   draggingImageWrapper: null,
   insertButtonContext: "",
   insertButtonTrigger: null,
@@ -1079,6 +1109,303 @@ function openHiddenColorPicker(input, trigger) {
   input.click();
 }
 
+function applyTextColorForContext(context, color) {
+  const normalized = normalizeHexColor(color, "#1d1c1a");
+  if (context === "about") {
+    applyAboutColorCommand("foreColor", normalized);
+    return;
+  }
+  if (context === "personalize") {
+    applyPersonalizeColorCommand("foreColor", normalized);
+    return;
+  }
+  applyColorCommand("foreColor", normalized);
+}
+
+function updateTextColorPresetActive(color) {
+  if (!(textColorPresetsPopover instanceof HTMLElement)) return;
+  const normalized = normalizeHexColor(color, "#1d1c1a");
+  textColorPresetsPopover.querySelectorAll(".text-color-presets-swatch").forEach((button) => {
+    if (!(button instanceof HTMLElement)) return;
+    const swatchColor = normalizeHexColor(button.dataset.color || "", "");
+    button.classList.toggle("is-active", Boolean(swatchColor) && swatchColor === normalized);
+  });
+}
+
+function applyTextColorFromPopover(color) {
+  const context = state.textColorPopoverContext;
+  if (!context) return;
+  const normalized = normalizeHexColor(color, "#1d1c1a");
+  if (state.textColorPopoverSourceInput instanceof HTMLInputElement) {
+    state.textColorPopoverSourceInput.value = normalized;
+  }
+  updateTextColorPresetActive(normalized);
+  applyTextColorForContext(context, normalized);
+}
+
+function createTextColorPresetSwatch(color) {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "text-color-presets-swatch";
+  swatch.dataset.color = color;
+  swatch.style.backgroundColor = color;
+  swatch.title = color;
+  swatch.setAttribute("aria-label", color);
+  swatch.addEventListener("click", () => {
+    applyTextColorFromPopover(color);
+  });
+  return swatch;
+}
+
+function ensureTextColorPresetsPopover() {
+  if (textColorPresetsPopover instanceof HTMLElement) return textColorPresetsPopover;
+
+  const popover = document.createElement("div");
+  popover.className = "detail-popover text-color-presets-popover";
+  popover.hidden = true;
+  popover.setAttribute("role", "dialog");
+  popover.setAttribute("aria-label", "Text Color");
+
+  const paletteGrid = document.createElement("div");
+  paletteGrid.className = "text-color-presets-palette";
+  TEXT_COLOR_PALETTE_ROWS.forEach((row) => {
+    row.forEach((color) => {
+      paletteGrid.appendChild(createTextColorPresetSwatch(color));
+    });
+  });
+
+  popover.appendChild(paletteGrid);
+
+  const paletteButton = document.createElement("button");
+  paletteButton.type = "button";
+  paletteButton.className = "editor-secondary text-color-presets-palette-btn";
+  paletteButton.textContent = state.lang === "en" ? "Palette" : "色盘";
+  paletteButton.addEventListener("click", () => {
+    const sourceInput = state.textColorPopoverSourceInput;
+    const trigger = state.textColorPopoverTrigger;
+    hideTextColorPresetsPopover();
+    if (sourceInput instanceof HTMLInputElement) {
+      openHiddenColorPicker(sourceInput, trigger instanceof HTMLElement ? trigger : paletteButton);
+    }
+  });
+  popover.appendChild(paletteButton);
+
+  popover.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      hideTextColorPresetsPopover();
+    }
+  });
+
+  document.body.appendChild(popover);
+  textColorPresetsPopover = popover;
+  return popover;
+}
+
+function positionTextColorPresetsPopover() {
+  const popover = ensureTextColorPresetsPopover();
+  if (!(popover instanceof HTMLElement) || popover.hidden) return;
+  const trigger = state.textColorPopoverTrigger;
+  if (!(trigger instanceof HTMLElement)) return;
+
+  const triggerRect = trigger.getBoundingClientRect();
+  popover.style.left = "12px";
+  popover.style.top = "12px";
+
+  const popRect = popover.getBoundingClientRect();
+  const maxLeft = Math.max(12, window.innerWidth - popRect.width - 12);
+  const nextLeft = Math.min(Math.max(12, triggerRect.left), maxLeft);
+
+  let nextTop = triggerRect.bottom + 8;
+  if (nextTop + popRect.height > window.innerHeight - 12) {
+    nextTop = triggerRect.top - popRect.height - 8;
+  }
+  if (nextTop < 12) {
+    nextTop = 12;
+  }
+
+  popover.style.left = `${nextLeft}px`;
+  popover.style.top = `${nextTop}px`;
+}
+
+function hideTextColorPresetsPopover() {
+  if (!(textColorPresetsPopover instanceof HTMLElement)) return;
+  textColorPresetsPopover.hidden = true;
+  state.textColorPopoverContext = "";
+  state.textColorPopoverTrigger = null;
+  state.textColorPopoverSourceInput = null;
+}
+
+function openTextColorPresetsPopover(context, trigger, sourceInput) {
+  if (!(trigger instanceof HTMLElement)) return;
+  const popover = ensureTextColorPresetsPopover();
+  if (!(popover instanceof HTMLElement)) return;
+  hideHighlightColorPresetsPopover();
+
+  state.textColorPopoverContext = context;
+  state.textColorPopoverTrigger = trigger;
+  state.textColorPopoverSourceInput = sourceInput instanceof HTMLInputElement ? sourceInput : null;
+
+  const currentColor = normalizeHexColor(
+    state.textColorPopoverSourceInput?.value || "#1d1c1a",
+    "#1d1c1a"
+  );
+  const paletteButton = popover.querySelector(".text-color-presets-palette-btn");
+  if (paletteButton instanceof HTMLButtonElement) {
+    paletteButton.textContent = state.lang === "en" ? "Palette" : "色盘";
+  }
+  updateTextColorPresetActive(currentColor);
+  popover.hidden = false;
+  positionTextColorPresetsPopover();
+}
+
+function applyHighlightColorForContext(context, color) {
+  const normalized = normalizeHexColor(color, "#fff59d");
+  if (context === "about") {
+    applyAboutColorCommand("hiliteColor", normalized);
+    return;
+  }
+  if (context === "personalize") {
+    applyPersonalizeColorCommand("hiliteColor", normalized);
+    return;
+  }
+  applyColorCommand("hiliteColor", normalized);
+}
+
+function updateHighlightColorPresetActive(color) {
+  if (!(highlightColorPresetsPopover instanceof HTMLElement)) return;
+  const normalized = normalizeHexColor(color, "#fff59d");
+  highlightColorPresetsPopover.querySelectorAll(".highlight-color-presets-swatch").forEach((button) => {
+    if (!(button instanceof HTMLElement)) return;
+    const swatchColor = normalizeHexColor(button.dataset.color || "", "");
+    button.classList.toggle("is-active", Boolean(swatchColor) && swatchColor === normalized);
+  });
+}
+
+function applyHighlightColorFromPopover(color) {
+  const context = state.highlightColorPopoverContext;
+  if (!context) return;
+  const normalized = normalizeHexColor(color, "#fff59d");
+  if (state.highlightColorPopoverSourceInput instanceof HTMLInputElement) {
+    state.highlightColorPopoverSourceInput.value = normalized;
+  }
+  updateHighlightColorPresetActive(normalized);
+  applyHighlightColorForContext(context, normalized);
+}
+
+function createHighlightColorPresetSwatch(color) {
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "highlight-color-presets-swatch";
+  swatch.dataset.color = color;
+  swatch.style.backgroundColor = color;
+  swatch.title = color;
+  swatch.setAttribute("aria-label", color);
+  swatch.addEventListener("click", () => {
+    applyHighlightColorFromPopover(color);
+  });
+  return swatch;
+}
+
+function ensureHighlightColorPresetsPopover() {
+  if (highlightColorPresetsPopover instanceof HTMLElement) return highlightColorPresetsPopover;
+
+  const popover = document.createElement("div");
+  popover.className = "detail-popover highlight-color-presets-popover";
+  popover.hidden = true;
+  popover.setAttribute("role", "dialog");
+  popover.setAttribute("aria-label", "Text Highlight");
+
+  const swatchRow = document.createElement("div");
+  swatchRow.className = "highlight-color-presets-row";
+  HIGHLIGHT_COLOR_PRESETS.forEach((color) => {
+    swatchRow.appendChild(createHighlightColorPresetSwatch(color));
+  });
+  popover.appendChild(swatchRow);
+
+  const paletteButton = document.createElement("button");
+  paletteButton.type = "button";
+  paletteButton.className = "editor-secondary text-color-presets-palette-btn highlight-color-presets-palette-btn";
+  paletteButton.textContent = state.lang === "en" ? "Palette" : "色盘";
+  paletteButton.addEventListener("click", () => {
+    const sourceInput = state.highlightColorPopoverSourceInput;
+    const trigger = state.highlightColorPopoverTrigger;
+    hideHighlightColorPresetsPopover();
+    if (sourceInput instanceof HTMLInputElement) {
+      openHiddenColorPicker(sourceInput, trigger instanceof HTMLElement ? trigger : paletteButton);
+    }
+  });
+  popover.appendChild(paletteButton);
+
+  popover.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      hideHighlightColorPresetsPopover();
+    }
+  });
+
+  document.body.appendChild(popover);
+  highlightColorPresetsPopover = popover;
+  return popover;
+}
+
+function positionHighlightColorPresetsPopover() {
+  const popover = ensureHighlightColorPresetsPopover();
+  if (!(popover instanceof HTMLElement) || popover.hidden) return;
+  const trigger = state.highlightColorPopoverTrigger;
+  if (!(trigger instanceof HTMLElement)) return;
+
+  const triggerRect = trigger.getBoundingClientRect();
+  popover.style.left = "12px";
+  popover.style.top = "12px";
+
+  const popRect = popover.getBoundingClientRect();
+  const maxLeft = Math.max(12, window.innerWidth - popRect.width - 12);
+  const nextLeft = Math.min(Math.max(12, triggerRect.left), maxLeft);
+
+  let nextTop = triggerRect.bottom + 8;
+  if (nextTop + popRect.height > window.innerHeight - 12) {
+    nextTop = triggerRect.top - popRect.height - 8;
+  }
+  if (nextTop < 12) {
+    nextTop = 12;
+  }
+
+  popover.style.left = `${nextLeft}px`;
+  popover.style.top = `${nextTop}px`;
+}
+
+function hideHighlightColorPresetsPopover() {
+  if (!(highlightColorPresetsPopover instanceof HTMLElement)) return;
+  highlightColorPresetsPopover.hidden = true;
+  state.highlightColorPopoverContext = "";
+  state.highlightColorPopoverTrigger = null;
+  state.highlightColorPopoverSourceInput = null;
+}
+
+function openHighlightColorPresetsPopover(context, trigger, sourceInput) {
+  if (!(trigger instanceof HTMLElement)) return;
+  const popover = ensureHighlightColorPresetsPopover();
+  if (!(popover instanceof HTMLElement)) return;
+  hideTextColorPresetsPopover();
+
+  state.highlightColorPopoverContext = context;
+  state.highlightColorPopoverTrigger = trigger;
+  state.highlightColorPopoverSourceInput = sourceInput instanceof HTMLInputElement ? sourceInput : null;
+
+  const currentColor = normalizeHexColor(
+    state.highlightColorPopoverSourceInput?.value || "#fff59d",
+    "#fff59d"
+  );
+  const paletteButton = popover.querySelector(".highlight-color-presets-palette-btn");
+  if (paletteButton instanceof HTMLButtonElement) {
+    paletteButton.textContent = state.lang === "en" ? "Palette" : "色盘";
+  }
+  updateHighlightColorPresetActive(currentColor);
+  popover.hidden = false;
+  positionHighlightColorPresetsPopover();
+}
+
 if (elements.langToggle) {
   elements.langToggle.addEventListener("click", () => {
     const nextLang = state.lang === "zh" ? "en" : "zh";
@@ -1219,13 +1546,13 @@ if (elements.personalizeAlignRight) {
 if (elements.personalizeTextColorBtn) {
   elements.personalizeTextColorBtn.addEventListener("click", () => {
     savePersonalizeSelectionRange();
-    openHiddenColorPicker(elements.personalizeTextColor, elements.personalizeTextColorBtn);
+    openTextColorPresetsPopover("personalize", elements.personalizeTextColorBtn, elements.personalizeTextColor);
   });
 }
 if (elements.personalizeHighlightBtn) {
   elements.personalizeHighlightBtn.addEventListener("click", () => {
     savePersonalizeSelectionRange();
-    openHiddenColorPicker(elements.personalizeHighlightColor, elements.personalizeHighlightBtn);
+    openHighlightColorPresetsPopover("personalize", elements.personalizeHighlightBtn, elements.personalizeHighlightColor);
   });
 }
 if (elements.personalizeHighlightColor) {
@@ -1344,6 +1671,9 @@ if (elements.personalizeFooterEditor) {
     }
   });
   elements.personalizeFooterEditor.addEventListener("keydown", (event) => {
+    if (handleListTabInEditor("personalize", elements.personalizeFooterEditor, event)) {
+      return;
+    }
     if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
@@ -1358,6 +1688,7 @@ if (elements.personalizeFooterEditor) {
     });
   });
   elements.personalizeFooterEditor.addEventListener("input", () => {
+    refreshEditorTables(elements.personalizeFooterEditor);
     savePersonalizeSelectionRange();
     persistPersonalizationDraftFromEditor();
     syncPersonalizeFontSizeControl();
@@ -1470,13 +1801,13 @@ if (elements.aboutAlignRight) {
 if (elements.aboutTextColorBtn) {
   elements.aboutTextColorBtn.addEventListener("click", () => {
     saveAboutSelectionRange();
-    openHiddenColorPicker(elements.aboutTextColor, elements.aboutTextColorBtn);
+    openTextColorPresetsPopover("about", elements.aboutTextColorBtn, elements.aboutTextColor);
   });
 }
 if (elements.aboutHighlightBtn) {
   elements.aboutHighlightBtn.addEventListener("click", () => {
     saveAboutSelectionRange();
-    openHiddenColorPicker(elements.aboutHighlightColor, elements.aboutHighlightBtn);
+    openHighlightColorPresetsPopover("about", elements.aboutHighlightBtn, elements.aboutHighlightColor);
   });
 }
 if (elements.aboutTextColor) {
@@ -1601,6 +1932,9 @@ if (elements.aboutEditor) {
     }
   });
   elements.aboutEditor.addEventListener("keydown", (event) => {
+    if (handleListTabInEditor("about", elements.aboutEditor, event)) {
+      return;
+    }
     if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
@@ -1614,6 +1948,7 @@ if (elements.aboutEditor) {
     });
   });
   elements.aboutEditor.addEventListener("input", () => {
+    refreshEditorTables(elements.aboutEditor);
     saveAboutSelectionRange();
     persistAboutDraftFromEditor();
     syncAboutFontSizeControl();
@@ -1790,6 +2125,12 @@ if (elements.webEmbedPopover) {
   });
 }
 window.addEventListener("resize", () => {
+  if (textColorPresetsPopover && !textColorPresetsPopover.hidden) {
+    positionTextColorPresetsPopover();
+  }
+  if (highlightColorPresetsPopover && !highlightColorPresetsPopover.hidden) {
+    positionHighlightColorPresetsPopover();
+  }
   if (elements.insertButtonPopover && !elements.insertButtonPopover.hidden) {
     positionInsertButtonPopover();
   }
@@ -1811,6 +2152,12 @@ window.addEventListener("resize", () => {
   queueLineNumberRefresh();
 });
 document.addEventListener("scroll", () => {
+  if (textColorPresetsPopover && !textColorPresetsPopover.hidden) {
+    positionTextColorPresetsPopover();
+  }
+  if (highlightColorPresetsPopover && !highlightColorPresetsPopover.hidden) {
+    positionHighlightColorPresetsPopover();
+  }
   if (elements.insertButtonPopover && !elements.insertButtonPopover.hidden) {
     positionInsertButtonPopover();
   }
@@ -1921,11 +2268,11 @@ elements.detailAlignCenter.addEventListener("click", () => runExecCommand("justi
 elements.detailAlignRight.addEventListener("click", () => runExecCommand("justifyRight"));
 elements.detailTextColorBtn.addEventListener("click", () => {
   saveSelectionRange();
-  openHiddenColorPicker(elements.detailTextColor, elements.detailTextColorBtn);
+  openTextColorPresetsPopover("detail", elements.detailTextColorBtn, elements.detailTextColor);
 });
 elements.detailHighlightBtn.addEventListener("click", () => {
   saveSelectionRange();
-  openHiddenColorPicker(elements.detailHighlightColor, elements.detailHighlightBtn);
+  openHighlightColorPresetsPopover("detail", elements.detailHighlightBtn, elements.detailHighlightColor);
 });
 elements.detailTextColor.addEventListener("input", (event) => {
   const value = event.target.value || "#1d1c1a";
@@ -2180,6 +2527,20 @@ elements.detailEditor.addEventListener("click", (event) => {
   }
 });
 
+const tableHandleDownEvent = window.PointerEvent ? "pointerdown" : "mousedown";
+document.addEventListener(tableHandleDownEvent, (event) => {
+  if (isPointerEventInstance(event)) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+  } else if (event instanceof MouseEvent && event.button !== 0) {
+    return;
+  }
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target) return;
+  const handle = target.closest(`.${TABLE_RESIZE_HANDLE_CLASS}`);
+  if (!(handle instanceof HTMLElement)) return;
+  startTableResizeFromHandle(handle, event);
+}, true);
+
 const detailHandleDownEvent = window.PointerEvent ? "pointerdown" : "mousedown";
 elements.detailEditor.addEventListener(detailHandleDownEvent, (event) => {
   if (isPointerEventInstance(event)) {
@@ -2283,6 +2644,9 @@ elements.detailEditor.addEventListener("keydown", (event) => {
       return;
     }
   }
+  if (handleListTabInEditor("detail", elements.detailEditor, event)) {
+    return;
+  }
   if (event.key !== "Enter" || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) {
     return;
   }
@@ -2298,6 +2662,7 @@ elements.detailEditor.addEventListener("keydown", (event) => {
 });
 elements.detailEditor.addEventListener("input", () => {
   const restoredImageWrapper = restoreOrphanEditorImages();
+  refreshEditorTables(elements.detailEditor);
   saveSelectionRange();
   persistDetailDraftFromEditor();
   if (restoredImageWrapper && state.selectedImage instanceof HTMLElement && !state.selectedImage.isConnected) {
@@ -2350,6 +2715,26 @@ if (elements.imageAlignRight) {
 document.addEventListener("click", (event) => {
   if (elements.folderHelp && !elements.folderHelp.contains(event.target)) {
     elements.folderHelp.classList.remove("is-open");
+  }
+  if (textColorPresetsPopover && !textColorPresetsPopover.hidden) {
+    const target = event.target instanceof Element ? event.target : null;
+    const clickedPopover = target ? textColorPresetsPopover.contains(target) : false;
+    const clickedTrigger = target
+      ? Boolean(target.closest("#detail-text-color-btn, #about-text-color-btn, #personalize-text-color-btn"))
+      : false;
+    if (!clickedPopover && !clickedTrigger) {
+      hideTextColorPresetsPopover();
+    }
+  }
+  if (highlightColorPresetsPopover && !highlightColorPresetsPopover.hidden) {
+    const target = event.target instanceof Element ? event.target : null;
+    const clickedPopover = target ? highlightColorPresetsPopover.contains(target) : false;
+    const clickedTrigger = target
+      ? Boolean(target.closest("#detail-highlight-btn, #about-highlight-btn, #personalize-highlight-btn"))
+      : false;
+    if (!clickedPopover && !clickedTrigger) {
+      hideHighlightColorPresetsPopover();
+    }
   }
   if (elements.insertButtonPopover && !elements.insertButtonPopover.hidden) {
     const target = event.target instanceof Element ? event.target : null;
@@ -2574,6 +2959,8 @@ function setEditorTab(tab) {
   hideLineRangePopover();
   hideColumnsPopover();
   hideWebEmbedPopover();
+  hideTextColorPresetsPopover();
+  hideHighlightColorPresetsPopover();
   exitColumnsEditMode();
   if (tab === "personalize" || tab === "about") {
     state.activeTab = tab;
@@ -2700,6 +3087,7 @@ function renderPersonalizeEditor() {
   if (!elements.personalizeFooterEditor) return;
   const html = getDraftHtmlByLangWithFallback(state.personalizeFooterDraftHtml, state.personalizeLang);
   elements.personalizeFooterEditor.innerHTML = html;
+  refreshEditorTables(elements.personalizeFooterEditor);
   state.personalizeSavedRange = null;
   hideInsertButtonPopover();
   hideColumnsPopover();
@@ -2865,10 +3253,14 @@ function normalizeDetailLikeHtml(html) {
   if (!raw) return "";
   const probe = document.createElement("div");
   probe.innerHTML = raw;
+  probe.querySelectorAll(`.${TABLE_RESIZE_HANDLE_CLASS}`).forEach((node) => node.remove());
   probe.querySelectorAll(".image-resize-handle").forEach((node) => node.remove());
   probe.querySelectorAll(".image-crop-handle").forEach((node) => node.remove());
   probe.querySelectorAll(".image-wrapper").forEach((wrapper) => {
     wrapper.classList.remove("is-selected", "is-resizing", "is-cropping");
+  });
+  probe.querySelectorAll("table").forEach((table) => {
+    table.classList.remove("is-column-resizing");
   });
   probe.querySelectorAll(".detail-columns-block").forEach((block) => {
     block.classList.remove("is-editing");
@@ -3914,6 +4306,78 @@ function persistDraftForContext(context) {
   }
 }
 
+function syncFontSizeControlForContext(context) {
+  if (context === "detail") {
+    syncDetailFontSizeControl();
+    return;
+  }
+  if (context === "about") {
+    syncAboutFontSizeControl();
+    return;
+  }
+  if (context === "personalize") {
+    syncPersonalizeFontSizeControl();
+  }
+}
+
+function getSelectionListItemWithinEditor(editor) {
+  if (!(editor instanceof HTMLElement)) return null;
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  if (!editor.contains(range.startContainer) || !editor.contains(range.endContainer)) return null;
+  let node = range.startContainer;
+  if (node.nodeType === Node.TEXT_NODE) {
+    node = node.parentElement;
+  }
+  if (!(node instanceof Element)) return null;
+  const listItem = node.closest("li");
+  if (!(listItem instanceof HTMLLIElement)) return null;
+  return editor.contains(listItem) ? listItem : null;
+}
+
+function getListDepthWithinEditor(listItem, editor) {
+  if (!(listItem instanceof HTMLLIElement) || !(editor instanceof HTMLElement)) return 0;
+  let depth = 0;
+  let cursor = listItem.parentElement;
+  while (cursor && editor.contains(cursor)) {
+    if (cursor instanceof HTMLOListElement || cursor instanceof HTMLUListElement) {
+      depth += 1;
+    }
+    cursor = cursor.parentElement;
+  }
+  return depth;
+}
+
+function handleListTabInEditor(context, editor, event) {
+  if (!(editor instanceof HTMLElement)) return false;
+  if (event.key !== "Tab" || event.metaKey || event.ctrlKey || event.altKey) return false;
+
+  const listItem = getSelectionListItemWithinEditor(editor);
+  if (!(listItem instanceof HTMLLIElement)) return false;
+
+  const depth = getListDepthWithinEditor(listItem, editor);
+  event.preventDefault();
+
+  if (event.shiftKey) {
+    if (depth <= 1) {
+      return true;
+    }
+    document.execCommand("outdent", false, null);
+  } else {
+    if (depth >= EDITOR_LIST_MAX_DEPTH) {
+      return true;
+    }
+    document.execCommand("indent", false, null);
+  }
+
+  saveSelectionForContext(context);
+  persistDraftForContext(context);
+  syncFontSizeControlForContext(context);
+  queueLineNumberRefresh();
+  return true;
+}
+
 function parseColumnsCount(value) {
   const count = Number.parseInt(String(value || "").trim(), 10);
   if (!Number.isFinite(count)) return NaN;
@@ -4347,7 +4811,7 @@ function handlePersonalizeToolbarClick(event) {
   const action = button.dataset.personalizeAction;
   if (action === "text-color") {
     savePersonalizeSelectionRange();
-    openHiddenColorPicker(elements.personalizeTextColor, button);
+    openTextColorPresetsPopover("personalize", button, elements.personalizeTextColor);
     return;
   }
   if (action === "link") {
@@ -5559,6 +6023,7 @@ function renderAboutEditor() {
   if (!elements.aboutEditor) return;
   if (state.aboutImportedMode) {
     elements.aboutEditor.innerHTML = `<p class="detail-note-text">${escapeHtml(t("status.importedAboutReadonly"))}</p>`;
+    refreshEditorTables(elements.aboutEditor);
     state.aboutSavedRange = null;
     hideInsertButtonPopover();
     hideColumnsPopover();
@@ -5570,6 +6035,7 @@ function renderAboutEditor() {
   }
   const html = getDraftHtmlByLangWithFallback(state.aboutDraftHtml, state.aboutLang);
   elements.aboutEditor.innerHTML = html;
+  refreshEditorTables(elements.aboutEditor);
   state.aboutSavedRange = null;
   hideInsertButtonPopover();
   hideColumnsPopover();
@@ -5907,6 +6373,7 @@ function insertAboutTableFromPopover() {
 function insertAboutTableAtCursor(rows, cols) {
   if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 1 || cols < 1) return;
   insertAboutNodeAtCursor(createTableNode(rows, cols));
+  refreshEditorTables(elements.aboutEditor);
 }
 
 function showEditorLocalOpenModal(message = "", tone = "") {
@@ -7258,6 +7725,7 @@ function renderDetailEditor() {
   elements.detailEditor.setAttribute("contenteditable", state.detailImportedMode ? "false" : "true");
   if (state.detailImportedMode) {
     elements.detailEditor.innerHTML = `<p class="detail-note-text">${escapeHtml(t("status.importedDetailReadonly"))}</p>`;
+    refreshEditorTables(elements.detailEditor);
     hideImageControls();
     hideTablePopover();
     hideInsertButtonPopover();
@@ -7275,6 +7743,7 @@ function renderDetailEditor() {
     normalizeEditorLinks(state.currentDetailProject);
   }
   prepareEditorImages();
+  refreshEditorTables(elements.detailEditor);
   state.savedRange = null;
   hideImageControls();
   hideTablePopover();
@@ -8311,8 +8780,12 @@ function normalizeContentForSave(contentHtml, project) {
   const container = document.createElement("div");
   container.innerHTML = contentHtml;
 
+  container.querySelectorAll(`.${TABLE_RESIZE_HANDLE_CLASS}`).forEach((node) => node.remove());
   container.querySelectorAll(".image-resize-handle").forEach((node) => node.remove());
   container.querySelectorAll(".image-crop-handle").forEach((node) => node.remove());
+  container.querySelectorAll("table").forEach((table) => {
+    table.classList.remove("is-column-resizing");
+  });
   container.querySelectorAll(".image-wrapper").forEach((wrapper) => {
     wrapper.classList.remove("is-selected", "is-resizing", "is-cropping");
     wrapper.removeAttribute("data-crop-mode");
@@ -8533,6 +9006,326 @@ function parseTableSizeInput(text) {
   return { rows, cols };
 }
 
+function parsePixelSize(value) {
+  const numeric = Number.parseFloat(String(value || "").trim());
+  return Number.isFinite(numeric) ? numeric : NaN;
+}
+
+function getEditorContextForElement(element) {
+  if (!(element instanceof Element)) return "";
+  if (elements.detailEditor && elements.detailEditor.contains(element)) return "detail";
+  if (elements.aboutEditor && elements.aboutEditor.contains(element)) return "about";
+  if (elements.personalizeFooterEditor && elements.personalizeFooterEditor.contains(element)) return "personalize";
+  return "";
+}
+
+function persistEditorDraftByContext(context) {
+  if (context === "detail") {
+    persistDetailDraftFromEditor();
+    return;
+  }
+  if (context === "about") {
+    persistAboutDraftFromEditor();
+    return;
+  }
+  if (context === "personalize") {
+    persistPersonalizationDraftFromEditor();
+  }
+}
+
+function getEditableTableColumnCount(table) {
+  if (!(table instanceof HTMLTableElement)) return 0;
+  const rows = Array.from(table.rows);
+  if (!rows.length) return 0;
+  let maxCount = 0;
+  rows.forEach((row) => {
+    const cells = Array.from(row.cells);
+    if (!cells.length) return;
+    const count = cells.reduce((sum, cell) => sum + Math.max(1, Number.parseInt(cell.colSpan || "1", 10) || 1), 0);
+    if (count > maxCount) {
+      maxCount = count;
+    }
+  });
+  return maxCount;
+}
+
+function isSimpleEditableTable(table, colCount) {
+  if (!(table instanceof HTMLTableElement)) return false;
+  if (!Number.isInteger(colCount) || colCount < 1) return false;
+  return Array.from(table.rows).every((row) => {
+    const cells = Array.from(row.cells);
+    if (cells.length !== colCount) return false;
+    return cells.every((cell) => cell.colSpan === 1 && cell.rowSpan === 1);
+  });
+}
+
+function getDirectTableColgroup(table) {
+  if (!(table instanceof HTMLTableElement)) return null;
+  return Array.from(table.children).find((child) => child.tagName === "COLGROUP") || null;
+}
+
+function ensureTableColgroup(table, colCount) {
+  if (!(table instanceof HTMLTableElement)) return [];
+  let colgroup = getDirectTableColgroup(table);
+  if (!(colgroup instanceof HTMLElement) || colgroup.tagName !== "COLGROUP") {
+    colgroup = document.createElement("colgroup");
+    table.insertBefore(colgroup, table.firstChild);
+  }
+  const extraColgroups = Array.from(table.children)
+    .filter((child) => child !== colgroup && child.tagName === "COLGROUP");
+  extraColgroups.forEach((group) => group.remove());
+
+  const cols = Array.from(colgroup.children).filter((child) => child.tagName === "COL");
+  while (cols.length < colCount) {
+    const col = document.createElement("col");
+    colgroup.appendChild(col);
+    cols.push(col);
+  }
+  while (cols.length > colCount) {
+    const last = cols.pop();
+    if (last) last.remove();
+  }
+  return cols;
+}
+
+function setEqualTableColWidths(cols) {
+  if (!Array.isArray(cols) || !cols.length) return;
+  const width = 100 / cols.length;
+  cols.forEach((col) => {
+    col.style.width = `${width}%`;
+    col.removeAttribute("width");
+  });
+}
+
+function syncTableResizeHandlePositions(table, cols) {
+  if (!(table instanceof HTMLTableElement) || !Array.isArray(cols) || cols.length < 2) return;
+  const firstRow = table.rows[0];
+  if (!firstRow) return;
+  const tableRect = table.getBoundingClientRect();
+  if (!(tableRect.width > 0)) return;
+
+  for (let index = 0; index < cols.length - 1; index += 1) {
+    const handle = table.querySelector(`.${TABLE_RESIZE_HANDLE_CLASS}[data-col-index="${index}"]`);
+    if (!(handle instanceof HTMLElement)) continue;
+    const cell = firstRow.cells[index];
+    if (cell instanceof HTMLElement) {
+      const boundary = cell.getBoundingClientRect().right - tableRect.left;
+      if (Number.isFinite(boundary)) {
+        handle.style.left = `${Math.round(boundary)}px`;
+      }
+    }
+  }
+}
+
+function syncTableResizableStructure(table) {
+  if (!(table instanceof HTMLTableElement)) return null;
+  table.querySelectorAll(`.${TABLE_RESIZE_HANDLE_CLASS}`).forEach((node) => node.remove());
+
+  const colCount = getEditableTableColumnCount(table);
+  if (colCount < 1) return null;
+  if (!isSimpleEditableTable(table, colCount)) {
+    return null;
+  }
+
+  const cols = ensureTableColgroup(table, colCount);
+  if (!cols.length) return null;
+
+  const allColsHaveWidth = cols.every((col) => {
+    const styleWidth = String(col.style.width || "").trim();
+    const attrWidth = String(col.getAttribute("width") || "").trim();
+    return Boolean(styleWidth || attrWidth);
+  });
+  if (!allColsHaveWidth) {
+    setEqualTableColWidths(cols);
+  }
+
+  if (colCount < 2 || !table.rows.length) {
+    return { table, colCount, cols };
+  }
+
+  for (let index = 0; index < colCount - 1; index += 1) {
+    const handle = document.createElement("span");
+    handle.className = TABLE_RESIZE_HANDLE_CLASS;
+    handle.dataset.colIndex = String(index);
+    handle.setAttribute("contenteditable", "false");
+    handle.setAttribute("draggable", "false");
+    table.appendChild(handle);
+  }
+  syncTableResizeHandlePositions(table, cols);
+  return { table, colCount, cols };
+}
+
+function refreshEditorTables(editor) {
+  if (!(editor instanceof HTMLElement)) return;
+  editor.querySelectorAll("table").forEach((table) => {
+    syncTableResizableStructure(table);
+  });
+}
+
+function normalizeTableColumnWidthsToPercent(table, cols) {
+  if (!(table instanceof HTMLTableElement) || !Array.isArray(cols) || !cols.length) return;
+  const firstRow = table.rows[0];
+  if (!firstRow) return;
+
+  const widths = cols.map((col, index) => {
+    const cell = firstRow.cells[index];
+    if (cell instanceof HTMLElement) {
+      const rect = cell.getBoundingClientRect();
+      if (rect.width > 0) return rect.width;
+    }
+    const fallback = parsePixelSize(col.style.width);
+    return Number.isFinite(fallback) && fallback > 0 ? fallback : 0;
+  });
+  const total = widths.reduce((sum, width) => sum + width, 0);
+  if (!(total > 0)) return;
+
+  cols.forEach((col, index) => {
+    const percent = (widths[index] / total) * 100;
+    col.style.width = `${percent.toFixed(4)}%`;
+    col.removeAttribute("width");
+  });
+}
+
+function applyPendingTableResizeFrame() {
+  state.tableResizeRaf = 0;
+  const session = state.tableResizeSession;
+  if (!session) return;
+  if (!(session.leftCol instanceof HTMLElement) || !(session.rightCol instanceof HTMLElement)) return;
+  session.leftCol.style.width = `${Math.round(session.pendingLeftWidth)}px`;
+  session.rightCol.style.width = `${Math.round(session.pendingRightWidth)}px`;
+  syncTableResizeHandlePositions(session.table, session.cols);
+}
+
+function handleTableResizeMove(event) {
+  const session = state.tableResizeSession;
+  if (!session) return;
+  if (session.usesPointer) {
+    if (!isPointerEventInstance(event)) return;
+    if (event.pointerId !== session.pointerId) return;
+  }
+  if (event.cancelable) event.preventDefault();
+
+  const point = getPointerPoint(event);
+  const deltaX = point.x - session.startX;
+  const pairWidth = session.startLeftWidth + session.startRightWidth;
+  const minWidth = session.minWidth;
+  const maxLeft = pairWidth - minWidth;
+  if (maxLeft <= minWidth) return;
+
+  const nextLeftWidth = Math.min(Math.max(minWidth, session.startLeftWidth + deltaX), maxLeft);
+  const nextRightWidth = pairWidth - nextLeftWidth;
+  session.pendingLeftWidth = nextLeftWidth;
+  session.pendingRightWidth = nextRightWidth;
+  if (state.tableResizeRaf) return;
+  state.tableResizeRaf = window.requestAnimationFrame(applyPendingTableResizeFrame);
+}
+
+function finishTableResizeSession() {
+  const session = state.tableResizeSession;
+  if (!session) return;
+  if (session.usesPointer) {
+    window.removeEventListener("pointermove", handleTableResizeMove, true);
+    window.removeEventListener("pointerup", finishTableResizeSession, true);
+    window.removeEventListener("pointercancel", finishTableResizeSession, true);
+  } else {
+    window.removeEventListener("mousemove", handleTableResizeMove, true);
+    window.removeEventListener("mouseup", finishTableResizeSession, true);
+  }
+  window.removeEventListener("blur", finishTableResizeSession, true);
+
+  if (state.tableResizeRaf) {
+    window.cancelAnimationFrame(state.tableResizeRaf);
+    state.tableResizeRaf = 0;
+    applyPendingTableResizeFrame();
+  }
+
+  if (session.handle instanceof HTMLElement) {
+    session.handle.classList.remove("is-active");
+  }
+  if (session.table instanceof HTMLElement) {
+    session.table.classList.remove("is-column-resizing");
+  }
+  normalizeTableColumnWidthsToPercent(session.table, session.cols);
+  syncTableResizableStructure(session.table);
+  persistEditorDraftByContext(session.context);
+  queueLineNumberRefresh();
+  state.tableResizeSession = null;
+}
+
+function startTableResizeFromHandle(handle, event) {
+  if (!(handle instanceof HTMLElement)) return false;
+  const table = handle.closest("table");
+  if (!(table instanceof HTMLTableElement)) return false;
+  const context = getEditorContextForElement(table);
+  if (!context) return false;
+
+  const structure = syncTableResizableStructure(table);
+  if (!structure || structure.colCount < 2) return false;
+  const colIndex = Number.parseInt(String(handle.dataset.colIndex || ""), 10);
+  if (!Number.isFinite(colIndex) || colIndex < 0 || colIndex >= structure.colCount - 1) return false;
+  const syncedHandle = table.querySelector(`.${TABLE_RESIZE_HANDLE_CLASS}[data-col-index="${colIndex}"]`);
+  const activeHandle = syncedHandle instanceof HTMLElement ? syncedHandle : handle;
+
+  const firstRow = table.rows[0];
+  if (!firstRow) return false;
+  for (let index = 0; index < structure.colCount; index += 1) {
+    const rowCell = firstRow.cells[index];
+    const col = structure.cols[index];
+    if (!(rowCell instanceof HTMLElement) || !(col instanceof HTMLElement)) continue;
+    const width = rowCell.getBoundingClientRect().width;
+    if (width > 0) {
+      col.style.width = `${Math.round(width)}px`;
+      col.removeAttribute("width");
+    }
+  }
+  syncTableResizeHandlePositions(table, structure.cols);
+
+  const leftCol = structure.cols[colIndex];
+  const rightCol = structure.cols[colIndex + 1];
+  if (!(leftCol instanceof HTMLElement) || !(rightCol instanceof HTMLElement)) return false;
+
+  const leftCell = firstRow.cells[colIndex];
+  const rightCell = firstRow.cells[colIndex + 1];
+  const leftWidth = leftCell instanceof HTMLElement ? leftCell.getBoundingClientRect().width : parsePixelSize(leftCol.style.width);
+  const rightWidth = rightCell instanceof HTMLElement ? rightCell.getBoundingClientRect().width : parsePixelSize(rightCol.style.width);
+  if (!(leftWidth > 0) || !(rightWidth > 0)) return false;
+
+  const point = getPointerPoint(event);
+  const usesPointer = isPointerEventInstance(event);
+  finishTableResizeSession();
+  state.tableResizeSession = {
+    context,
+    table,
+    cols: structure.cols,
+    handle: activeHandle,
+    leftCol,
+    rightCol,
+    startX: point.x,
+    startLeftWidth: leftWidth,
+    startRightWidth: rightWidth,
+    pendingLeftWidth: leftWidth,
+    pendingRightWidth: rightWidth,
+    minWidth: TABLE_MIN_COLUMN_WIDTH,
+    usesPointer,
+    pointerId: usesPointer ? event.pointerId : null
+  };
+  activeHandle.classList.add("is-active");
+  table.classList.add("is-column-resizing");
+
+  if (usesPointer) {
+    window.addEventListener("pointermove", handleTableResizeMove, true);
+    window.addEventListener("pointerup", finishTableResizeSession, true);
+    window.addEventListener("pointercancel", finishTableResizeSession, true);
+  } else {
+    window.addEventListener("mousemove", handleTableResizeMove, true);
+    window.addEventListener("mouseup", finishTableResizeSession, true);
+  }
+  window.addEventListener("blur", finishTableResizeSession, true);
+  if (event.cancelable) event.preventDefault();
+  event.stopPropagation();
+  return true;
+}
+
 function insertTableFromPopover() {
   const parsed = parseTableSizeInput(elements.detailTableSize.value);
   if (!parsed) {
@@ -8549,6 +9342,7 @@ function insertTableAtCursor(rows, cols) {
   if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 1 || cols < 1) return;
   const table = createTableNode(rows, cols);
   insertNodeAtCursor(table);
+  refreshEditorTables(elements.detailEditor);
 }
 
 function createTableNode(rows, cols) {
@@ -8571,6 +9365,7 @@ function createTableNode(rows, cols) {
 function insertPersonalizeTableAtCursor(rows, cols) {
   if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 1 || cols < 1) return;
   insertPersonalizeNodeAtCursor(createTableNode(rows, cols));
+  refreshEditorTables(elements.personalizeFooterEditor);
 }
 
 function createFileLinkNode(filename, href, pendingId) {
