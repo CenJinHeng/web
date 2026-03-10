@@ -1262,24 +1262,12 @@ function buildCard(project, index) {
     const type = document.createElement("span");
     type.textContent = typeLabel;
     meta.appendChild(type);
-
-    if (project.date) {
-      const dot = document.createElement("span");
-      dot.className = "meta-dot";
-      dot.textContent = "·";
-      meta.appendChild(dot);
-    }
-  }
-
-  if (project.date) {
-    const time = document.createElement("time");
-    time.textContent = project.date;
-    time.dateTime = project.date;
-    meta.appendChild(time);
   }
 
   body.appendChild(title);
-  body.appendChild(meta);
+  if (typeLabel) {
+    body.appendChild(meta);
+  }
 
   if (Array.isArray(project.tags) && project.tags.length) {
     const tags = document.createElement("div");
