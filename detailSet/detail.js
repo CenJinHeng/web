@@ -82,6 +82,10 @@ const detailBgRangesByLang = {
   zh: parseLineRangesTemplate(detailBgRangesZhTemplate ? detailBgRangesZhTemplate.innerHTML : ""),
   en: parseLineRangesTemplate(detailBgRangesEnTemplate ? detailBgRangesEnTemplate.innerHTML : "")
 };
+const detailBgRangeTemplatePresence = {
+  zh: Boolean(detailBgRangesZhTemplate),
+  en: Boolean(detailBgRangesEnTemplate)
+};
 let outlineContrastRaf = 0;
 let outlineLayoutRaf = 0;
 let navThemeRaf = 0;
@@ -301,7 +305,7 @@ function getDetailRangesForLang(lang) {
   const currentLang = lang === "en" ? "en" : "zh";
   const fallbackLang = currentLang === "zh" ? "en" : "zh";
   const primaryRanges = detailBgRangesByLang[currentLang] || [];
-  if (primaryRanges.length) {
+  if (primaryRanges.length || detailBgRangeTemplatePresence[currentLang]) {
     return primaryRanges;
   }
   return detailBgRangesByLang[fallbackLang] || [];

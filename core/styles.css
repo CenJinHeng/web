@@ -37,6 +37,10 @@ body {
   overflow-x: clip;
 }
 
+body[data-page="projects"] {
+  --font-sans: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", sans-serif;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -177,7 +181,7 @@ button {
   padding: 5px 11px;
   border-radius: 16px;
   font-size: 0.8rem;
-  font-weight: 300;
+  font-weight: 500;
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: color 220ms ease, border-color 220ms ease;
