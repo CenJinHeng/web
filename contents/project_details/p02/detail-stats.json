@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-14T20:40:19.016Z",
+  "updatedAt": "2026-03-19T18:34:07.846Z",
   "zh": {
     "count": 2908,
     "minutes": 10,
     "unit": "char"
   },
   "en": {
-    "count": 1661,
+    "count": 1652,
     "minutes": 8,
     "unit": "word"
   }
