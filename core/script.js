@@ -1160,13 +1160,25 @@ function layoutMasonry() {
   const rootStyles = getComputedStyle(document.documentElement);
   const baseWidth = parseFloat(rootStyles.getPropertyValue("--card-width")) || 280;
   const gap = parseFloat(rootStyles.getPropertyValue("--card-gap")) || 24;
+  const parsedCardScale = parseFloat(rootStyles.getPropertyValue("--card-scale"));
+  const cardScale = Number.isFinite(parsedCardScale) && parsedCardScale > 0
+    ? parsedCardScale
+    : 1;
   const containerWidth = grid.clientWidth;
   if (!containerWidth) return;
 
-  const columnCount = Math.max(1, Math.floor((containerWidth + gap) / (baseWidth + gap)));
-  const columnWidth = columnCount === 1
+  const maxColumns = 3;
+  const columnCount = Math.min(
+    maxColumns,
+    Math.max(1, Math.floor((containerWidth + gap) / (baseWidth + gap))),
+  );
+  const slotWidth = columnCount === 1
     ? containerWidth
     : (containerWidth - gap * (columnCount - 1)) / columnCount;
+  const appliedCardScale = columnCount === 1 ? 1 : cardScale;
+  const columnWidth = slotWidth * appliedCardScale;
+  const rowWidth = columnWidth * columnCount + gap * (columnCount - 1);
+  const startX = Math.max((containerWidth - rowWidth) / 2, 0);
   const heights = new Array(columnCount).fill(0);
   const shouldCheckMetaWrap = window.matchMedia("(max-width: 520px)").matches;
 
@@ -1181,7 +1193,7 @@ function layoutMasonry() {
       }
     }
 
-    const left = targetColumn * (columnWidth + gap);
+    const left = startX + targetColumn * (columnWidth + gap);
     const top = heights[targetColumn];
 
     card.style.left = `${left}px`;
