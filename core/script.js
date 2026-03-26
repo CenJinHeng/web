@@ -1,7 +1,7 @@
 const i18n = {
   zh: {
     page: {
-      title: "项目目录"
+      title: "Jinheng Portfolio"
     },
     nav: {
       projects: "项目",
@@ -21,7 +21,7 @@ const i18n = {
   },
   en: {
     page: {
-      title: "Project Directory"
+      title: "Jinheng Portfolio"
     },
     nav: {
       projects: "Projects",
