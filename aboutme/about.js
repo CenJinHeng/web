@@ -1,14 +1,15 @@
 const PERSONALIZATION_FILE = "../assets/site_personalization.json";
 const ABOUT_DATA_FILE = "./about-data.js";
 const DEFAULT_PERSONALIZATION = Object.freeze({
-  navBrandTextZh: "XXX的个人空间",
-  navBrandTextEn: "XXX's Space",
+  navBrandTextZh: "",
+  navBrandTextEn: "",
   footerEnabled: false,
   footerHtmlZh: "",
   footerHtmlEn: "",
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
+const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
 const langToggle = document.querySelector("[data-lang-toggle]");
 const aboutContent = document.getElementById("about-content");
@@ -86,6 +87,11 @@ function detectLanguage() {
   }
   const lang = (navigator.language || "en").toLowerCase();
   return lang.startsWith("zh") ? "zh" : "en";
+}
+
+function sanitizeBrandText(value) {
+  const text = String(value || "").trim();
+  return PLACEHOLDER_BRAND_TEXTS.has(text) ? "" : text;
 }
 
 function setLanguage(lang) {
@@ -275,9 +281,9 @@ function normalizePersonalization(raw) {
   const next = cloneDefaultPersonalization();
   if (!raw || typeof raw !== "object") return next;
 
-  const legacyBrand = String(raw.navBrandText ?? raw.brandText ?? raw.nav_brand_text ?? "").trim();
-  const brandZh = String(raw.navBrandTextZh ?? raw.nav_brand_text_zh ?? legacyBrand).trim();
-  const brandEn = String(raw.navBrandTextEn ?? raw.nav_brand_text_en ?? legacyBrand).trim();
+  const legacyBrand = sanitizeBrandText(raw.navBrandText ?? raw.brandText ?? raw.nav_brand_text ?? "");
+  const brandZh = sanitizeBrandText(raw.navBrandTextZh ?? raw.nav_brand_text_zh ?? legacyBrand);
+  const brandEn = sanitizeBrandText(raw.navBrandTextEn ?? raw.nav_brand_text_en ?? legacyBrand);
   if (brandZh) next.navBrandTextZh = brandZh;
   if (brandEn) next.navBrandTextEn = brandEn;
 
@@ -365,9 +371,10 @@ async function loadPersonalization() {
 
 function applyPersonalization() {
   if (siteBrandText) {
+    const currentLabel = sanitizeBrandText(siteBrandText.textContent);
     const label = state.lang === "zh"
-      ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || DEFAULT_PERSONALIZATION.navBrandTextZh)
-      : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || DEFAULT_PERSONALIZATION.navBrandTextEn);
+      ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
+      : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
     siteBrandText.textContent = label;
   }
 

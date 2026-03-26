@@ -501,8 +501,8 @@ const PERSONALIZATION_FILE = "site_personalization.json";
 const ABOUT_DATA_FILE = "about-data.js";
 const ABOUT_CONTENT_FILE = "index.html";
 const DEFAULT_PERSONALIZATION = Object.freeze({
-  navBrandTextZh: "XXX的个人空间",
-  navBrandTextEn: "XXX's Space",
+  navBrandTextZh: "",
+  navBrandTextEn: "",
   footerEnabled: false,
   footerHtmlZh: "",
   footerHtmlEn: "",
@@ -6086,7 +6086,7 @@ function buildAboutContentPage(contentByLang) {
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
-        <span class="brand-label" id="site-brand-text">${escapeHtml(DEFAULT_PERSONALIZATION.navBrandTextZh)}</span>
+        <span class="brand-label" id="site-brand-text"></span>
       </div>
       <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
         <a class="nav-btn" href="../../index.html" data-i18n="nav.projects">项目</a>
@@ -8754,7 +8754,7 @@ function buildDetailHtml(project, contentHtml) {
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
-        <span class="brand-label" id="site-brand-text">${escapeHtml(DEFAULT_PERSONALIZATION.navBrandTextZh)}</span>
+        <span class="brand-label" id="site-brand-text"></span>
       </div>
       <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
         <a class="nav-btn is-active" aria-current="page" href="../../../index.html" data-i18n="nav.projects">项目</a>
