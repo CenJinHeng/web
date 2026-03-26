@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jinheng Portfolio Social Preview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-a: #f4efe6;
+      --bg-b: #ece4d7;
+      --ink: #1f1a15;
+      --muted: #4b443d;
+      --soft: #7c7269;
+      --accent-a: #c97833;
+      --accent-b: #e2a15d;
+      --shape-a: #d6c3ae;
+      --shape-b: #e7d7c5;
+      --shape-c: #ddd0bf;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-a), var(--bg-b));
+      color: var(--ink);
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      position: relative;
+    }
+
+    .shape {
+      position: absolute;
+      border-radius: 999px;
+      opacity: 0.65;
+      filter: blur(1px);
+    }
+
+    .shape-a {
+      top: -42px;
+      right: 42px;
+      width: 320px;
+      height: 320px;
+      background: var(--shape-a);
+    }
+
+    .shape-b {
+      right: -66px;
+      bottom: -90px;
+      width: 420px;
+      height: 420px;
+      background: var(--shape-b);
+    }
+
+    .shape-c {
+      left: 48px;
+      bottom: -24px;
+      width: 252px;
+      height: 252px;
+      background: var(--shape-c);
+    }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(31, 26, 21, 0.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31, 26, 21, 0.09) 1px, transparent 1px);
+      background-size: 100% 88px, 240px 100%;
+      opacity: 0.55;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      padding: 72px;
+    }
+
+    .accent {
+      width: 176px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+    }
+
+    h1 {
+      margin: 106px 0 0;
+      font-size: 84px;
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+    }
+
+    p {
+      margin: 34px 0 0;
+      font-size: 31px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .url {
+      margin-top: 44px;
+      font-size: 27px;
+      letter-spacing: 0.18em;
+      color: var(--soft);
+      text-transform: uppercase;
+    }
+
+    .mark {
+      position: absolute;
+      top: 84px;
+      right: 86px;
+      width: 252px;
+      height: 252px;
+      border-radius: 44px;
+      background: var(--ink);
+      padding: 28px;
+    }
+
+    .mark-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 32px;
+      background: #f7f1e9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .mark-text {
+      font-size: 86px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .mark-line {
+      width: 106px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent-a);
+    }
+  </style>
+</head>
+<body>
+  <div class="shape shape-a"></div>
+  <div class="shape shape-b"></div>
+  <div class="shape shape-c"></div>
+  <div class="grid"></div>
+  <main class="content">
+    <div class="accent"></div>
+    <h1>Jinheng<br>Portfolio</h1>
+    <p>Selected work in product, urban, and spatial design</p>
+    <div class="url">cenjinheng.github.io/web</div>
+    <div class="mark" aria-hidden="true">
+      <div class="mark-inner">
+        <div class="mark-text">P</div>
+        <div class="mark-line"></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
