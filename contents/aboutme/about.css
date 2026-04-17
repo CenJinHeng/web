@@ -60,7 +60,7 @@ body[data-page="about"] {
   flex-direction: column;
   align-items: center;
   padding-bottom: 18px;
-  margin-right: 140px;
+  margin-right: 0;
 }
 
 .portrait-frame {
@@ -695,16 +695,16 @@ body[data-page="about"] {
   }
 
   .portrait-panel {
-    width: 50vw;
-    max-width: 50vw;
+    width: 65vw;
+    max-width: 65vw;
     min-width: 160px;
     padding-bottom: 16px;
   }
 
   .portrait-frame {
-    width: 50vw;
-    height: calc(50vw * 1.2523);
-    max-height: 300px;
+    width: 65vw;
+    height: calc(65vw * 1.2523);
+    max-height: 390px;
   }
 
   .portrait-card {
