@@ -60,6 +60,7 @@ body[data-page="about"] {
   flex-direction: column;
   align-items: center;
   padding-bottom: 18px;
+  margin-right: 140px;
 }
 
 .portrait-frame {
@@ -662,6 +663,8 @@ body[data-page="about"] {
 
   .portrait-panel {
     order: -1;
+    align-self: center;
+    margin-right: 0;
     width: 214px;
     align-items: center;
   }
@@ -689,6 +692,40 @@ body[data-page="about"] {
   .intro-connect,
   .intro-description {
     font-size: 14.4px;
+  }
+
+  .portrait-panel {
+    width: 50vw;
+    max-width: 50vw;
+    min-width: 160px;
+    padding-bottom: 16px;
+  }
+
+  .portrait-frame {
+    width: 50vw;
+    height: calc(50vw * 1.2523);
+    max-height: 300px;
+  }
+
+  .portrait-card {
+    width: 83.2%;
+    height: 88.1%;
+    top: 6%;
+    left: 50%;
+    margin-left: -41.6%;
+    border-width: 3%;
+  }
+
+  .portrait-card[data-layer="back"] {
+    transform: translate(8%, -1.2%) rotate(5.59deg);
+  }
+
+  .portrait-card[data-layer="middle"] {
+    transform: translate(-3.3%, 0) rotate(-4.33deg);
+  }
+
+  .portrait-card[data-layer="front"] {
+    transform: translate(0, 0) rotate(0deg);
   }
 
   .view-filter {

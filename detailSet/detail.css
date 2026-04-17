@@ -477,7 +477,7 @@
 }
 
 .detail-outline-row:hover {
-  background: #f5f2ed;
+  background: #f5f5f5;
   color: var(--text);
 }
 
@@ -585,7 +585,7 @@
 }
 
 .detail-outline-toggle:hover {
-  background: #f5f2ed;
+  background: #f5f5f5;
 }
 
 .detail-outline-toggle:focus-visible {
