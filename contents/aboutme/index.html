@@ -4,13 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>关于我</title>
+  <meta name="description" content="关于我 - 履历与时光机">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../core/styles.css">
-  <link rel="stylesheet" href="../../aboutme/about.css">
+  <link rel="stylesheet" href="../../core/styles.css?v=20260319c">
+  <link rel="stylesheet" href="./about.css?v=20260417j">
 </head>
-<body data-page="about" data-title-zh="关于我" data-title-en="About" data-notice-zh="暂无内容，请先导入 contents 文件夹。" data-notice-en="No content found. Please import the contents folder first.">
+<body data-page="about">
   <header class="site-header">
     <div class="container header-inner">
       <div class="brand">
@@ -24,18 +25,80 @@
     </div>
   </header>
 
-  <main class="container about-main">
-    <section class="about-status">
-      <article id="about-content" class="about-content" hidden></article>
-      <p id="about-notice" class="about-notice" data-i18n="about.notice">暂无内容，请先导入 contents 文件夹。</p>
+  <main class="container about-page" id="about-page">
+    <section class="about-hero" aria-label="Intro">
+      <article class="intro-panel" id="intro-panel">
+        <h1 class="intro-name" id="intro-name"></h1>
+        <p class="intro-title" id="intro-title"></p>
+        <p class="intro-connect" id="intro-connect"></p>
+        <p class="intro-description" id="intro-description"></p>
+      </article>
+
+      <section class="portrait-panel" aria-label="Portrait">
+        <div class="portrait-frame" id="portrait-frame" role="button" tabindex="0" aria-label="Next portrait">
+          <div class="portrait-card" data-layer="back"></div>
+          <div class="portrait-card" data-layer="middle"></div>
+          <div class="portrait-card" data-layer="front"></div>
+        </div>
+        <button class="corner-button" id="corner-button" type="button" aria-hidden="true" data-i18n="timeline.corner">角落</button>
+      </section>
     </section>
+
+    <section class="view-filter" role="tablist" data-i18n-attr="aria-label:view.ariaLabel">
+      <button class="view-filter-btn filter-btn is-active" id="view-resume-btn" type="button" role="tab" aria-selected="true" data-view="resume" data-i18n="view.resume">履历</button>
+      <button class="view-filter-btn filter-btn" id="view-timeline-btn" type="button" role="tab" aria-selected="false" data-view="timeline" data-i18n="view.timeline">时光机</button>
+    </section>
+
+    <section class="about-view" id="resume-view" aria-live="polite"></section>
+
+    <section class="about-view" id="timeline-view" aria-live="polite" hidden>
+      <div class="timeline-toolbar">
+        <div class="timeline-sort" id="timeline-sort">
+          <button class="timeline-sort-trigger" id="timeline-sort-trigger" type="button" aria-expanded="false">
+            <span id="timeline-sort-label"></span>
+            <span class="caret" aria-hidden="true"></span>
+          </button>
+          <div class="timeline-sort-menu" id="timeline-sort-menu" hidden>
+            <button class="timeline-sort-item" type="button" data-sort-mode="desc"></button>
+            <button class="timeline-sort-item" type="button" data-sort-mode="asc"></button>
+            <div class="timeline-sort-year-wrap" id="timeline-sort-year-wrap">
+              <button class="timeline-sort-item timeline-sort-year-trigger" id="timeline-sort-year-trigger" type="button" data-sort-mode="year"></button>
+              <div class="timeline-year-submenu" id="timeline-year-submenu"></div>
+            </div>
+            <div class="timeline-sort-cate-list" id="timeline-sort-cate-list"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="timeline-list" id="timeline-list"></div>
+    </section>
+
     <section id="site-footer-copy" class="site-footer-copy" hidden></section>
   </main>
 
-  <template id="about-content-zh-template"><p><br></p><p><br></p><p style="text-align: center;"><font size="5">页面开发中，敬请期待～</font></p></template>
-  <template id="about-content-en-template"><div style="text-align: center;"><span style="background-color: transparent; font-family: &quot;Microsoft YaHei&quot;, 微软雅黑, &quot;PingFang SC&quot;, &quot;Hiragino Sans GB&quot;, sans-serif; font-size: 0.95rem;"><br></span></div><p style="text-align: center;"><b>Developing</b><span style="background-color: transparent; font-family: &quot;Microsoft YaHei&quot;, 微软雅黑, &quot;PingFang SC&quot;, &quot;Hiragino Sans GB&quot;, sans-serif; font-size: 0.95rem;"></span></p><p style="text-align: center;"><br></p></template>
-  <template id="about-bg-ranges-zh-template">[]</template>
-  <template id="about-bg-ranges-en-template">[]</template>
-  <script src="../../aboutme/about.js" defer></script>
+  <div id="local-open-modal" class="local-open-modal" hidden>
+    <div class="local-open-dialog" role="dialog" aria-modal="true" aria-labelledby="local-open-title">
+      <h2 id="local-open-title">请选择 `contents` 文件夹</h2>
+      <p class="local-open-intro" id="local-open-intro">
+        你现在是直接打开 HTML 文件。为了读取 About 数据，需要手动授权一次 `contents` 文件夹。
+      </p>
+      <div class="local-open-actions">
+        <button id="local-open-pick" class="editor-primary" type="button">选择 `contents` 文件夹</button>
+        <button id="local-open-later" class="editor-secondary" type="button">稍后再说</button>
+      </div>
+      <p id="local-open-status" class="local-open-status" role="status" aria-live="polite"></p>
+      <details class="local-open-help">
+        <summary>为什么会这样？（点击展开）</summary>
+        <div class="local-open-help-body" id="local-open-help-body">
+          <p>直接双击 HTML 打开时，浏览器会限制网页自动访问本地文件夹。</p>
+          <p>这不是你的操作问题，是浏览器的安全规则。</p>
+          <p>上线到网站后（例如部署到 Netlify、Vercel、GitHub Pages），通常不需要这一步。</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script src="./about.js?v=20260417j" defer></script>
 </body>
 </html>

@@ -2,13 +2,13 @@
   "navBrandTextZh": "劲衡的空间",
   "navBrandTextEn": "Jinheng's portfolio",
   "footerEnabled": true,
-  "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\">由劲衡设计和开发</p><p style=\"text-align: center;\">Designed and developed by Jinheng</p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
-  "footerHtmlEn": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\">Designed and developed by Jinheng (劲衡)</p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
+  "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><span style=\"color: rgb(238, 238, 238);\">由劲衡设计和开发</span></p><p style=\"text-align: center;\"><span style=\"color: rgb(238, 238, 238);\">Designed and developed by Jinheng</span></p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
+  "footerHtmlEn": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><span style=\"color: rgb(238, 238, 238); font-size: 15.2px;\">由劲衡设计和开发</span></p><p style=\"text-align: center;\"><span style=\"color: rgb(238, 238, 238);\">Designed and developed by Jinheng</span></p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
   "footerBgRangesZh": [
     {
       "start": 1,
       "end": 5,
-      "color": "#f5f2ed"
+      "color": "#4a4a4a"
     }
   ],
   "footerBgRangesEn": []
