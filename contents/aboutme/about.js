@@ -1116,8 +1116,7 @@ function setupPortraitDeck() {
       ? layerName
       : (fallbackLayers[index] || "back");
     const photoIndex = initialByLayer[layer] ?? initialByLayer.front;
-    card.dataset.layer = layer;
-    state.portraitLayerByCard.set(card, layer);
+    setCardLayer(card, layer);
     state.portraitIndexByCard.set(card, photoIndex);
     paintPortraitCard(card, photoIndex);
   });
@@ -1142,18 +1141,16 @@ function rotatePortraitDeck() {
   state.portraitAnimating = true;
   cards.forEach((card) => card.classList.add("is-animating"));
 
+  const exclude = new Set();
+  exclude.add(state.portraitIndexByCard.get(middle));
+  exclude.add(state.portraitIndexByCard.get(back));
+  const nextBackIndex = consumeNextPortraitIndex(exclude);
+
   setCardLayer(front, "back");
   setCardLayer(middle, "front");
   setCardLayer(back, "middle");
-
-  window.setTimeout(() => {
-    const exclude = new Set();
-    exclude.add(state.portraitIndexByCard.get(middle));
-    exclude.add(state.portraitIndexByCard.get(back));
-    const nextIndex = consumeNextPortraitIndex(exclude);
-    state.portraitIndexByCard.set(front, nextIndex);
-    paintPortraitCard(front, nextIndex);
-  }, 170);
+  state.portraitIndexByCard.set(front, nextBackIndex);
+  paintPortraitCard(front, nextBackIndex);
 
   window.setTimeout(() => {
     cards.forEach((card) => card.classList.remove("is-animating"));
@@ -1182,6 +1179,13 @@ function getCardLayer(card) {
 function setCardLayer(card, layer) {
   card.dataset.layer = layer;
   state.portraitLayerByCard.set(card, layer);
+  if (layer === "front") {
+    card.style.zIndex = "3";
+  } else if (layer === "middle") {
+    card.style.zIndex = "2";
+  } else {
+    card.style.zIndex = "1";
+  }
 }
 
 function paintPortraitCard(card, index) {
