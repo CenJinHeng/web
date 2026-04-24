@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>城市中的野生动物</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Konkhmer+Sleokchher&amp;family=Libre+Franklin:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <button
+      type="button"
+      class="detail-outline-toggle"
+      id="detail-outline-toggle"
+      aria-controls="detail-outline-panel"
+      aria-expanded="false"
+      aria-label="提纲"
+      title="提纲"
+    >
+      <span class="detail-outline-toggle-icon" aria-hidden="true"></span>
+      <span class="detail-outline-toggle-label">提纲</span>
+    </button>
+
+    <button
+      type="button"
+      class="detail-outline-backdrop"
+      id="detail-outline-backdrop"
+      hidden
+      aria-hidden="true"
+      tabindex="-1"
+    ></button>
+
+    <aside class="detail-outline" id="detail-outline-panel" aria-hidden="true" inert hidden>
+      <h2 class="detail-outline-title">提纲</h2>
+      <nav class="detail-outline-nav" aria-label="提纲">
+        <ul class="detail-outline-list">
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#our-team-partnerships"><span class="detail-outline-label">团队与合作伙伴</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#introduction"><span class="detail-outline-label">引言</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#research-objective-framework"><span class="detail-outline-label">研究目标与框架</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#methodology"><span class="detail-outline-label">研究方法</span></a>
+            </div>
+            <ul class="detail-outline-children">
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-observation-data"><span class="detail-outline-label">野生动物观测数据</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#built-environment-variables"><span class="detail-outline-label">建成环境变量</span></a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#exploratory-data-analysis"><span class="detail-outline-label">探索性数据分析</span></a>
+            </div>
+            <ul class="detail-outline-children">
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-species-distribution"><span class="detail-outline-label">野生动物物种分布</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-activity-temporal-patterns"><span class="detail-outline-label">野生动物活动时间模式</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-activity-spatial-patterns"><span class="detail-outline-label">野生动物活动空间模式</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#built-env-x-wildlife-activity"><span class="detail-outline-label">建成环境变量 × 野生动物活动看板</span></a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#model-building"><span class="detail-outline-label">模型构建</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#conclusion"><span class="detail-outline-label">结论</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#planning-implications"><span class="detail-outline-label">规划启示</span></a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <header class="hero" data-node-id="54:6" id="page-top">
+      <img
+        src="assets/76a7f80908cd3fff4d901b1bc0c46072268c7772.png"
+        alt="Forest with deer"
+        class="hero-image"
+        id="image-33"
+      />
+      <div class="hero-overlay"></div>
+      <div class="hero-content" data-node-id="54:7">
+        <h1 data-node-id="54:8">城市中的野生动物</h1>
+        <p data-node-id="54:9">理解城市环境与野生动物活动的关系</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="container top-content" data-node-id="61:354">
+        <section class="section-block" data-node-id="54:10">
+          <h2 class="title-24 nav-anchor" data-node-id="54:11" id="our-team-partnerships">团队成员</h2>
+          <div class="team-grid" data-node-id="54:12">
+            <div class="team-col" data-node-id="54:13">
+              <h3 class="subtitle-20 muted" data-node-id="54:14">学生</h3>
+              <div class="profile-list" data-node-id="54:15">
+                <article class="profile" data-node-id="54:16">
+                  <img
+                    src="assets/b4ffc22c241fc9355f149a2a8c077e0dfcb26daa.png"
+                    alt="Zihang Yang"
+                    class="avatar"
+                    data-node-id="54:17"
+                  />
+                  <div class="profile-copy" data-node-id="54:18">
+                    <h4>Zihang (Henry) Yang</h4>
+                    <p>城市规划硕士（Smart cities）</p>
+                    <p>宾夕法尼亚大学设计学院（University of Pennsylvania School of Design）</p>
+                    <p>
+                      邮箱：
+                      <a href="mailto:henryyzh@design.upenn.edu">henryyzh@design.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:19">
+                  <img
+                    src="assets/a39842a9552737f6d61de45a824d920d8707c626.png"
+                    alt="Jinheng Cen"
+                    class="avatar"
+                    data-node-id="54:20"
+                  />
+                  <div class="profile-copy" data-node-id="54:21">
+                    <h4>Jinheng Cen</h4>
+                    <p>城市规划硕士（Smart cities）</p>
+                    <p>宾夕法尼亚大学设计学院（University of Pennsylvania School of Design）</p>
+                    <p>
+                      邮箱：
+                      <a href="mailto:jinhengc@design.upenn.edu">jinhengc@design.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <div class="team-col" data-node-id="54:22">
+              <h3 class="subtitle-20 muted" data-node-id="54:23">指导教师</h3>
+              <div class="profile-list" data-node-id="54:24">
+                <article class="profile" data-node-id="54:25">
+                  <img
+                    src="assets/73f124da64c4841e9586cadfc2117fcecadfefdf.png"
+                    alt="Xiaojiang Li"
+                    class="avatar"
+                    data-node-id="54:26"
+                  />
+                  <div class="profile-copy" data-node-id="54:27">
+                    <h4>Xiaojiang Li</h4>
+                    <p>城市空间分析与地理空间数据科学助理教授</p>
+                    <p>宾夕法尼亚大学设计学院（University of Pennsylvania School of Design）</p>
+                    <p>
+                      邮箱：
+                      <a href="mailto:jianglix@design.upenn.edu">jianglix@design.upenn.edu</a>
+                    </p>
+                    <p>
+                      网站：
+                      <a href="https://www.urbanspatial.info/#/" target="_blank" rel="noreferrer"
+                        >城市空间信息实验室（Urban Spatial Informatics Lab）</a
+                      >
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:28">
+                  <img
+                    src="assets/b4e4dee6b488a7b4a1b68a878c060a8c5abaab07.png"
+                    alt="Julie C. Ellis"
+                    class="avatar"
+                    data-node-id="54:29"
+                  />
+                  <div class="profile-copy" data-node-id="54:30">
+                    <h4>Julie C. Ellis</h4>
+                    <p>野生动物生态学家</p>
+                    <p>One Health in Action 副主任</p>
+                    <p>宾夕法尼亚大学兽医学院（University of Pennsylvania School of Veterinary Medicine）</p>
+                    <p>
+                      邮箱：
+                      <a href="mailto:jellis04@upenn.edu">jellis04@upenn.edu</a>
+                    </p>
+                    <p>
+                      网站：
+                      <a
+                        href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                        target="_blank"
+                        rel="noreferrer"
+                        >城市自然可达性倡议（Accessing Urban Nature Initiative）</a
+                      >
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:31">
+                  <img
+                    src="assets/6193e33c56c42ec318b78ffdc77c492a482ebe2e.png"
+                    alt="Brock Geary"
+                    class="avatar"
+                    data-node-id="54:32"
+                  />
+                  <div class="profile-copy" data-node-id="54:33">
+                    <h4>Brock Geary</h4>
+                    <p>Wildlife Futures Program 定量疾病生态学家</p>
+                    <p>病理生物学系（Department of Pathobiology）</p>
+                    <p>宾夕法尼亚大学兽医学院（University of Pennsylvania School of Veterinary Medicine）</p>
+                    <p>
+                      邮箱：
+                      <a href="mailto:brgeary@vet.upenn.edu">brgeary@vet.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:352">
+          <h2 class="title-24" data-node-id="54:34">合作伙伴</h2>
+          <div class="partners-stack" data-node-id="61:351">
+            <div class="partner-row frame40-row" data-node-id="54:35">
+              <img
+                src="assets/560c39fe53f9009153138295514f7bcb701784e5.png"
+                alt="UWIN"
+                class="partner-image"
+                data-node-id="54:36"
+              />
+              <div class="partner-copy" data-node-id="54:37">
+                <h3 class="big-20" data-node-id="54:38">城市野生动物信息网络（Urban Wildlife Information Network, UWIN）</h3>
+                <p class="sub-14" data-node-id="54:39">
+                  UWIN 的使命是与不同城市的合作伙伴协作，复用研究方法并收集可比数据，以支持在人类持续城市化的地球上实现人与野生动物共存。
+                </p>
+                <div class="link-list" data-node-id="54:40">
+                  <a href="https://www.urbanwildlifeinfo.org/" target="_blank" rel="noreferrer"
+                    >UWIN 官方网站 &gt;</a
+                  >
+                  <a href="https://www.urbanwildlifeinfo.org/uwin-research" target="_blank" rel="noreferrer"
+                    >UWIN 研究目标 &gt;</a
+                  >
+                  <a href="https://www.urbanwildlifeinfo.org/partners" target="_blank" rel="noreferrer"
+                    >UWIN 其他合作伙伴 &gt;</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="partner-row second" data-node-id="61:349">
+              <img
+                src="assets/3ce30447bbab6a07b2ac45b1c525b3953b1f1b65.png"
+                alt="AUNI"
+                class="auni-logo"
+                data-node-id="54:306"
+              />
+              <div class="partner-copy" data-node-id="54:44">
+                <p class="sub-14" data-node-id="54:46">
+                  本项目属于城市自然可达性倡议（Accessing Urban Nature Initiative, AUNI）。AUNI 于 2025 年加入城市野生动物信息网络（Urban Wildlife Information Network, UWIN）成为合作站点。UWIN 是 2017 年成立的国际协作网络，最初用于更好地理解芝加哥的城市野生动物生态，现已扩展到 80 多个合作站点，为跨城市比较城市野生动物生态模式提供了条件。
+                </p>
+                <p class="sub-14">
+                  该网络的重要优势之一是采用共享研究协议，可支持更标准化的数据采集并提升跨站点结果可比性；同时，各合作项目也能针对本地城市野生动物格局开展深入研究。
+                </p>
+                <div class="link-list" data-node-id="54:47">
+                  <a
+                    href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                    target="_blank"
+                    rel="noreferrer"
+                    >了解更多 AUNI &gt;</a
+                  >
+                  <a
+                    href="https://www.vet.upenn.edu/a-new-penn-vet-study-is-finding-where-the-wild-things-are-right-here-in-philly/"
+                    target="_blank"
+                    rel="noreferrer"
+                    >AUNI 相关新闻 &gt;</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:227">
+          <h2 class="title-24 nav-anchor" data-node-id="54:228" id="introduction">引言</h2>
+          <h3 class="big-20" data-node-id="54:229">城市化对野生动物具有深刻影响</h3>
+          <div class="two-col copy" data-node-id="54:230">
+            <p data-node-id="54:231">
+              从土地利用变化视角看，城市化本质上是人类主导的空间重构过程。它通过改造自然环境来容纳居住、生产、贸易等社会经济活动。其核心机制是将植被覆盖地表转化为硬化建成地表，并由此引发一系列物理环境的系统性变化。[1]
+            </p>
+            <p data-node-id="54:232">
+              对野生动物而言，这一过程具有多维影响：城市热岛、噪声干扰与夜间光污染显著改变其生境；同时，土地利用转变导致栖息地丧失与破碎化[2]。此外，工业排放与全球贸易等人类活动会加剧生态系统扰动，带来外来入侵物种等问题，进一步重塑城市生态系统结构。
+            </p>
+          </div>
+        </section>
+
+        <section class="intro-cards mobile-hscroll-cards" data-node-id="54:233">
+          <article class="intro-card" data-node-id="54:234">
+            <img src="assets/81537646f85c55082ca41d622a96dce4c7990a36.png" alt="Environmental changes" />
+            <p>环境变化：城市热、夜间照明、噪声……</p>
+          </article>
+          <article class="intro-card" data-node-id="54:237">
+            <img src="assets/61b29f1a0819d81cf44cb3ace56fd316a6724e27.png" alt="Habitat fragmentation" />
+            <p>栖息地丧失与破碎化</p>
+          </article>
+          <article class="intro-card" data-node-id="54:240">
+            <img src="assets/1679120eae3247d55f4cfc28e07e90bd50913ad2.png" alt="Industrial pollutants" />
+            <p>水体与土壤系统中的工业污染物</p>
+          </article>
+        </section>
+
+        <section class="section-block two-col-section" data-node-id="54:67">
+          <div data-node-id="54:68">
+            <h3 class="big-20" data-node-id="54:69">
+              城市化正在系统性重塑野生动物群落结构
+            </h3>
+            <p class="sub-14" data-node-id="54:70">
+              城市化的一个显著后果是生物多样性下降。[3] 随着物理环境改变，不适应城市环境的物种在自然选择下减少。覆盖 54 种城市鸟类与 110 种城市植物的全球研究显示，城市中本地鸟类和本地植物的“物种密度”仅约为非城市参照值的 8% 与 25%；相比气候和地理因素，城市化特征（如土地覆盖与城市年龄）更能解释这类损失。[4]
+            </p>
+          </div>
+          <div class="sub-14 frame124-right" data-node-id="54:71">
+            <p>
+              此外，破碎且不连续的城市绿地，以及大面积不透水地表，会限制动物迁移并降低基因交流。除遗传隔离外，迁移受限还会在残余生境中加剧竞争，尤其是在植物与资源多样性本就受限的区域。这可能导致城市种群内部遗传多样性下降，并加大种群间遗传分化，特别是对迁移能力有限的物种而言更为明显。[5]
+            </p>
+            <p>
+              一项研究发现，在人类活动足迹较高区域，哺乳动物平均移动距离仅为低足迹区域的约二分之一到三分之一，这意味着觅食、扩散和种子传播等生态功能可能出现系统性下降。尽管城市化并非唯一解释变量，但基础设施和人类活动强度是关键因素。[6]
+            </p>
+          </div>
+        </section>
+
+        <section class="unsplash-grid" data-node-id="54:311">
+          <div class="gallery-four mobile-hscroll-images" data-node-id="54:312">
+            <img src="assets/8b9354dbf154311657ac20de7d7ca0e387fd3dc5.png" alt="wildlife photo 1" />
+            <img src="assets/71c136d293cc09c577b50c63ec1d9cf3e0e1359d.png" alt="wildlife photo 2" />
+            <img src="assets/e7e5de9d4589d087c059637457013fbf85ce94aa.png" alt="wildlife photo 3" />
+            <img src="assets/754e8b61bdddd410ba2aa218d25b19471a306ede.png" alt="wildlife photo 4" />
+          </div>
+          <p class="tiny-note" data-node-id="54:317">
+            图片来源于 <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a>，
+            使用
+            <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+          </p>
+        </section>
+
+        <section class="section-block two-col-section frame127-row" data-node-id="54:72">
+          <div data-node-id="54:73">
+            <h3 class="big-20" data-node-id="54:74">城市化影响在不同物种间存在差异</h3>
+            <div class="sub-14" data-node-id="54:75">
+              <p>
+                城市化对生物多样性的影响广泛且涉及多个物种，但影响方式与强度在不同物种之间存在明显差异。[7]
+              </p>
+              <p>
+                例如，鸟类会面临栖息地丧失、玻璃撞击风险，以及夜间照明与噪声的叠加影响[8,9]；但部分耐城市化鸟类，尤其是乌鸦、鸽子等广适性物种，也可通过利用人类来源食物、人工巢位和建成环境资源而受益。[10]
+              </p>
+              <p>
+                对哺乳动物而言，道路与建筑形成物理屏障，缩小其活动范围、降低连通性并限制基因流动。[11] 但像浣熊这类广适性哺乳动物，凭借广泛食性、行为灵活性及利用垃圾和宠物食物等人类补给的能力，仍可在城市持续生存甚至繁盛。[12]
+              </p>
+              <p>
+                两栖动物对湿度、繁殖水体和生境连通性高度敏感[13]；城市河流污染与排水系统改造可能导致繁殖成功率下降，并提高局地灭绝风险。[14]
+              </p>
+            </div>
+          </div>
+          <img
+            src="assets/98bf2d3c110218bbe3cd396a636e8f93c00f4401.png"
+            alt="species variation"
+            class="species-wide-img"
+            data-node-id="54:76"
+          />
+        </section>
+      </section>
+
+      <section class="heat-band" data-node-id="54:77">
+        <div class="container heat-inner">
+          <div class="two-col heat-head" data-node-id="54:78">
+            <h3 class="big-20" data-node-id="54:79">
+              城市热是跨物种最具挑战性的压力源之一
+            </h3>
+            <p class="sub-14" data-node-id="54:80">
+              几乎所有城市动物都会受到城市热影响。热岛效应使城市气温通常比周边郊区高约 1–3°C，增温影响平均可扩展 4–12 km。[15,16] 这会改变生物体的耐热能力、日活动节律与繁殖成功率。
+            </p>
+          </div>
+          <div class="heat-cards" data-node-id="54:81">
+            <article class="heat-card" data-node-id="54:82">
+              <div class="heat-title-row" data-node-id="54:84">
+                <span class="icon-wrap" data-node-id="54:85"
+                  ><img src="assets/7ff286b77c1bfd0e952561e175042f54a830963c.svg" alt="Heat icon" data-node-id="54:86"
+                /></span>
+                <h4 data-node-id="54:88">耐热性</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:89">
+                城市种群可能通过进化响应提升耐热性，但这通常伴随耐寒性下降或温度耐受范围变窄。[17]
+              </p>
+              <p class="sub-14">
+                与森林种群相比，城市蜥蜴可承受更高环境温度，且上限耐热阈值更高；但其低温耐受能力下降，最适温度范围也趋于收窄。[18]
+              </p>
+            </article>
+            <article class="heat-card" data-node-id="54:90">
+              <div class="heat-title-row" data-node-id="54:92">
+                <span class="icon-wrap" data-node-id="54:93"
+                  ><img
+                    src="assets/440923b1ccf8e62f86e9a167f47070e3fbb8b0ca.svg"
+                    alt="Rhythm icon"
+                    data-node-id="54:94"
+                /></span>
+                <h4 data-node-id="54:97">日活动节律</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:98">
+                城市热还会改变动物行为与活动模式。[19] 热暴露增加会促使动物通过调整觅食时段、增强夜行性、更多停留在阴影处/近水区/地下等方式适应环境。[20] 这将改变动物与资源、同种个体或捕食者之间的相遇概率，从而引发食物网结构变化。
+              </p>
+            </article>
+            <article class="heat-card" data-node-id="54:99">
+              <div class="heat-title-row" data-node-id="54:101">
+                <span class="icon-wrap" data-node-id="54:102"
+                  ><img src="assets/e073a36bc18c6158430dcb53fd90627abecf6274.svg" alt="Reproduction icon" data-node-id="54:103"
+                /></span>
+                <h4 data-node-id="54:105">繁殖成功率</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:106">
+                极端高温峰值会影响动物繁殖阶段的存活率。在胚胎与幼体阶段，短时热峰可能超过生理阈值并导致存活率下降。对爬行动物而言，较高孵化温度可加快发育，但过高温度会造成死亡。[21] 城市热岛可能形成异常温暖的巢位条件，使其在平均与极端温度上都不同于邻近自然区域，从而影响动物生长。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="container bottom-content" data-node-id="62:393">
+        <section class="section-block two-col-row frame1203-row" data-node-id="54:107">
+          <div class="left-media-block frame1203-media" data-node-id="54:108">
+            <img src="assets/da8289c4bb41a26473c9c0207452593291ab051e.png" alt="city wildlife" data-node-id="54:109" />
+            <p class="tiny-note" data-node-id="54:110">
+              图片来源于 <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a>，使用
+              <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+            </p>
+          </div>
+          <div class="right-copy" data-node-id="54:111">
+            <h3 class="big-20" data-node-id="54:112">
+              城市野生动物研究在保护生物多样性与促进人类可持续发展中具有关键作用
+            </h3>
+            <div class="sub-14 frame1203-text-group" data-node-id="54:113">
+              <p class="frame1203-textbox" data-node-id="54:114">
+                根据联合国经济和社会事务部（United Nations Department of Economic and Social Affairs）预测，全球城市人口占比将从 2021 年的 56% 上升至 2050 年的 68%。[22] 城市化将影响全球越来越多的野生动物物种。城市野生动物研究不仅有助于理解物种如何在高人类干扰环境中生存与适应，也为城市生物多样性保护提供科学依据。由于城市环境高度复杂，其生态过程常不同于实验室或自然场景观察结果，因此在真实城市语境中开展研究尤为关键。[5]
+              </p>
+              <p class="frame1203-textbox" data-node-id="54:115">
+                城市规划可通过建设绿地系统与生态廊道，成为缓解栖息地破碎化的关键干预手段。通过建立连续的绿色廊道网络并提升绿地斑块连通性，可为动物提供迁徙通道与栖息空间，进而增强基因交流与种群稳定性。此外，维持生物多样性有助于调节害虫种群并减少对化学防治的依赖，从而支撑更稳定、更具韧性的生态系统，并形成持续维护生物多样性的正向循环。[5]
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block center-head nav-anchor" data-node-id="61:355" id="research-objective-framework">
+          <h2 class="title-24 research-objective-title" data-node-id="54:226">研究目标</h2>
+          <p class="objective-text" data-node-id="54:303">
+            理解城市化梯度如何影响野生动物活动
+          </p>
+        </section>
+
+        <section class="section-block center-head" data-node-id="61:356">
+          <h2 class="title-24" data-node-id="54:266">研究框架</h2>
+          <img
+            src="assets/15e8b405fb51139d3374a8d9913034ef4203ac76.png"
+            alt="research framework"
+            class="framework-img"
+            data-node-id="54:4"
+          />
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="54:243" id="methodology">
+          <h2 class="title-24" data-node-id="54:244">研究方法</h2>
+          <h3 class="big-20 nav-anchor" data-node-id="54:246" id="wildlife-observation-data">野生动物观测数据</h3>
+          <div class="two-col-row" data-node-id="54:247">
+            <img
+              src="assets/38bf3f14feee3fd15d855e2024615b684355c44d.png"
+              alt="wildlife camera"
+              class="fixed-media"
+              data-node-id="54:248"
+            />
+            <div class="right-copy" data-node-id="54:249">
+              <h3 class="big-20" data-node-id="54:250">我们使用运动触发相机采集野生动物观测数据</h3>
+              <p class="sub-14" data-node-id="54:252">
+                当检测到运动时，运动触发相机会自动记录带有时间戳、温度与气压信息的图像，使我们能够长期监测野生动物出现情况、活动频率与行为模式。
+              </p>
+              <p class="sub-14">
+                相机使用 SD 卡进行本地存储。数据每年采集四次（1 月、4 月、7 月、10 月）以覆盖季节变化；每次布设周期约为 4–6 周。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block map-row mobile-hscroll-group" data-node-id="61:361">
+          <div class="map-col" data-node-id="61:360">
+            <img src="assets/d0ebc835b2028a188d8bb0ca2efdc5ddef999685.png" alt="camera locations map" data-node-id="61:358" />
+            <div class="data-source-mini" data-node-id="54:164">
+              <p>数据来源：</p>
+              <p>
+                OpenStreetMap:
+                <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">https://www.openstreetmap.org/</a>
+              </p>
+              <p>
+                OpenDataPhilly:
+                <a href="https://opendataphilly.org" target="_blank" rel="noreferrer">https://opendataphilly.org</a>
+              </p>
+            </div>
+          </div>
+          <div class="right-copy map-copy" data-node-id="54:165">
+            <h3 class="big-20" data-node-id="54:166">数据采集位置</h3>
+            <p class="sub-14" data-node-id="54:167">
+              相机战略性布设于费城主要绿色廊道，包括 Fairmount Park、Wissahickon Valley Park、Cobbs Creek 与 John Heinz Wildlife Refuge。
+            </p>
+            <p class="sub-14">
+              项目分阶段推进，总目标为 35 个点位，目前已完成 16 个。相机间距至少 900–1000 米，以确保各点位可作为独立重复样本。
+            </p>
+            <p class="sub-14">
+              当前优先沿 Schuylkill River 进行样带布设，并正向费城东部与北部扩展覆盖，以形成更具代表性的城市尺度观测样本（如 Tacony Creek 等）。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block center-head" data-node-id="54:168">
+          <h3 class="big-20" data-node-id="54:169">运动触发相机拍摄样例</h3>
+          <img
+            src="assets/21a88fc18e830e5c2a5bed846906b9d38c237fba.png"
+            alt="motion camera photos"
+            class="wide-gallery"
+            data-node-id="54:170"
+          />
+        </section>
+
+        <section class="section-block" data-node-id="54:171">
+          <div class="two-col copy" data-node-id="54:172">
+            <h3 class="big-20" data-node-id="54:173">图像数据处理流程</h3>
+            <div class="sub-14" data-node-id="54:174">
+              <p>
+                团队将全部图像上传至
+                <a href="https://wildtrax.ca" target="_blank" rel="noreferrer">WildTrax</a>, an online database
+                供 UWIN 合作方共享数据。平台利用集成 AI 工具将图像分类为动物、人类与车辆，但在具体动物物种识别上仍有限制。为保证数据质量，所有 AI 标签都会进行人工复核与校验，验证后的数据再导出为结构化表格用于后续分析与建模。
+              </p>
+            </div>
+          </div>
+          <img
+            src="assets/250f1440420e494e34b86eaf83eb8781d3d03a1a.png"
+            alt="processing pipeline"
+            class="pipeline"
+            data-node-id="54:175"
+          />
+        </section>
+
+        <section class="section-block two-col-row" data-node-id="54:176">
+          <div class="left-media-block compact" data-node-id="54:177">
+            <img src="assets/7b37cf8558f18837cdae1a3c17747317384b283a.png" alt="find squirrel" data-node-id="54:178" />
+            <p class="sub-14 center muted-2" data-node-id="54:179">挑战：你能在图中找到松鼠吗？</p>
+          </div>
+          <div class="right-copy" data-node-id="54:180">
+            <h3 class="big-20" data-node-id="54:181">图像标注挑战</h3>
+            <p class="sub-14" data-node-id="54:182">
+              WildTrax 能识别动物并框出其出现区域。但当动物体型较小、被树叶部分遮挡，或在夜间黑白图像中较模糊时，AI 识别精度会下降。此外，风吹植被等非目标运动也会引入噪声数据。
+            </p>
+            <p class="sub-14">
+              因此，每张图像都需人工仔细复核，以确认是否存在动物并标注其物种与数量。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block two-col-row" data-node-id="54:183">
+          <div class="left-media-block" data-node-id="54:184">
+            <img src="assets/a892ddfef8b53a0ba23367f5cb253e39fb060c7a.png" alt="duplicated trigger" class="fixed-media-sm" data-node-id="54:185" />
+            <p class="sub-14 center muted-2" data-node-id="54:186">
+              同一只动物在短时间内可能触发多次拍摄
+            </p>
+          </div>
+          <div class="right-copy" data-node-id="54:187">
+            <h3 class="big-20" data-node-id="54:188">重复出现问题</h3>
+            <p class="sub-14" data-node-id="54:189">
+              当动物在相机附近停留较长时间时，可能在短时间内触发多次拍摄；但在分析中，我们希望将其视为一次出现记录。
+            </p>
+            <p class="sub-14">
+              因此我们采用“重复出现去重规则”：在 15 分钟窗口内，同一物种且同一数量的照片视为同一次出现。该规则可减少重复记录，提高野生动物活动统计准确性。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:190">
+          <h3 class="big-20" data-node-id="54:191">野生动物观测数据示例</h3>
+          <div class="sample-table-shell" id="sample-table-shell" data-node-id="54:192" aria-live="polite">
+            <p class="sample-table-status">正在加载示例数据…</p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:196">
+          <h3 class="big-20 built-vars-title nav-anchor" data-node-id="54:197" id="built-environment-variables">
+            建成环境变量
+          </h3>
+          <div class="variable-grid" data-node-id="54:198">
+            <article class="var-item" data-node-id="54:200">
+              <img src="assets/af9e032dd1b86fde24f956b40b6bcbe9d7677944.png" alt="radiant temperature" data-node-id="54:204" />
+              <h4>辐射温度</h4>
+              <p>300 米缓冲区平均值</p>
+              <p>基于城市热数据计算</p>
+            </article>
+            <article class="var-item" data-node-id="54:205">
+              <img src="assets/6f3c8fae082589eb2c5852cbd863946448575b97.png" alt="impervious surface" data-node-id="54:209" />
+              <h4>不透水地表比例</h4>
+              <p>300 米缓冲区平均值</p>
+              <p>基于不透水面数据计算</p>
+            </article>
+            <article class="var-item" data-node-id="54:211">
+              <img src="assets/35635351884f3ddf32de3f24b573d760e67c7989.png" alt="green space" data-node-id="54:215" />
+              <h4>绿地面积占比</h4>
+              <p>300 米缓冲区面积占比</p>
+              <p>基于土地利用数据计算</p>
+            </article>
+            <article class="var-item" data-node-id="54:216">
+              <img src="assets/346533a0151ed4b659ba9c95cd64c8d0333456dc.png" alt="distance hydrology" data-node-id="54:220" />
+              <h4>距水体距离</h4>
+              <p>最近距离</p>
+              <p>基于土地利用数据计算</p>
+            </article>
+            <article class="var-item" data-node-id="54:221">
+              <img src="assets/bb0e8f45a6ef6aa61e7b9b0093a0b8b3b077f93f.png" alt="distance transportation" data-node-id="54:225" />
+              <h4>距交通设施距离</h4>
+              <p>最近距离</p>
+              <p>基于土地利用数据计算</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-block urban-dataset-section" data-node-id="54:134">
+          <h3 class="big-20" data-node-id="54:135">城市环境数据长什么样？</h3>
+
+          <h4 class="big-20 small-top" data-node-id="54:136">城市热数据</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:137">
+            <img src="assets/00bbaad511eff4925e9bc727a1e49ccb81571db2.png" alt="urban heat 1" data-node-id="54:139" />
+            <img src="assets/1b2fc06288b7eb70706f7e79b7dc041b985762a8.png" alt="urban heat 2" data-node-id="54:141" />
+            <img src="assets/cebc7f545ef1e4e8681e7a235b62b6e77e42b9db.png" alt="urban heat 3" data-node-id="54:143" />
+          </div>
+
+          <h4 class="big-20 small-top" data-node-id="54:144">不透水地表数据</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:145">
+            <img src="assets/789d83a54e64ff1319a1c1ec27035a2240f1d0b6.png" alt="impervious 1" data-node-id="54:147" />
+            <img src="assets/71d5ee5e2d3ca8ca784d8072f7480fc267096960.png" alt="impervious 2" data-node-id="54:149" />
+            <img src="assets/7ea1e3a98b969c5d0587c7dec0cce54bd6e77db1.png" alt="impervious 3" data-node-id="54:151" />
+          </div>
+
+          <h4 class="big-20 small-top" data-node-id="54:152">土地利用数据</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:153">
+            <img src="assets/f28991f5f63ce6279e7a23ee6a363aef81885a23.png" alt="land use 1" data-node-id="54:155" />
+            <img src="assets/8d248bfcbdaddf6ed8f20655edee4d314539311f.png" alt="land use 2" data-node-id="54:157" />
+            <img src="assets/f6bf9a8e5d20b5ee7d8061f5bdaff027905a148e.png" alt="land use 3" data-node-id="54:159" />
+          </div>
+
+          <p class="sub-14 data-sources-lines" data-node-id="54:160">
+            数据来源：城市热数据：
+            <a href="https://xiaojianggis.github.io/pedheat/" target="_blank" rel="noreferrer">https://xiaojianggis.github.io/pedheat/</a><br />
+            不透水地表数据：
+            <a href="https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip" target="_blank" rel="noreferrer">https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip</a><br />
+            土地利用数据：
+            <a href="https://catalog.dvrpc.org/dataset/land-use-2023" target="_blank" rel="noreferrer">https://catalog.dvrpc.org/dataset/land-use-2023</a>
+          </p>
+        </section>
+
+        <section class="section-block" data-node-id="61:362">
+          <h3 class="big-20" data-node-id="54:51">我们如何将建成环境数据与野生动物活动整合</h3>
+          <p class="sub-14" data-node-id="54:52">
+            团队将野生动物活动数据与建成环境数据进行空间连接，以支持联合分析。每个相机点位均完成地理定位，并围绕点位建立缓冲区以刻画周边环境背景。在缓冲区内提取关键建成环境变量并汇总为定量指标。经多种距离测试后，我们最终采用 300 米缓冲区作为数据采集范围。
+          </p>
+          <img src="assets/a5d29875bd1ee81e9c98470203bb8786bd09e054.png" alt="integration workflow" class="integration-img" data-node-id="54:300" />
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="61:366" id="exploratory-data-analysis">
+          <h2 class="title-24" data-node-id="54:253">探索性数据分析</h2>
+          <h3 class="big-20 nav-anchor" data-node-id="54:258" id="wildlife-species-distribution">
+            野生动物物种分布
+          </h3>
+          <div class="center-chart" data-node-id="61:364">
+            <div class="species-pie-shell" id="species-pie-shell" data-node-id="54:3" aria-live="polite">
+              <p class="species-pie-status">正在加载图表…</p>
+            </div>
+            <p class="sub-14" data-node-id="54:53">
+              全部出现记录的物种频次显示出高度不均衡结构。Eastern Gray Squirrels 占全部记录约 50%，其后为 Common Raccoons 和 Red Foxes（约 14%），以及 White-tailed Deer（约 9%）。
+            </p>
+            <p class="sub-14">
+              Eastern Gray Squirrels 的优势地位与费城城市生态结构相一致。破碎化绿地与邻人类生境为其提供了条件，而该物种适应性强，能在城市环境中维持较高种群密度。
+            </p>
+            <p class="sub-14">
+              Common Raccoons 与 Red Foxes 均为机会主义物种，能够利用边缘生境与人类改造景观。其较高占比说明它们在城郊生态位中已形成稳定存在。White-tailed Deer 通常与更大尺度郊区保育地或扰动较低的绿色廊道相关。
+            </p>
+            <p class="sub-14">
+              从整体上看，数据集以哺乳动物为主，占全部记录的 95%。这也反映出运动触发相机天然更容易捕捉地栖哺乳动物，而鸟类较少触发传感器或在镜头内停留足够时间被记录。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:368">
+          <h3 class="big-20 nav-anchor" data-node-id="54:259" id="wildlife-activity-temporal-patterns">
+            野生动物活动时间模式
+          </h3>
+          <div class="center-chart temporal" data-node-id="61:367">
+            <div class="temporal-presence-shell" id="temporal-presence-shell" data-node-id="54:5" aria-live="polite">
+              <p class="temporal-presence-status">正在加载图表…</p>
+            </div>
+            <p class="sub-14" data-node-id="54:54">
+              野生动物出现呈现明显双峰模式，峰值分别在早上 8 点与下午 5 点。若与费城 10 月平均日出（约 7 点）和日落（约 6 点）对照，这两个峰值均落在晨昏时段前后一小时窗口内。
+            </p>
+            <p class="sub-14" data-node-id="54:54">
+              这表明野生动物活动高度集中于黎明与黄昏过渡期，此时不同节律物种发生重叠。换言之，昼行性与夜行性物种都会在该窗口活跃，从而形成总体出现量收敛。
+            </p>
+            <div class="species-temporal-shell" id="species-temporal-shell" data-node-id="54:307" aria-live="polite">
+              <p class="species-temporal-status">正在加载图表…</p>
+            </div>
+            <ul class="sub-14" data-node-id="54:55">
+              <li>
+                Eastern Gray Squirrels 呈现明显昼行性，主峰在 8 点左右，次峰在 5 点左右；19:00–6:00 出现记录极少。
+              </li>
+              <li>
+                Common Raccoons 呈现显著夜行性，活动集中在夜间，白天出现极少。
+              </li>
+              <li>
+                Red Foxes 与 White-tailed Deer 也以夜间活动为主，白天出现相对较低。
+              </li>
+            </ul>
+            <p class="sub-14">
+              浣熊、狐狸与鹿类白天活动减少，可理解为其对城市与城郊人类干扰的行为适应。[23] 这种时间分割也有助于降低物种间竞争，并支持其在共享城市绿地中共存。[24]
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:370">
+          <h3 class="big-20 nav-anchor" data-node-id="54:260" id="wildlife-activity-spatial-patterns">
+            野生动物活动空间模式
+          </h3>
+          <div class="center-chart spatial" data-node-id="61:369">
+            <h4 class="big-20" data-node-id="54:261">不同点位的出现情况</h4>
+            <p class="sub-14" data-node-id="54:57">
+              为避免对野生动物造成额外干扰，相机点位精确坐标不对外公开。本文按纬度由北到南顺序展示 13 个点位。
+            </p>
+            <div class="location-daynight-shell" id="location-daynight-shell" data-node-id="54:309" aria-live="polite">
+              <p class="location-daynight-status">正在加载图表…</p>
+            </div>
+            <p class="sub-14" data-node-id="54:56">
+              各点位野生动物出现差异显著。多数相机在白天记录占比超过 60%，部分点位白天占比高达 95%，且通常由 Eastern Gray Squirrels 主导。
+            </p>
+            <p class="sub-14" data-node-id="54:56">
+              相比之下，2 号与 13 号点位夜间记录占比超过 60%，并以浣熊、鹿等夜行哺乳动物为主。值得注意的是，这些点位对应更大、扰动更低的自然或保育区域。
+            </p>
+            <p class="sub-14">
+              总体上，这一对比说明：
+            </p>
+            <ul>
+              <li>
+                城市或邻人类活动点位 → 昼行性占优
+              </li>
+              <li>
+                扰动较低且面积更大的绿地 → 物种更丰富
+              </li>
+            </ul>
+            <h4 class="big-20" data-node-id="54:262">野生动物拍摄频次</h4>
+            <div class="location-frequency-shell" id="location-frequency-shell" data-node-id="54:308" aria-live="polite">
+              <p class="location-frequency-status">正在加载图表…</p>
+            </div>
+            <p class="sub-14" data-node-id="54:58">
+              拍摄频次可作为整体活动强度的代理指标。最高活动水平约为每天 12 次，出现在大型保育区点位；最低仅约每天 1 次，多见于人类干扰较强点位。
+            </p>
+            <p class="sub-14">
+              该模式表明人类干扰与野生动物活动强度之间存在明显负相关，符合既有城市生态学理论。[23]
+            </p>
+            <h4 class="big-20" data-node-id="54:263">不同点位的物种丰富度</h4>
+            <div class="location-richness-shell" id="location-richness-shell" data-node-id="54:310" aria-live="polite">
+              <p class="location-richness-status">正在加载图表…</p>
+            </div>
+            <p class="sub-14" data-node-id="54:59">
+              各点位物种丰富度差异显著。最丰富点位记录到 21 个物种，位于大型连续自然区域（如森林谷地系统），可能受益于更高生境多样性。
+            </p>
+            <p class="sub-14" data-node-id="54:59">
+              相反，最低点位仅记录到 3 个物种，位于高人类活动区域，且以哺乳动物为主，说明在此类条件下仅最具适应性的物种能够持续存在。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:373">
+          <h3 class="big-20 nav-anchor" data-node-id="54:264" id="built-env-x-wildlife-activity">
+            建成环境变量 × 野生动物活动看板
+          </h3>
+          <div class="built-x-activity-flow">
+            <div class="built-x-activity dashboard-shell" data-node-id="61:371">
+              <div class="built-dashboard" id="built-dashboard" aria-live="polite">
+                <aside class="built-dashboard-sidebar">
+                  <div class="built-dashboard-sidebar-inner">
+                    <p class="built-dashboard-side-title">选择点位</p>
+                    <div class="built-dashboard-location-scroll" id="dashboard-location-list"></div>
+                  </div>
+                </aside>
+
+                <section class="built-dashboard-middle">
+                  <h4 class="built-dashboard-panel-title">
+                    点位 <span id="dashboard-location-name-middle">1</span> 的野生动物出现数据
+                  </h4>
+                  <div class="built-dashboard-middle-grid">
+                    <article class="built-dashboard-card built-dashboard-card-presence">
+                      <div class="built-dashboard-presence-content">
+                        <p class="built-dashboard-label">出现次数</p>
+                        <p class="built-dashboard-presence" id="dashboard-presence">0</p>
+                        <div class="built-dashboard-daynight">
+                          <div><span>白天</span><span id="dashboard-day">0 (0%)</span></div>
+                          <div><span>夜间</span><span id="dashboard-night">0 (0%)</span></div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="built-dashboard-card built-dashboard-card-frequency">
+                      <div class="built-dashboard-mini">
+                        <p class="built-dashboard-mini-label">频次</p>
+                        <p class="built-dashboard-mini-value" id="dashboard-frequency">0</p>
+                        <p class="built-dashboard-mini-label built-dashboard-mini-label-secondary">记录天数</p>
+                        <p class="built-dashboard-mini-value" id="dashboard-recording-day">0</p>
+                      </div>
+                    </article>
+
+                    <article class="built-dashboard-card built-dashboard-card-richness">
+                      <div class="built-dashboard-richness-head">
+                        <p class="built-dashboard-label">丰富度（物种数）</p>
+                        <p class="built-dashboard-richness" id="dashboard-richness">0</p>
+                      </div>
+                      <div class="built-dashboard-taxa">
+                        <div><span>Aves</span><span id="dashboard-aves">0 (0%)</span></div>
+                        <div><span>Mammalia</span><span id="dashboard-mammalia">0 (0%)</span></div>
+                      </div>
+                      <div class="built-dashboard-toplist">
+                        <div>
+                          <span>TOP 1</span>
+                          <span id="dashboard-top1">-</span>
+                          <span id="dashboard-top1-count">0</span>
+                        </div>
+                        <div>
+                          <span>TOP 2</span>
+                          <span id="dashboard-top2">-</span>
+                          <span id="dashboard-top2-count">0</span>
+                        </div>
+                        <div>
+                          <span>TOP 3</span>
+                          <span id="dashboard-top3">-</span>
+                          <span id="dashboard-top3-count">0</span>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="built-dashboard-right">
+                  <h4 class="built-dashboard-panel-title">
+                    点位 <span id="dashboard-location-name-right">1</span> 的建成环境数据
+                  </h4>
+                  <div class="built-dashboard-metric-list">
+                    <div class="built-dashboard-metric" data-metric="mrt">
+                      <img src="assets/af9e032dd1b86fde24f956b40b6bcbe9d7677944.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>辐射温度</span>
+                          <span id="dashboard-mrt-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-orange"><span id="dashboard-mrt-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="imp">
+                      <img src="assets/6f3c8fae082589eb2c5852cbd863946448575b97.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>不透水地表比例</span>
+                          <span id="dashboard-imp-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-yellow"><span id="dashboard-imp-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="green">
+                      <img src="assets/35635351884f3ddf32de3f24b573d760e67c7989.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>绿地面积占比</span>
+                          <span id="dashboard-green-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-green"><span id="dashboard-green-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="water">
+                      <img src="assets/346533a0151ed4b659ba9c95cd64c8d0333456dc.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>距水体距离</span>
+                          <span id="dashboard-water-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-blue"><span id="dashboard-water-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="trans">
+                      <img src="assets/bb0e8f45a6ef6aa61e7b9b0093a0b8b3b077f93f.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>距交通设施距离</span>
+                          <span id="dashboard-trans-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-purple"><span id="dashboard-trans-fill"></span></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <p class="built-dashboard-status" id="built-dashboard-status">正在加载看板数据…</p>
+            </div>
+            <div class="section-copy-flow narrative-copy built-dashboard-copy">
+              <p class="sub-14" data-node-id="54:60">
+              我们进一步考察了每个相机点位的五项建成环境变量。虽然整体关系尚不明显（部分受点位数量与采样规模限制），但 7 号点位提供了一个典型案例：其拍摄频次最低（约 1 次/天）。结合环境特征，可提出与生态学预期一致的假设：在以下条件下，野生动物活动可能降低：
+              </p>
+              <ul>
+                <li>
+                  更接近交通基础设施
+                </li>
+                <li>
+                  离水源更远
+                </li>
+                <li>
+                  绿地可达性更低
+                </li>
+                <li>
+                  辐射温度更高（城市热效应）
+                </li>
+                <li>
+                  不透水地表比例更高
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:377" id="model-building">
+          <h3 class="big-20" data-node-id="54:265">模型构建</h3>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:63">
+              我们测试了线性模型、GLMM（在非正态响应与随机效应下扩展线性模型）和 GAMM（在随机效应下允许非线性平滑关系）。由于 MEAN_IMP（不透水地表）是唯一持续显著且表现出非线性迹象的预测变量，我们最终采用 GAMM 框架刻画其平滑效应。
+            </p>
+          </div>
+          <div class="model-grid" data-node-id="62:376">
+            <div class="model-left" data-node-id="62:374">
+              <img src="assets/9a402c5bb6ae562ed68390b0e07f9b80f9614be6.png" alt="imp-rich" data-node-id="54:64" />
+              <img src="assets/13e5224d20648bf5aea7b12d67e4a50495abced2.png" alt="histogram" data-node-id="54:301" />
+            </div>
+            <div class="model-right" data-node-id="62:375">
+              <img src="assets/30f3fff0694790a962a882f1144acacc1ddf9254.png" alt="imp-presence" data-node-id="54:302" />
+              <div class="sub-14" data-node-id="54:61">
+                <p>（1）城市化（MEAN_IMP）的非线性效应</p>
+                <p>
+                  两个模型均显示不透水地表与野生动物之间存在高度显著的非线性关系（p &lt; 0.001）。
+                </p>
+                <ul>
+                  <li>
+                    野生动物活动（出现量）与物种丰富度均呈驼峰曲线
+                  </li>
+                  <li>
+                    峰值出现在中等不透水水平（约 25–30%）
+                  </li>
+                  <li>
+                    过低或过高不透水水平下指标值均较低
+                  </li>
+               </ul>
+                <p>（2）两个模型方向一致</p>
+               <ul>
+                  <li>
+                    出现量模型（Negative Bin）：解释偏差 = 32.3%
+                  </li>
+                  <li>
+                    丰富度模型（Poisson）：解释偏差 = 24.4%
+                  </li>
+               </ul>
+                <p>（3）其他变量效应</p>
+                <p>
+                  在两个模型中，以下变量均显著：
+                </p>
+                <ul>
+                  <li>
+                    距交通设施距离（+）
+                  </li>
+                  <li>
+                    距水体距离（+）
+                  </li>
+                  <li>
+                    辐射温度（–）
+                  </li>
+                  <li>
+                    绿地面积占比（–）
+                  </li>                  
+               </ul>
+              </div>
+            </div>
+          </div>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:62">
+              总体上，结果表明城市化并非对野生动物“线性有害”，而是：
+            </p>
+            <ul>
+                    <li>
+                      野生动物出现与多样性在中等城市化强度下达到峰值
+                    </li>
+                    <li>
+                      过度城市化或过度自然化区域的观测活动均较低
+                    </li>        
+                 </ul>
+            <p class="sub-14">
+              不透水地表与野生动物出现/丰富度之间的驼峰关系，可能部分由常见物种 Eastern Gray Squirrels 的优势（约占观测 47–50%）所驱动。该发现总体与中度干扰假说（Intermediate Disturbance Hypothesis, IDH）一致，即中等干扰水平下物种多样性最高。[25]
+            </p>
+            <p class="sub-14">
+              Eastern Gray Squirrels 对城市-自然混合环境适应性较强，该环境中树木覆盖、食物资源与中等人类活动并存。因此，其活动常在中等城市化水平下达到峰值，与约 25–30% 不透水地表对应的预测峰值高度吻合。
+            </p>
+            <p class="sub-14">
+              但该模式不应仅归因于松鼠。出现量与丰富度模型均呈现一致驼峰曲线，说明这可能是更广义生态信号，或反映了能同时容纳耐城市化物种与较低干扰耐受物种的郊区/边缘生境。
+            </p>
+            <p class="sub-14">
+              从这一角度看，松鼠优势可能放大了观测模式，但底层关系更可能代表一般性的城乡生态梯度。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:378" id="conclusion">
+          <h2 class="title-24" data-node-id="54:257">结论</h2>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:66">
+              本研究提供了初步证据：费城城市野生动物格局由物种组成、时间行为与城市化梯度共同塑造。
+            </p>
+            <ul class="sub-14">
+                <li>
+                  野生动物出现高度不均衡，且由哺乳动物显著主导，尤其是 Eastern Gray Squirrels。时间模式显示昼行性与夜行性物种存在明确分割，活动峰值集中在晨昏时段，反映了其对生态条件与人类干扰的行为适应。
+                </li>
+                <li>
+                  各点位表现出显著空间异质性。邻人类活动点位以白天、松鼠驱动活动为主；扰动较低保育区则支持更高夜间活动与更大物种多样性。该结果凸显生境背景对行为格局的重要性，但受点位数量限制，仍需谨慎解读。
+                </li>
+                <li>
+                  建模结果表明城市化（不透水地表）与野生动物活动之间存在非线性关系。出现量与丰富度均呈驼峰模式，并在中等城市化水平（约 25–30% 不透水地表）达到峰值。这与中度干扰假说一致，即野生动物活动可能在中等、混合景观中最高。
+                </li>
+            </ul>
+            <p class="sub-14">
+              虽然该模式部分受松鼠等耐城市化物种优势影响，但其在不同模型中的一致性指向更广义的城乡生态梯度。考虑到样本规模有限（13 个相机点位），这些发现更应被视为探索性结果与假设生成依据。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:379" id="planning-implications">
+          <h2 class="title-24" data-node-id="54:254">规划启示</h2>
+          <div class="section-copy-flow narrative-copy sub-14" data-node-id="54:65">
+            <p>
+              这些发现表明，城市野生动物可能从中间型城市景观的策略性设计中受益。
+            </p>
+            <p>
+              1. 优先营造混合生境
+            </p>
+            <ul>
+              <li>
+                野生动物活动与多样性在建成环境与自然环境交汇区达到峰值。规划应优先维护并强化城乡过渡带，而非仅依赖完全自然空间。
+              </li>
+              <li>
+                注：过渡带较高观测多样性也可能部分来自生境异质性与检测偏差；完全自然区域可能承载不同群落（如鸟类与两栖爬行类），但较难被相机陷阱充分捕捉。
+              </li>
+            </ul>
+            <p>
+              2. 提升生境连通性
+            </p>
+            <ul>
+              <li>
+                在低扰动区域观测到鹿、狐狸等哺乳动物，凸显了连通绿廊的重要性。加强公园、森林与郊区绿地之间的生态连接，有助于提升野生动物活动与生物多样性。
+              </li>
+            </ul>
+            <p>
+              3. 缓解高强度区域城市压力源
+            </p>
+            <ul>
+              <li>
+                高不透水地表、高辐射温度和临近交通设施区域通常对应更低野生动物活动。通过减少不透水覆盖、增加植被、设置基础设施缓冲带等规划干预，有望改善生境质量。
+              </li>
+            </ul>
+            <p>
+              4. 在人类主导空间中进行共存导向设计
+            </p>
+            <ul>
+              <li>
+                松鼠优势与其他适应性物种的存在表明，野生动物已融入城市环境。规划应纳入共存策略，包括安全生境设计与人-野生动物互动模式管理。
+              </li>
+            </ul>
+            <p>
+              总体而言，尽管这些发现仍属初步，但它们强调：城市生物多样性并非简单取决于“更多自然”，而在于自然环境与建成环境之间的恰当平衡。围绕这一平衡开展设计，是支撑韧性城市生态系统的关键。
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="62:380">
+          <h2 class="title-24" data-node-id="54:255">参考文献</h2>
+          <ol class="citation-list" id="citation-list"></ol>
+        </section>
+
+        <section class="section-block" data-node-id="62:381">
+          <h2 class="title-24" data-node-id="54:256">致谢</h2>
+          <div class="ack-text" data-node-id="54:305">
+            <p>
+              引言部分的三张图片来源于
+              <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a>，并依据
+              <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+            </p>
+            <p>
+              运动触发相机相关图片来自以下合作项目：
+              <a
+                href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                target="_blank"
+                rel="noreferrer"
+                >城市自然可达性倡议（Accessing Urban Nature Initiative）</a
+              >
+              （AUNI）与
+              <a href="https://www.urbanwildlifeinfo.org" target="_blank" rel="noreferrer"
+                >城市野生动物信息网络（Urban Wildlife Information Network）</a
+              >
+              (UWIN).
+            </p>
+            <p>
+              部分图标改编自
+              <a href="https://www.iconfont.cn/?lang=en-us" target="_blank" rel="noreferrer">Alibaba Iconfont</a>
+              ，并按平台许可条款使用。
+            </p>
+            <p>数据来源：</p>
+            <p>
+              OpenStreetMap:
+              <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">https://www.openstreetmap.org/</a>
+            </p>
+            <p>
+              OpenDataPhilly:
+              <a href="https://opendataphilly.org" target="_blank" rel="noreferrer">https://opendataphilly.org</a>
+            </p>
+            <p>
+              城市热数据：
+              <a href="https://xiaojianggis.github.io/pedheat/" target="_blank" rel="noreferrer">https://xiaojianggis.github.io/pedheat/</a>
+            </p>
+            <p>
+              不透水地表数据：
+              <a href="https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip" target="_blank" rel="noreferrer">https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip</a>
+            </p>
+            <p>
+              土地利用数据：
+              <a href="https://catalog.dvrpc.org/dataset/land-use-2023" target="_blank" rel="noreferrer">https://catalog.dvrpc.org/dataset/land-use-2023</a>
+            </p>
+            <p>
+              使用工具：
+            </p>
+            <p>
+              数据分析：RStudio
+            </p>
+            <p>
+              网页设计与开发：Visual Studio Code、Figma、Codex
+            </p>
+            <p>
+              网站部署与托管：GitHub Pages 与 Vercel
+            </p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

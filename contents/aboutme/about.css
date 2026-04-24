@@ -93,6 +93,10 @@ body[data-page="about"] {
   transition: transform 320ms cubic-bezier(0.2, 0.7, 0.25, 1), opacity 320ms ease;
 }
 
+.portrait-card[hidden] {
+  display: none !important;
+}
+
 .portrait-card[data-layer="back"] {
   z-index: 1;
   transform: translate(17px, -3px) rotate(5.59deg);

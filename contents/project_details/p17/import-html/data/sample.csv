@@ -1,0 +1,11 @@
+﻿Location,Image time,Species scientific name,Species common name,Count,Age class,Species class,Duplicate
+1,2025-10-08 09:59:16,SCIURUS CAROLINENSIS,Eastern Gray Squirrel,1,Adult,Mammalia,TRUE
+2,2025-10-23 11:07:30,TURDUS MIGRATORIUS,American Robin,1,Adult,Aves,FALSE
+3,2025-10-17 00:14:41,CANIS LATRANS,Coyote,1,Adult,Mammalia,TRUE
+4,2025-10-12 07:26:52,TAMIAS STRIATUS,Eastern Chipmunk,1,Adult,Mammalia,FALSE
+5,2025-10-11 03:45:45,SYLVILAGUS FLORIDANUS,Eastern Cottontail,1,Adult,Mammalia,TRUE
+7,2025-09-23 19:09:19,MIMUS POLYGLOTTOS,Northern Mockingbird,1,Adult,Aves,FALSE
+8,2025-10-27 23:27:18,VULPES VULPES,Red Fox,2,Adult,Mammalia,FALSE
+9,2025-10-12 19:43:47,PROCYON LOTOR,Common Raccoon,3,Adult,Mammalia,TRUE
+10,2025-10-23 08:44:11,SCIURUS CAROLINENSIS,Eastern Gray Squirrel,1,Adult,Mammalia,FALSE
+12,2025-10-13 22:15:40,ODOCOILEUS VIRGINIANUS,White-tailed Deer,1,Adult,Mammalia,TRUE

@@ -31,11 +31,12 @@ const i18n = {
       idExists: "编号已存在，请更换",
       fileApi: "当前浏览器不支持本地文件编辑，请使用 Chrome 或 Edge。",
       importCanceled: "你取消了导入",
-      importMissingHtml: "导入失败：没有找到 HTML 文件（请确认文件夹里至少有一个 .html 文件）",
+      importMissingHtml: "导入失败：请选择可读取的 HTML 文件（.html 或 .htm）",
       importSourceConflict: "导入失败：请不要选择当前网站或 contents 目录，请选择外部内容文件夹",
-      importDetailDone: "详情页已导入，并自动套用模板",
+      importDetailHtmlLocation: "导入失败：请选择当前项目 contents/project_details/<id>/import-html/（或 improt-html）目录里的 HTML 文件",
+      importDetailDone: "详情页已导入；选中的 import-html HTML 已包装为项目详情页，并自动加上统一导航与上下个项目",
       importAboutDone: "关于我已导入，并自动套用模板",
-      importedDetailReadonly: "当前详情页来自“导入文件”模式，编辑器不支持直接保存。请修改 contents/project_details/<id>/index.html 或重新导入。",
+      importedDetailReadonly: "当前详情页来自“导入文件”模式，编辑器不支持直接保存。请先把文件放入 contents/project_details/<id>/import-html/（或 improt-html），再点击“导入文件”选择 HTML 生成壳页面；壳页面位于 contents/project_details/<id>/index.html。",
       importedAboutReadonly: "当前关于我来自“导入文件”模式，编辑器不支持直接保存。请修改 contents/aboutme/index.html 或重新导入。",
       projectHiddenByType: "该项目当前被“项目类型隐藏”控制，请先展示对应类型。"
     },
@@ -276,11 +277,12 @@ const i18n = {
       idExists: "ID already exists",
       fileApi: "File System Access API not supported. Use Chrome or Edge.",
       importCanceled: "Import cancelled",
-      importMissingHtml: "Import failed: no HTML file found (at least one .html file is required)",
+      importMissingHtml: "Import failed: choose a readable HTML file (.html or .htm)",
       importSourceConflict: "Import failed: do not pick the current site folder or contents folder. Pick an external source folder.",
-      importDetailDone: "Detail page imported and wrapped by template",
+      importDetailHtmlLocation: "Import failed: choose an HTML file from contents/project_details/<id>/import-html/ (or improt-html) for the current project.",
+      importDetailDone: "Detail page imported. The selected HTML in import-html is now wrapped as the project detail page with the standard nav and prev/next links.",
       importAboutDone: "About page imported and wrapped by template",
-      importedDetailReadonly: "This detail page is from imported-file mode. Rich-text save is disabled. Edit contents/project_details/<id>/index.html directly or re-import.",
+      importedDetailReadonly: "This detail page is from imported-file mode. Rich-text save is disabled. Put files in contents/project_details/<id>/import-html/ (or improt-html), then click Import Files and pick the HTML to regenerate the wrapper page at contents/project_details/<id>/index.html.",
       importedAboutReadonly: "This about page is from imported-file mode. Rich-text save is disabled. Edit contents/aboutme/index.html directly or re-import.",
       projectHiddenByType: "This project is hidden by its project type. Show the type first."
     },
@@ -582,6 +584,10 @@ let highlightColorPresetsPopover = null;
 
 function getDetailFolder(project) {
   return [...state.contentPrefix, "project_details", project.id];
+}
+
+function getImportedDetailFolder(project) {
+  return [...getDetailFolder(project), "import-html"];
 }
 
 function getLegacyDetailFolder(project) {
@@ -6561,6 +6567,35 @@ async function openImportFolderPicker() {
   }
 }
 
+async function openImportHtmlPicker() {
+  try {
+    const handles = await window.showOpenFilePicker({
+      multiple: false,
+      types: [{
+        description: "HTML",
+        accept: { "text/html": [".html", ".htm"] }
+      }]
+    });
+    const handle = handles?.[0] || null;
+    if (!handle) {
+      setStatus(t("status.importCanceled"));
+      return null;
+    }
+    if (!await ensurePermission(handle, true, "read")) {
+      setStatus(t("status.error").replace("{message}", "Permission denied"), "error");
+      return null;
+    }
+    return handle;
+  } catch (error) {
+    if (error && error.name === "AbortError") {
+      setStatus(t("status.importCanceled"));
+      return null;
+    }
+    setStatus(t("status.error").replace("{message}", error.message), "error");
+    return null;
+  }
+}
+
 async function findImportEntryFileName(folderHandle) {
   const preferred = ["index.html", "index.htm"];
   for (const name of preferred) {
@@ -6599,7 +6634,47 @@ async function readTextFileFromDirectory(directoryHandle, fileName) {
   }
 }
 
-function buildImportedDetailPage(sourceHtml, project) {
+async function readTextFromFileHandle(fileHandle) {
+  try {
+    const file = await fileHandle.getFile();
+    return await file.text();
+  } catch (error) {
+    return "";
+  }
+}
+
+function hasPathPrefix(pathSegments, prefixSegments) {
+  if (!Array.isArray(pathSegments) || !Array.isArray(prefixSegments)) return false;
+  if (pathSegments.length < prefixSegments.length) return false;
+  return prefixSegments.every((segment, index) => pathSegments[index] === segment);
+}
+
+function getImportedDetailFolderCandidates(project) {
+  return [
+    getImportedDetailFolder(project),
+    [...getDetailFolder(project), "improt-html"]
+  ];
+}
+
+function isProjectImportHtmlPath(pathSegments, project) {
+  if (!project || !project.id) return false;
+  if (!Array.isArray(pathSegments) || !pathSegments.length) return false;
+  const fileName = String(pathSegments[pathSegments.length - 1] || "");
+  if (!/\.html?$/i.test(fileName)) return false;
+  return getImportedDetailFolderCandidates(project).some((folder) => hasPathPrefix(pathSegments, folder));
+}
+
+function getImportBaseHref(pathSegments, project) {
+  if (!Array.isArray(pathSegments) || !project) return "./import-html/";
+  const detailFolder = getDetailFolder(project);
+  if (!hasPathPrefix(pathSegments, detailFolder)) return "./import-html/";
+  const sourceDir = pathSegments.slice(0, -1);
+  const relativeDir = sourceDir.slice(detailFolder.length);
+  if (!relativeDir.length) return "./";
+  return `./${relativeDir.join("/")}/`;
+}
+
+function buildImportedDetailPage(sourceHtml, project, importBaseHref = "./import-html/") {
   const parser = new DOMParser();
   const doc = parser.parseFromString(String(sourceHtml || ""), "text/html");
   const html = doc.documentElement || doc.createElement("html");
@@ -6626,6 +6701,14 @@ function buildImportedDetailPage(sourceHtml, project) {
     viewport.setAttribute("content", "width=device-width, initial-scale=1");
     head.appendChild(viewport);
   }
+  let base = head.querySelector("base[data-template-shell='detail-base']");
+  if (!base) {
+    base = doc.createElement("base");
+    base.setAttribute("data-template-shell", "detail-base");
+    head.insertBefore(base, head.firstChild);
+  }
+  const normalizedBase = String(importBaseHref || "").trim() || "./import-html/";
+  base.setAttribute("href", normalizedBase.endsWith("/") ? normalizedBase : `${normalizedBase}/`);
 
   body.setAttribute("data-page", "projects");
   body.setAttribute("data-project-id", String(project?.id || ""));
@@ -6635,10 +6718,22 @@ function buildImportedDetailPage(sourceHtml, project) {
   body.setAttribute("data-date", String(project?.date || ""));
 
   body.querySelectorAll("script[data-template-shell='detail']").forEach((node) => node.remove());
+  body.querySelectorAll("script[data-template-shell='detail-runtime']").forEach((node) => node.remove());
   const shellScript = doc.createElement("script");
-  shellScript.src = "../../../detailSet/imported-detail.js";
-  shellScript.defer = true;
   shellScript.setAttribute("data-template-shell", "detail");
+  shellScript.textContent = `
+(function () {
+  const src = new URL("../../../detailSet/imported-detail.js", window.location.href).href;
+  const existing = document.querySelector('script[data-template-shell="detail-runtime"]');
+  if (existing && existing.src === src) return;
+  if (existing) existing.remove();
+  const script = document.createElement("script");
+  script.src = src;
+  script.defer = true;
+  script.setAttribute("data-template-shell", "detail-runtime");
+  document.body.appendChild(script);
+})();
+  `.trim();
   body.appendChild(shellScript);
 
   const serialized = `<!doctype html>\n${html.outerHTML}`;
@@ -6687,16 +6782,20 @@ function buildImportedAboutPage(sourceHtml) {
 
 async function copyExternalDirectoryToPath(sourceDirectoryHandle, targetSegments) {
   await getDirectoryHandle(state.rootHandle, targetSegments, true);
+  let copiedFiles = 0;
   for await (const [name, handle] of sourceDirectoryHandle.entries()) {
     if (handle.kind === "directory") {
-      await copyExternalDirectoryToPath(handle, [...targetSegments, name]);
+      copiedFiles += await copyExternalDirectoryToPath(handle, [...targetSegments, name]);
       continue;
     }
     if (handle.kind !== "file") continue;
     const file = await handle.getFile();
+    const bytes = await file.arrayBuffer();
     const target = await getFileHandle(state.rootHandle, [...targetSegments, name], true);
-    await writeFile(target, file);
+    await writeFile(target, bytes);
+    copiedFiles += 1;
   }
+  return copiedFiles;
 }
 
 async function isHandleSameAsPath(sourceHandle, pathSegments) {
@@ -6720,6 +6819,9 @@ async function hasImportSourceConflict(sourceHandle, mode, project) {
   }
   if (mode === "detail" && project) {
     if (await isHandleSameAsPath(sourceHandle, getDetailFolder(project))) {
+      return true;
+    }
+    if (await isHandleSameAsPath(sourceHandle, getImportedDetailFolder(project))) {
       return true;
     }
     if (await isHandleSameAsPath(sourceHandle, [...getDetailFolder(project), "assets"])) {
@@ -6746,32 +6848,24 @@ async function importDetailFromFolder() {
     setStatus(t("status.needDetailProject"), "error");
     return;
   }
-  if (state.detailImportedMode) {
-    setStatus(t("status.importedDetailReadonly"), "error");
-    return;
-  }
-  const sourceHandle = await openImportFolderPicker();
-  if (!sourceHandle) return;
+  const sourceFileHandle = await openImportHtmlPicker();
+  if (!sourceFileHandle) return;
 
   try {
     const project = state.currentDetailProject;
-    if (await hasImportSourceConflict(sourceHandle, "detail", project)) {
-      setStatus(t("status.importSourceConflict"), "error");
+    const sourcePath = await state.rootHandle.resolve(sourceFileHandle);
+    if (!isProjectImportHtmlPath(sourcePath, project)) {
+      setStatus(t("status.importDetailHtmlLocation"), "error");
       return;
     }
-    const entryFileName = await findImportEntryFileName(sourceHandle);
-    if (!entryFileName) {
-      setStatus(t("status.importMissingHtml"), "error");
-      return;
-    }
-    const sourceHtml = await readTextFileFromDirectory(sourceHandle, entryFileName);
+    const sourceHtml = await readTextFromFileHandle(sourceFileHandle);
     if (!sourceHtml) {
       setStatus(t("status.importMissingHtml"), "error");
       return;
     }
     await ensureProjectDetailStructure(project);
-    await copyExternalDirectoryToPath(sourceHandle, getDetailFolder(project));
-    const importedPage = buildImportedDetailPage(sourceHtml, project);
+    const importBaseHref = getImportBaseHref(sourcePath, project);
+    const importedPage = buildImportedDetailPage(sourceHtml, project, importBaseHref);
     await writeFileByPath([...getDetailFolder(project), "index.html"], importedPage);
     state.detailImportedMode = true;
     state.detailDraftHtml.zh = "";
@@ -8054,7 +8148,7 @@ function renderDetailEditor() {
     elements.saveDetail.disabled = state.detailImportedMode;
   }
   if (elements.importDetailFolder) {
-    elements.importDetailFolder.disabled = state.detailImportedMode;
+    elements.importDetailFolder.disabled = false;
   }
   if (!elements.detailEditor) return;
   elements.detailEditor.setAttribute("contenteditable", state.detailImportedMode ? "false" : "true");
@@ -11023,6 +11117,14 @@ async function loadCssText(path) {
 
 async function openDetailPreview() {
   if (!state.currentDetailProject) return;
+  if (state.detailImportedMode) {
+    const previewUrl = buildProjectDetailPreviewUrl(state.currentDetailProject);
+    const previewWindow = window.open(previewUrl, "_blank", "noopener,noreferrer");
+    if (!previewWindow) {
+      setStatus(t("status.error").replace("{message}", "Preview popup blocked"), "error");
+    }
+    return;
+  }
   persistDetailDraftFromEditor();
   const project = state.currentDetailProject;
   const previewLang = state.detailLang === "en" ? "en" : "zh";
@@ -11570,6 +11672,13 @@ async function openDetailPreview() {
   win.document.open();
   win.document.write(previewHtml);
   win.document.close();
+}
+
+function buildProjectDetailPreviewUrl(project) {
+  const relativePath = `contents/project_details/${encodeURIComponent(project.id)}/index.html`;
+  const url = new URL(relativePath, window.location.href);
+  url.searchParams.set("preview", String(Date.now()));
+  return url.toString();
 }
 
 async function openAboutPreview() {

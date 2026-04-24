@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wildlife in the City</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Konkhmer+Sleokchher&amp;family=Libre+Franklin:wght@400;500&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <button
+      type="button"
+      class="detail-outline-toggle"
+      id="detail-outline-toggle"
+      aria-controls="detail-outline-panel"
+      aria-expanded="false"
+      aria-label="TOC"
+      title="TOC"
+    >
+      <span class="detail-outline-toggle-icon" aria-hidden="true"></span>
+      <span class="detail-outline-toggle-label">TOC</span>
+    </button>
+
+    <button
+      type="button"
+      class="detail-outline-backdrop"
+      id="detail-outline-backdrop"
+      hidden
+      aria-hidden="true"
+      tabindex="-1"
+    ></button>
+
+    <aside class="detail-outline" id="detail-outline-panel" aria-hidden="true" inert hidden>
+      <h2 class="detail-outline-title">Outline</h2>
+      <nav class="detail-outline-nav" aria-label="Outline">
+        <ul class="detail-outline-list">
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#our-team-partnerships"><span class="detail-outline-label">Our Team&amp;Partnerships</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#introduction"><span class="detail-outline-label">Introduction</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#research-objective-framework"><span class="detail-outline-label">Research Objective&amp;Framework</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#methodology"><span class="detail-outline-label">Methodology</span></a>
+            </div>
+            <ul class="detail-outline-children">
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-observation-data"><span class="detail-outline-label">Wildlife Observation Data</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#built-environment-variables"><span class="detail-outline-label">Built environment variables</span></a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#exploratory-data-analysis"><span class="detail-outline-label">Exploratory Data Analysis</span></a>
+            </div>
+            <ul class="detail-outline-children">
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-species-distribution"><span class="detail-outline-label">Wildlife species distribution</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-activity-temporal-patterns"><span class="detail-outline-label">Wildlife activity temporal patterns</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#wildlife-activity-spatial-patterns"><span class="detail-outline-label">Wildlife activity spatial patterns</span></a>
+                </div>
+              </li>
+              <li class="detail-outline-item is-level-2">
+                <div class="detail-outline-row">
+                  <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+                  <a class="detail-outline-link" href="#built-env-x-wildlife-activity"><span class="detail-outline-label">Built environment variables x Wildlife activity Dashboard</span></a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#model-building"><span class="detail-outline-label">Model building</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#conclusion"><span class="detail-outline-label">Conclusion</span></a>
+            </div>
+          </li>
+          <li class="detail-outline-item is-level-1">
+            <div class="detail-outline-row">
+              <span class="detail-outline-caret-spacer" aria-hidden="true"></span>
+              <a class="detail-outline-link" href="#planning-implications"><span class="detail-outline-label">Planning Implications</span></a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <header class="hero" data-node-id="54:6" id="page-top">
+      <img
+        src="assets/76a7f80908cd3fff4d901b1bc0c46072268c7772.png"
+        alt="Forest with deer"
+        class="hero-image"
+        id="image-33"
+      />
+      <div class="hero-overlay"></div>
+      <div class="hero-content" data-node-id="54:7">
+        <h1 data-node-id="54:8">Wildlife in the City</h1>
+        <p data-node-id="54:9">Understanding Urban Environments x Wildlife Activity</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="container top-content" data-node-id="61:354">
+        <section class="section-block" data-node-id="54:10">
+          <h2 class="title-24 nav-anchor" data-node-id="54:11" id="our-team-partnerships">Our Team</h2>
+          <div class="team-grid" data-node-id="54:12">
+            <div class="team-col" data-node-id="54:13">
+              <h3 class="subtitle-20 muted" data-node-id="54:14">Students</h3>
+              <div class="profile-list" data-node-id="54:15">
+                <article class="profile" data-node-id="54:16">
+                  <img
+                    src="assets/b4ffc22c241fc9355f149a2a8c077e0dfcb26daa.png"
+                    alt="Zihang Yang"
+                    class="avatar"
+                    data-node-id="54:17"
+                  />
+                  <div class="profile-copy" data-node-id="54:18">
+                    <h4>Zihang (Henry) Yang</h4>
+                    <p>Master of City Planning (Smart cities)</p>
+                    <p>University of Pennsylvania School of Design</p>
+                    <p>
+                      Email:
+                      <a href="mailto:henryyzh@design.upenn.edu">henryyzh@design.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:19">
+                  <img
+                    src="assets/a39842a9552737f6d61de45a824d920d8707c626.png"
+                    alt="Jinheng Cen"
+                    class="avatar"
+                    data-node-id="54:20"
+                  />
+                  <div class="profile-copy" data-node-id="54:21">
+                    <h4>Jinheng Cen</h4>
+                    <p>Master of City Planning (Smart cities)</p>
+                    <p>University of Pennsylvania School of Design</p>
+                    <p>
+                      Email:
+                      <a href="mailto:jinhengc@design.upenn.edu">jinhengc@design.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <div class="team-col" data-node-id="54:22">
+              <h3 class="subtitle-20 muted" data-node-id="54:23">Instructors</h3>
+              <div class="profile-list" data-node-id="54:24">
+                <article class="profile" data-node-id="54:25">
+                  <img
+                    src="assets/73f124da64c4841e9586cadfc2117fcecadfefdf.png"
+                    alt="Xiaojiang Li"
+                    class="avatar"
+                    data-node-id="54:26"
+                  />
+                  <div class="profile-copy" data-node-id="54:27">
+                    <h4>Xiaojiang Li</h4>
+                    <p>Assistant Professor of Urban Spatial Analytics and Geospatial Data Science</p>
+                    <p>University of Pennsylvania School of Design</p>
+                    <p>
+                      Email:
+                      <a href="mailto:jianglix@design.upenn.edu">jianglix@design.upenn.edu</a>
+                    </p>
+                    <p>
+                      Web:
+                      <a href="https://www.urbanspatial.info/#/" target="_blank" rel="noreferrer"
+                        >Urban spatial Informatics Lab</a
+                      >
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:28">
+                  <img
+                    src="assets/b4e4dee6b488a7b4a1b68a878c060a8c5abaab07.png"
+                    alt="Julie C. Ellis"
+                    class="avatar"
+                    data-node-id="54:29"
+                  />
+                  <div class="profile-copy" data-node-id="54:30">
+                    <h4>Julie C. Ellis</h4>
+                    <p>Wildlife Ecologist</p>
+                    <p>Associate Director, One Health in Action</p>
+                    <p>University of Pennsylvania School of Veterinary Medicine</p>
+                    <p>
+                      Email:
+                      <a href="mailto:jellis04@upenn.edu">jellis04@upenn.edu</a>
+                    </p>
+                    <p>
+                      Web:
+                      <a
+                        href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                        target="_blank"
+                        rel="noreferrer"
+                        >Accessing Urban Nature Initiative</a
+                      >
+                    </p>
+                  </div>
+                </article>
+                <article class="profile" data-node-id="54:31">
+                  <img
+                    src="assets/6193e33c56c42ec318b78ffdc77c492a482ebe2e.png"
+                    alt="Brock Geary"
+                    class="avatar"
+                    data-node-id="54:32"
+                  />
+                  <div class="profile-copy" data-node-id="54:33">
+                    <h4>Brock Geary</h4>
+                    <p>Quantitative Disease Ecologist, Wildlife Futures Program</p>
+                    <p>Department of Pathobiology</p>
+                    <p>University of Pennsylvania School of Veterinary Medicine</p>
+                    <p>
+                      Email:
+                      <a href="mailto:brgeary@vet.upenn.edu">brgeary@vet.upenn.edu</a>
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:352">
+          <h2 class="title-24" data-node-id="54:34">Partnerships</h2>
+          <div class="partners-stack" data-node-id="61:351">
+            <div class="partner-row frame40-row" data-node-id="54:35">
+              <img
+                src="assets/560c39fe53f9009153138295514f7bcb701784e5.png"
+                alt="UWIN"
+                class="partner-image"
+                data-node-id="54:36"
+              />
+              <div class="partner-copy" data-node-id="54:37">
+                <h3 class="big-20" data-node-id="54:38">Urban Wildlife Information Network (UWIN)</h3>
+                <p class="sub-14" data-node-id="54:39">
+                  UWIN‘s mission is to collaborate with partners across diverse cities to replicate research
+                  methods and collect data which can support people and wildlife to coexist on our urbanizing
+                  planet.
+                </p>
+                <div class="link-list" data-node-id="54:40">
+                  <a href="https://www.urbanwildlifeinfo.org/" target="_blank" rel="noreferrer"
+                    >UWIN Official Website &gt;</a
+                  >
+                  <a href="https://www.urbanwildlifeinfo.org/uwin-research" target="_blank" rel="noreferrer"
+                    >UWIN Research Goal &gt;</a
+                  >
+                  <a href="https://www.urbanwildlifeinfo.org/partners" target="_blank" rel="noreferrer"
+                    >Other Partners in UWIN &gt;</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="partner-row second" data-node-id="61:349">
+              <img
+                src="assets/3ce30447bbab6a07b2ac45b1c525b3953b1f1b65.png"
+                alt="AUNI"
+                class="auni-logo"
+                data-node-id="54:306"
+              />
+              <div class="partner-copy" data-node-id="54:44">
+                <p class="sub-14" data-node-id="54:46">
+                  Our project is part of the Accessing Urban Nature Initiative (AUNI). AUNI was established in
+                  2025 as a partner site within the Urban Wildlife Information Network (UWIN), an international
+                  collaborative network founded in 2017. Initially developed to better understand urban wildlife
+                  in Chicago, UWIN has expanded to include more than 80 partner sites, creating opportunities to
+                  examine broader patterns of urban wildlife ecology across diverse cities.
+                </p>
+                <p class="sub-14">
+                  One of the network’s major strengths is its use of shared research protocols, which support more
+                  standardized data collection and improve the comparability of findings across sites. At the same
+                  time, individual partner projects are able to investigate local urban wildlife patterns.
+                </p>
+                <div class="link-list" data-node-id="54:47">
+                  <a
+                    href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                    target="_blank"
+                    rel="noreferrer"
+                    >More about AUNI &gt;</a
+                  >
+                  <a
+                    href="https://www.vet.upenn.edu/a-new-penn-vet-study-is-finding-where-the-wild-things-are-right-here-in-philly/"
+                    target="_blank"
+                    rel="noreferrer"
+                    >Reporting on AUNI &gt;</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:227">
+          <h2 class="title-24 nav-anchor" data-node-id="54:228" id="introduction">Introduction</h2>
+          <h3 class="big-20" data-node-id="54:229">Urbanization has a huge impact on wildlife</h3>
+          <div class="two-col copy" data-node-id="54:230">
+            <p data-node-id="54:231">
+              From the perspective of land-use change, urbanization is essentially a human-driven process of
+              spatial restructuring. It involves transforming the natural environment to accommodate various
+              socioeconomic activities, such as housing, production, and trade. Its core mechanism involves the
+              conversion of vegetated surfaces into hardened, built-up surfaces, which in turn triggers a series
+              of systemic changes in the physical environment. [1]
+            </p>
+            <p data-node-id="54:232">
+              For wildlife, this process has multidimensional impacts: the urban heat island effect, noise
+              disturbance, and nighttime light pollution significantly alter their living environment; additionally,
+              land-use transitions lead to habitat loss and fragmentation [2]. Furthermore, human activities such
+              as industrial emissions and global trade exacerbate ecosystem disturbances, bringing about issues
+              such as invasive species, which further reshape the structure of urban ecosystems.
+            </p>
+          </div>
+        </section>
+
+        <section class="intro-cards mobile-hscroll-cards" data-node-id="54:233">
+          <article class="intro-card" data-node-id="54:234">
+            <img src="assets/81537646f85c55082ca41d622a96dce4c7990a36.png" alt="Environmental changes" />
+            <p>Environmental Changes: urban Heat, nighttime lighting, noise...</p>
+          </article>
+          <article class="intro-card" data-node-id="54:237">
+            <img src="assets/61b29f1a0819d81cf44cb3ace56fd316a6724e27.png" alt="Habitat fragmentation" />
+            <p>Habitat Loss and Fragmentation</p>
+          </article>
+          <article class="intro-card" data-node-id="54:240">
+            <img src="assets/1679120eae3247d55f4cfc28e07e90bd50913ad2.png" alt="Industrial pollutants" />
+            <p>Industrial Pollutants in Water and Soil Systems</p>
+          </article>
+        </section>
+
+        <section class="section-block two-col-section" data-node-id="54:67">
+          <div data-node-id="54:68">
+            <h3 class="big-20" data-node-id="54:69">
+              Urbanization systematically reshapes the structure of wildlife communities
+            </h3>
+            <p class="sub-14" data-node-id="54:70">
+              A notable consequence of urbanization is the decline of biodiversity. [3] Due to changes in the physical environment, certain species unsuited to urban environments have declined as a result of natural selection. A global analysis covering 54 urban bird species and 110 urban plant species estimated that the “species density” of native birds and native plants in cities is only about 8% and 25% of the non-urban reference values; Urbanization characteristics (such as land cover and city age) better explain this loss than climatic and geographic factors. [4]
+            </p>
+          </div>
+          <div class="sub-14 frame124-right" data-node-id="54:71">
+            <p>
+              Moreover, fragmented and discontinuous urban green spaces, along with extensive impervious surfaces, can
+              restrict animal movement and reduce gene flow. Beyond genetic isolation, restricted movement can increase
+              competition within remaining habitats, particularly where plant and resource diversity are already
+              limited. This can lead to a reduction in genetic diversity within urban populations and greater genetic
+              differentiation between populations, particularly for species with limited mobility. [5]
+            </p>
+            <p>
+              One study found that the average movement distance of mammals in areas with high human footprints is only
+              about one-half to one-third of that in areas with low human footprints, implying a potential systemic
+              decline in ecological functions such as foraging, dispersal, and seed dispersal. Although urbanization is
+              not the sole explanatory variable, infrastructure and the intensity of human activity are key factors.
+              [6]
+            </p>
+          </div>
+        </section>
+
+        <section class="unsplash-grid" data-node-id="54:311">
+          <div class="gallery-four mobile-hscroll-images" data-node-id="54:312">
+            <img src="assets/8b9354dbf154311657ac20de7d7ca0e387fd3dc5.png" alt="wildlife photo 1" />
+            <img src="assets/71c136d293cc09c577b50c63ec1d9cf3e0e1359d.png" alt="wildlife photo 2" />
+            <img src="assets/e7e5de9d4589d087c059637457013fbf85ce94aa.png" alt="wildlife photo 3" />
+            <img src="assets/754e8b61bdddd410ba2aa218d25b19471a306ede.png" alt="wildlife photo 4" />
+          </div>
+          <p class="tiny-note" data-node-id="54:317">
+            Photos sourced from <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a>
+            under the
+            <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+          </p>
+        </section>
+
+        <section class="section-block two-col-section frame127-row" data-node-id="54:72">
+          <div data-node-id="54:73">
+            <h3 class="big-20" data-node-id="54:74">The effects of urbanization varies across species</h3>
+            <div class="sub-14" data-node-id="54:75">
+              <p>
+                The impact of urbanization on biodiversity is widespread and affects multiple species, but the
+                manner and extent of this impact vary among different species. [7]
+              </p>
+              <p>
+                For example, birds face habitat loss, collisions with glass surfaces, and the combined effects of
+                nighttime lighting and noise; [8,9] However, some urban-tolerant birds, especially generalists
+                such as crows and pigeons, can benefit from urban environments by exploiting human-derived food,
+                artificial nesting sites, and other built resources. [10]
+              </p>
+              <p>
+                For mammals, roads and buildings create physical barriers that reduce their range of movement,
+                decrease connectivity, and restrict gene flow. [11] Yet some generalist mammals such as raccoons
+                can persist and even thrive in cities because of their broad diet, behavioral flexibility, and
+                ability to use anthropogenic subsidies such as trash and pet food. [12]
+              </p>
+              <p>
+                Amphibians are highly sensitive to humidity, breeding water bodies, and connectivity; [13] urban
+                pollution of rivers and drainage modifications may lead to decreased breeding success and an
+                increased risk of local extinction. [14]
+              </p>
+            </div>
+          </div>
+          <img
+            src="assets/98bf2d3c110218bbe3cd396a636e8f93c00f4401.png"
+            alt="species variation"
+            class="species-wide-img"
+            data-node-id="54:76"
+          />
+        </section>
+      </section>
+
+      <section class="heat-band" data-node-id="54:77">
+        <div class="container heat-inner">
+          <div class="two-col heat-head" data-node-id="54:78">
+            <h3 class="big-20" data-node-id="54:79">
+              Urban heat is one of the most challenging stressors across species
+            </h3>
+            <p class="sub-14" data-node-id="54:80">
+              Nearly all animals living in cities are affected by urban heat. The urban heat island effect causes
+              air temperatures in cities to be approximately 1–3°C higher than in surrounding suburban areas, with
+              this warming effect extending an average of 4–12 km. [15,16] This can alter organisms’ heat
+              tolerance, daily rhythms, and reproductive success.
+            </p>
+          </div>
+          <div class="heat-cards" data-node-id="54:81">
+            <article class="heat-card" data-node-id="54:82">
+              <div class="heat-title-row" data-node-id="54:84">
+                <span class="icon-wrap" data-node-id="54:85"
+                  ><img src="assets/7ff286b77c1bfd0e952561e175042f54a830963c.svg" alt="Heat icon" data-node-id="54:86"
+                /></span>
+                <h4 data-node-id="54:88">Heat Tolerance</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:89">
+                Urban populations may develop evolutionary responses that enhance heat tolerance, but these are
+                often accompanied by a loss of cold tolerance or a narrowing of their temperature tolerance range.
+                [17]
+              </p>
+              <p class="sub-14">
+                Urban lizard populations can withstand higher ambient temperatures and exhibit a higher upper heat
+                tolerance limit than forest populations; however, their tolerance to low temperatures is reduced,
+                and their optimal temperature range tends to narrow. [18]
+              </p>
+            </article>
+            <article class="heat-card" data-node-id="54:90">
+              <div class="heat-title-row" data-node-id="54:92">
+                <span class="icon-wrap" data-node-id="54:93"
+                  ><img
+                    src="assets/440923b1ccf8e62f86e9a167f47070e3fbb8b0ca.svg"
+                    alt="Rhythm icon"
+                    data-node-id="54:94"
+                /></span>
+                <h4 data-node-id="54:97">Daily Rhythm</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:98">
+                Urban heat may also alter animal behavior and activity patterns. [19] Increased heat exposure
+                causes animals to adapt by changing their foraging times, becoming more nocturnal, and spending
+                more time in the shade, near water, or underground. [20] This alters the encounter rates between
+                animals and resources, as well as between animals and their conspecifics or predators, thereby
+                triggering changes in the structure of food webs.
+              </p>
+            </article>
+            <article class="heat-card" data-node-id="54:99">
+              <div class="heat-title-row" data-node-id="54:101">
+                <span class="icon-wrap" data-node-id="54:102"
+                  ><img src="assets/e073a36bc18c6158430dcb53fd90627abecf6274.svg" alt="Reproduction icon" data-node-id="54:103"
+                /></span>
+                <h4 data-node-id="54:105">Reproductive Success</h4>
+              </div>
+              <p class="sub-14" data-node-id="54:106">
+                Extreme heat spikes affect the survival rates of animals during reproduction. During the embryonic
+                and larval stages, brief heat spikes can exceed physiological thresholds, leading to reduced
+                survival rates. In reptiles, relatively warm incubation temperatures can accelerate development,
+                but extremely high temperatures can cause mortality. [21] Urban heat islands may create abnormally
+                warm nesting conditions that differ from adjacent natural areas in terms of both average and
+                extreme temperatures, thereby affecting animal growth.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="container bottom-content" data-node-id="62:393">
+        <section class="section-block two-col-row frame1203-row" data-node-id="54:107">
+          <div class="left-media-block frame1203-media" data-node-id="54:108">
+            <img src="assets/da8289c4bb41a26473c9c0207452593291ab051e.png" alt="city wildlife" data-node-id="54:109" />
+            <p class="tiny-note" data-node-id="54:110">
+              Sourced from <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a> under the
+              <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+            </p>
+          </div>
+          <div class="right-copy" data-node-id="54:111">
+            <h3 class="big-20" data-node-id="54:112">
+              Studying urban wildlife plays crucial roles in protecting biodiversity and promoting sustainable human
+              development
+            </h3>
+            <div class="sub-14 frame1203-text-group" data-node-id="54:113">
+              <p class="frame1203-textbox" data-node-id="54:114">
+                According to the United Nations Department of Economic and Social Affairs, the share of the world’s
+                population living in urban areas is projected to rise from 56% in 2021 to 68% by 2050. [22]
+                Urbanization will affect an increasing number of wildlife species worldwide. Research on urban
+                wildlife not only helps us understand how species survive and adapt in environments with high levels
+                of human disturbance, but also provides a scientific basis for the conservation of urban biodiversity.
+                Because urban environments are highly complex, their ecological processes often differ from
+                observations made in laboratories or natural settings; therefore, conducting research in real-world
+                urban contexts is particularly critical. [5]
+              </p>
+              <p class="frame1203-textbox" data-node-id="54:115">
+                Urban planning can serve as a key intervention to mitigate habitat fragmentation through the
+                development of green space systems and ecological corridors. By establishing a continuous network of
+                green corridors and improving connectivity between green patches, we can provide migration routes and
+                habitat for animals, thereby enhancing gene flow and population stability. Furthermore, maintaining
+                biodiversity helps regulate pest populations and reduces reliance on chemical control methods. This
+                supports more stable and resilient ecosystems, creating a positive feedback loop that further
+                sustains biodiversity over time. [5]
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block center-head nav-anchor" data-node-id="61:355" id="research-objective-framework">
+          <h2 class="title-24 research-objective-title" data-node-id="54:226">Research Objective</h2>
+          <p class="objective-text" data-node-id="54:303">
+            To understand how urbanization gradients influence wildlife activity
+          </p>
+        </section>
+
+        <section class="section-block center-head" data-node-id="61:356">
+          <h2 class="title-24" data-node-id="54:266">Framework</h2>
+          <img
+            src="assets/15e8b405fb51139d3374a8d9913034ef4203ac76.png"
+            alt="research framework"
+            class="framework-img"
+            data-node-id="54:4"
+          />
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="54:243" id="methodology">
+          <h2 class="title-24" data-node-id="54:244">Methodology</h2>
+          <h3 class="big-20 nav-anchor" data-node-id="54:246" id="wildlife-observation-data">Wildlife observation data</h3>
+          <div class="two-col-row" data-node-id="54:247">
+            <img
+              src="assets/38bf3f14feee3fd15d855e2024615b684355c44d.png"
+              alt="wildlife camera"
+              class="fixed-media"
+              data-node-id="54:248"
+            />
+            <div class="right-copy" data-node-id="54:249">
+              <h3 class="big-20" data-node-id="54:250">We use motion-triggered cameras to collect wildlife observation data</h3>
+              <p class="sub-14" data-node-id="54:252">
+                Motion-triggered cameras automatically capture images with time stamp, temperature, and barometric
+                pressure when movement is detected, allowing us to monitor wildlife presence, frequency, and
+                behavior over time.
+              </p>
+              <p class="sub-14">
+                The cameras use SD cards for local data storage. Data are collected four times per year to capture
+                seasonal variation: January, April, July, and October. Each deployment runs for approximately 4-6
+                weeks.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block map-row mobile-hscroll-group" data-node-id="61:361">
+          <div class="map-col" data-node-id="61:360">
+            <img src="assets/d0ebc835b2028a188d8bb0ca2efdc5ddef999685.png" alt="camera locations map" data-node-id="61:358" />
+            <div class="data-source-mini" data-node-id="54:164">
+              <p>Data sources:</p>
+              <p>
+                OpenStreetMap:
+                <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">https://www.openstreetmap.org/</a>
+              </p>
+              <p>
+                OpenDataPhilly:
+                <a href="https://opendataphilly.org" target="_blank" rel="noreferrer">https://opendataphilly.org</a>
+              </p>
+            </div>
+          </div>
+          <div class="right-copy map-copy" data-node-id="54:165">
+            <h3 class="big-20" data-node-id="54:166">Where we collect data</h3>
+            <p class="sub-14" data-node-id="54:167">
+              Our cameras are strategically deployed across Philadelphia’s major green corridors, including
+              Fairmount Park, Wissahickon Valley Park, Cobbs Creek, and John Heinz Wildlife Refuge.
+            </p>
+            <p class="sub-14">
+              The project is being deployed in phases with a total target of 35 locations, of which 16 have
+              already been installed. Camera locations are spaced at least 900–1000 meters apart to ensure that
+              cameras are independent replicates.
+            </p>
+            <p class="sub-14">
+              The locations prioritize transects along the Schuylkill River and are in the process of expanding
+              coverage toward the East and North areas of Philadelphia, to build a representative sample of
+              observations across the city (e.g. Tacony Creek, etc.).
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block center-head" data-node-id="54:168">
+          <h3 class="big-20" data-node-id="54:169">Photos captured by motion cameras</h3>
+          <img
+            src="assets/21a88fc18e830e5c2a5bed846906b9d38c237fba.png"
+            alt="motion camera photos"
+            class="wide-gallery"
+            data-node-id="54:170"
+          />
+        </section>
+
+        <section class="section-block" data-node-id="54:171">
+          <div class="two-col copy" data-node-id="54:172">
+            <h3 class="big-20" data-node-id="54:173">How do we process image data</h3>
+            <div class="sub-14" data-node-id="54:174">
+              <p>
+                Our team uploads all images to
+                <a href="https://wildtrax.ca" target="_blank" rel="noreferrer">WildTrax</a>, an online database
+                for UWIN partners to use to share data. The platform uses AI integrated tools to classify images
+                as animals, humans, and vehicles. Yet its ability to identify specific animal species remains
+                limited. To ensure data quality, all AI-generated labels are manually reviewed and validated. The verified
+                dataset is then exported as structured tables for further analysis and modeling.
+              </p>
+            </div>
+          </div>
+          <img
+            src="assets/250f1440420e494e34b86eaf83eb8781d3d03a1a.png"
+            alt="processing pipeline"
+            class="pipeline"
+            data-node-id="54:175"
+          />
+        </section>
+
+        <section class="section-block two-col-row" data-node-id="54:176">
+          <div class="left-media-block compact" data-node-id="54:177">
+            <img src="assets/7b37cf8558f18837cdae1a3c17747317384b283a.png" alt="find squirrel" data-node-id="54:178" />
+            <p class="sub-14 center muted-2" data-node-id="54:179">Challenge: can you find the squirrel in the photo?</p>
+          </div>
+          <div class="right-copy" data-node-id="54:180">
+            <h3 class="big-20" data-node-id="54:181">Challenges in tagging photos</h3>
+            <p class="sub-14" data-node-id="54:182">
+              WildTrax identifies animals and places a frame around the area where the animal appears. However,
+              when animals are small in size, partially hidden such as under leaves, or blurred in nighttime
+              black-white images, AI recognition accuracy decreases. In addition, non-target motion like wind-blown
+              vegetation introduces noisy data.
+            </p>
+            <p class="sub-14">
+              Therefore, each image must be carefully reviewed by humans to confirm the presence of animals and to
+              annotate their species and counts.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block two-col-row" data-node-id="54:183">
+          <div class="left-media-block" data-node-id="54:184">
+            <img src="assets/a892ddfef8b53a0ba23367f5cb253e39fb060c7a.png" alt="duplicated trigger" class="fixed-media-sm" data-node-id="54:185" />
+            <p class="sub-14 center muted-2" data-node-id="54:186">
+              A single animal can trigger multiple captures during a short period
+            </p>
+          </div>
+          <div class="right-copy" data-node-id="54:187">
+            <h3 class="big-20" data-node-id="54:188">Duplicated occurrence problem</h3>
+            <p class="sub-14" data-node-id="54:189">
+              When an animal remains near a camera for an extended period, it may trigger multiple captures within a short timeframe. However, for analysis purposes, we aim to treat these as a single presence.
+            </p>
+            <p class="sub-14">
+              We therefore apply a duplicated occurrence rule: photos capturing the same species and same counts within a 15-minute window will be considered as one presence of the same animal. This helps reduce duplicate records and ensures more accurate records of wildlife activity.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:190">
+          <h3 class="big-20" data-node-id="54:191">A sample of what wildlife observation data looks like</h3>
+          <div class="sample-table-shell" id="sample-table-shell" data-node-id="54:192" aria-live="polite">
+            <p class="sample-table-status">Loading sample data...</p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="54:196">
+          <h3 class="big-20 built-vars-title nav-anchor" data-node-id="54:197" id="built-environment-variables">
+            Built environment variables
+          </h3>
+          <div class="variable-grid" data-node-id="54:198">
+            <article class="var-item" data-node-id="54:200">
+              <img src="assets/af9e032dd1b86fde24f956b40b6bcbe9d7677944.png" alt="radiant temperature" data-node-id="54:204" />
+              <h4>Radiant Temperature</h4>
+              <p>300m buffer average</p>
+              <p>calculated from urban heat data</p>
+            </article>
+            <article class="var-item" data-node-id="54:205">
+              <img src="assets/6f3c8fae082589eb2c5852cbd863946448575b97.png" alt="impervious surface" data-node-id="54:209" />
+              <h4>Impervious Surface</h4>
+              <p>300m buffer average</p>
+              <p>calculated from impervious surface data</p>
+            </article>
+            <article class="var-item" data-node-id="54:211">
+              <img src="assets/35635351884f3ddf32de3f24b573d760e67c7989.png" alt="green space" data-node-id="54:215" />
+              <h4>Area of Green Space</h4>
+              <p>300m buffer area percentage</p>
+              <p>calculated from land use data</p>
+            </article>
+            <article class="var-item" data-node-id="54:216">
+              <img src="assets/346533a0151ed4b659ba9c95cd64c8d0333456dc.png" alt="distance hydrology" data-node-id="54:220" />
+              <h4>Distance to Hydrology</h4>
+              <p>nearest distance</p>
+              <p>calculated from land use data</p>
+            </article>
+            <article class="var-item" data-node-id="54:221">
+              <img src="assets/bb0e8f45a6ef6aa61e7b9b0093a0b8b3b077f93f.png" alt="distance transportation" data-node-id="54:225" />
+              <h4>Distance to Transportation</h4>
+              <p>nearest distance</p>
+              <p>calculated from land use data</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section-block urban-dataset-section" data-node-id="54:134">
+          <h3 class="big-20" data-node-id="54:135">What does the urban dataset look like?</h3>
+
+          <h4 class="big-20 small-top" data-node-id="54:136">Urban heat data</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:137">
+            <img src="assets/00bbaad511eff4925e9bc727a1e49ccb81571db2.png" alt="urban heat 1" data-node-id="54:139" />
+            <img src="assets/1b2fc06288b7eb70706f7e79b7dc041b985762a8.png" alt="urban heat 2" data-node-id="54:141" />
+            <img src="assets/cebc7f545ef1e4e8681e7a235b62b6e77e42b9db.png" alt="urban heat 3" data-node-id="54:143" />
+          </div>
+
+          <h4 class="big-20 small-top" data-node-id="54:144">Impervious surface data</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:145">
+            <img src="assets/789d83a54e64ff1319a1c1ec27035a2240f1d0b6.png" alt="impervious 1" data-node-id="54:147" />
+            <img src="assets/71d5ee5e2d3ca8ca784d8072f7480fc267096960.png" alt="impervious 2" data-node-id="54:149" />
+            <img src="assets/7ea1e3a98b969c5d0587c7dec0cce54bd6e77db1.png" alt="impervious 3" data-node-id="54:151" />
+          </div>
+
+          <h4 class="big-20 small-top" data-node-id="54:152">Land use data</h4>
+          <div class="gallery-three mobile-hscroll-row" data-node-id="54:153">
+            <img src="assets/f28991f5f63ce6279e7a23ee6a363aef81885a23.png" alt="land use 1" data-node-id="54:155" />
+            <img src="assets/8d248bfcbdaddf6ed8f20655edee4d314539311f.png" alt="land use 2" data-node-id="54:157" />
+            <img src="assets/f6bf9a8e5d20b5ee7d8061f5bdaff027905a148e.png" alt="land use 3" data-node-id="54:159" />
+          </div>
+
+          <p class="sub-14 data-sources-lines" data-node-id="54:160">
+            Data sources: Urban heat:
+            <a href="https://xiaojianggis.github.io/pedheat/" target="_blank" rel="noreferrer">https://xiaojianggis.github.io/pedheat/</a><br />
+            Impervious surface:
+            <a href="https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip" target="_blank" rel="noreferrer">https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip</a><br />
+            Land use:
+            <a href="https://catalog.dvrpc.org/dataset/land-use-2023" target="_blank" rel="noreferrer">https://catalog.dvrpc.org/dataset/land-use-2023</a>
+          </p>
+        </section>
+
+        <section class="section-block" data-node-id="61:362">
+          <h3 class="big-20" data-node-id="54:51">How we integrate built environment data with wildlife activity</h3>
+          <p class="sub-14" data-node-id="54:52">
+            Our team spatially joins wildlife activity with built environment dataset to enable joint analysis.
+            Each camera location is geo-referenced, and we create buffer zones around it to capture the
+            surrounding environmental context. Within these buffers, we extract specific built environment
+            variables and aggregate them into quantitative indicators. After testing various distances, we settled
+            on a 300-meter buffer zone as the data collection area.
+          </p>
+          <img src="assets/a5d29875bd1ee81e9c98470203bb8786bd09e054.png" alt="integration workflow" class="integration-img" data-node-id="54:300" />
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="61:366" id="exploratory-data-analysis">
+          <h2 class="title-24" data-node-id="54:253">Exploratory Data Analysis</h2>
+          <h3 class="big-20 nav-anchor" data-node-id="54:258" id="wildlife-species-distribution">
+            Wildlife species distribution
+          </h3>
+          <div class="center-chart" data-node-id="61:364">
+            <div class="species-pie-shell" id="species-pie-shell" data-node-id="54:3" aria-live="polite">
+              <p class="species-pie-status">Loading chart...</p>
+            </div>
+            <p class="sub-14" data-node-id="54:53">
+              The species frequency across all presences reveals a highly uneven composition. Eastern Gray Squirrels dominate the dataset, representing 50% of all wildlife presences, followed by Common Raccoons and Red Foxes (~14%), and White-tailed Deer (~9%).
+            </p>
+            <p class="sub-14">
+              The dominance of Eastern Gray Squirrels is consistent with Philadelphia’s urban ecological structure. The fragmented green spaces and human-adjacent habitats creates conditions for squirrels, which are highly adaptable and maintain high population densities in urban environments.
+            </p>
+            <p class="sub-14">
+              Common Raccoons and Red Foxes are both opportunistic and capable of exploiting edge habitats and human-modified landscapes. Their relatively high proportions suggest a well-established presence in peri-urban ecological niches. White-tailed Deer are typically associated with larger suburban conservation areas or less disturbed green corridors.
+            </p>
+            <p class="sub-14">
+              From a broader perspective, the dataset is mammal-dominated, accounting for 95% of all presences. This reflects motion-triggered cameras are inherently more effective at detecting ground-dwelling mammals, whereas birds are less likely to trigger sensors or remain within the camera frame long enough to be recorded.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:368">
+          <h3 class="big-20 nav-anchor" data-node-id="54:259" id="wildlife-activity-temporal-patterns">
+            Wildlife activity temporal patterns
+          </h3>
+          <div class="center-chart temporal" data-node-id="61:367">
+            <div class="temporal-presence-shell" id="temporal-presence-shell" data-node-id="54:5" aria-live="polite">
+              <p class="temporal-presence-status">Loading chart...</p>
+            </div>
+            <p class="sub-14" data-node-id="54:54">
+              Wildlife presences follow a clear bimodal pattern, with two distinct peaks occurring at 8AM and 5PM. When aligned with the average sunrise (~7AM) and sunset (~6PM) times in Philadelphia during October, these peaks fall within a one-hour window of crepuscular periods.
+            </p>
+            <p class="sub-14" data-node-id="54:54">
+              This suggests that wildlife activity is strongly concentrated during dawn and dusk transition periods, when species with different activity rhythms overlap. In other words, both diurnal and nocturnal species are active during these transition windows, leading to a convergence in overall presences.
+            </p>
+            <div class="species-temporal-shell" id="species-temporal-shell" data-node-id="54:307" aria-live="polite">
+              <p class="species-temporal-status">Loading chart...</p>
+            </div>
+            <ul class="sub-14" data-node-id="54:55">
+              <li>
+                Eastern Gray Squirrels exhibit a strongly diurnal pattern, with a primary activity peak around
+                8AM, followed by a secondary peak around 5PM. During 7PM - 6AM, presences become extremely rare.
+              </li>
+              <li>
+                Common Raccoons display a distinctly nocturnal pattern, with activity concentrated during nighttime
+                hours and minimal presence during the day.
+              </li>
+              <li>
+                Red Foxes and White-tailed Deer show predominantly nighttime activity, with relatively low
+                presence during daylight hours.
+              </li>
+            </ul>
+            <p class="sub-14">
+              The reduced daytime activity among raccoons, foxes, and deer can be interpreted as a form of
+              behavioral adaptation to human disturbance in urban and peri-urban environments. [23] This temporal
+              partitioning of wildlife also reduces interspecies competition while enabling coexistence within
+              shared urban green spaces. [24]
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:370">
+          <h3 class="big-20 nav-anchor" data-node-id="54:260" id="wildlife-activity-spatial-patterns">
+            Wildlife activity spatial patterns
+          </h3>
+          <div class="center-chart spatial" data-node-id="61:369">
+            <h4 class="big-20" data-node-id="54:261">Wildlife presence across locations</h4>
+            <p class="sub-14" data-node-id="54:57">
+              To avoid unintended disturbance to wildlife, the precise locations of the camera sites are not
+              publicly disclosed. The 13 camera sites are instead presented in order from north to south based on
+              latitude.
+            </p>
+            <div class="location-daynight-shell" id="location-daynight-shell" data-node-id="54:309" aria-live="polite">
+              <p class="location-daynight-status">Loading chart...</p>
+            </div>
+            <p class="sub-14" data-node-id="54:56">
+              Wildlife presence varies substantially across locations. Most cameras record over 60% of total presence during daytime, with several locations reaching as high as 95% daytime presence. These sites are typically dominated by Eastern Gray Squirrels.
+            </p>
+            <p class="sub-14" data-node-id="54:56">
+              In contrast, Locations 2 and 13 shows over 60% of presence occurring during nighttime. These sites are dominated by nocturnal mammals such as raccoons and deer. Notably, these locations correspond to larger, less disturbed natural or conservation areas.
+            </p>
+            <p class="sub-14">
+              Overall, this contrast indicates that:
+            </p>
+            <ul>
+              <li>
+                Urban or human-adjacent sites → diurnal dominant
+              </li>
+              <li>
+                Less disturbed, larger green spaces → more diverse
+              </li>
+            </ul>
+            <h4 class="big-20" data-node-id="54:262">Photo frequency of wildlife</h4>
+            <div class="location-frequency-shell" id="location-frequency-shell" data-node-id="54:308" aria-live="polite">
+              <p class="location-frequency-status">Loading chart...</p>
+            </div>
+            <p class="sub-14" data-node-id="54:58">
+              The photo frequency metric provides a proxy for overall wildlife activity intensity. The highest activity level reaches 12 presences per day, observed at a site located within a large conservation area. At the lower end, some cameras record as few as ~1 presence per day, typically found in human-disturbed locations.
+            </p>
+            <p class="sub-14">
+              This pattern highlights a strong negative relationship between human disturbance and wildlife activity intensity, consistent with established urban ecology theory. [23]
+            </p>
+            <h4 class="big-20" data-node-id="54:263">Wildlife species richness across locations</h4>
+            <div class="location-richness-shell" id="location-richness-shell" data-node-id="54:310" aria-live="polite">
+              <p class="location-richness-status">Loading chart...</p>
+            </div>
+            <p class="sub-14" data-node-id="54:59">
+              Wildlife richness varies substantially across locations. The most species-rich site records up to 21 species, located within a large, continuous natural area (e.g., forested valley system), likely benefiting from higher habitat diversity.
+            </p>
+            <p class="sub-14" data-node-id="54:59">
+              In contrast, the lowest site records only 3 species, in high human-activity areas, and is mostly mammal-dominated, suggesting that only the most adaptable species persist under these conditions.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="61:373">
+          <h3 class="big-20 nav-anchor" data-node-id="54:264" id="built-env-x-wildlife-activity">
+            Built environment variables x Wildlife activity Dashboard
+          </h3>
+          <div class="built-x-activity-flow">
+            <div class="built-x-activity dashboard-shell" data-node-id="61:371">
+              <div class="built-dashboard" id="built-dashboard" aria-live="polite">
+                <aside class="built-dashboard-sidebar">
+                  <div class="built-dashboard-sidebar-inner">
+                    <p class="built-dashboard-side-title">Select a Location</p>
+                    <div class="built-dashboard-location-scroll" id="dashboard-location-list"></div>
+                  </div>
+                </aside>
+
+                <section class="built-dashboard-middle">
+                  <h4 class="built-dashboard-panel-title">
+                    Wildlife Presence Data in Location <span id="dashboard-location-name-middle">1</span>
+                  </h4>
+                  <div class="built-dashboard-middle-grid">
+                    <article class="built-dashboard-card built-dashboard-card-presence">
+                      <div class="built-dashboard-presence-content">
+                        <p class="built-dashboard-label">Presence number</p>
+                        <p class="built-dashboard-presence" id="dashboard-presence">0</p>
+                        <div class="built-dashboard-daynight">
+                          <div><span>Day</span><span id="dashboard-day">0 (0%)</span></div>
+                          <div><span>Night</span><span id="dashboard-night">0 (0%)</span></div>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="built-dashboard-card built-dashboard-card-frequency">
+                      <div class="built-dashboard-mini">
+                        <p class="built-dashboard-mini-label">Frequency</p>
+                        <p class="built-dashboard-mini-value" id="dashboard-frequency">0</p>
+                        <p class="built-dashboard-mini-label built-dashboard-mini-label-secondary">Recording Day</p>
+                        <p class="built-dashboard-mini-value" id="dashboard-recording-day">0</p>
+                      </div>
+                    </article>
+
+                    <article class="built-dashboard-card built-dashboard-card-richness">
+                      <div class="built-dashboard-richness-head">
+                        <p class="built-dashboard-label">Richness (species count)</p>
+                        <p class="built-dashboard-richness" id="dashboard-richness">0</p>
+                      </div>
+                      <div class="built-dashboard-taxa">
+                        <div><span>Aves</span><span id="dashboard-aves">0 (0%)</span></div>
+                        <div><span>Mammalia</span><span id="dashboard-mammalia">0 (0%)</span></div>
+                      </div>
+                      <div class="built-dashboard-toplist">
+                        <div>
+                          <span>TOP 1</span>
+                          <span id="dashboard-top1">-</span>
+                          <span id="dashboard-top1-count">0</span>
+                        </div>
+                        <div>
+                          <span>TOP 2</span>
+                          <span id="dashboard-top2">-</span>
+                          <span id="dashboard-top2-count">0</span>
+                        </div>
+                        <div>
+                          <span>TOP 3</span>
+                          <span id="dashboard-top3">-</span>
+                          <span id="dashboard-top3-count">0</span>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+
+                <section class="built-dashboard-right">
+                  <h4 class="built-dashboard-panel-title">
+                    Build Environment Data in Location <span id="dashboard-location-name-right">1</span>
+                  </h4>
+                  <div class="built-dashboard-metric-list">
+                    <div class="built-dashboard-metric" data-metric="mrt">
+                      <img src="assets/af9e032dd1b86fde24f956b40b6bcbe9d7677944.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>Radiant temperature</span>
+                          <span id="dashboard-mrt-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-orange"><span id="dashboard-mrt-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="imp">
+                      <img src="assets/6f3c8fae082589eb2c5852cbd863946448575b97.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>Impervious surface</span>
+                          <span id="dashboard-imp-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-yellow"><span id="dashboard-imp-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="green">
+                      <img src="assets/35635351884f3ddf32de3f24b573d760e67c7989.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>Area of green space</span>
+                          <span id="dashboard-green-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-green"><span id="dashboard-green-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="water">
+                      <img src="assets/346533a0151ed4b659ba9c95cd64c8d0333456dc.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>Distance to hydrology</span>
+                          <span id="dashboard-water-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-blue"><span id="dashboard-water-fill"></span></div>
+                      </div>
+                    </div>
+
+                    <div class="built-dashboard-metric" data-metric="trans">
+                      <img src="assets/bb0e8f45a6ef6aa61e7b9b0093a0b8b3b077f93f.png" alt="" />
+                      <div class="built-dashboard-metric-body">
+                        <div class="built-dashboard-metric-head">
+                          <span>Distance to transportation</span>
+                          <span id="dashboard-trans-value">0</span>
+                        </div>
+                        <div class="built-dashboard-metric-bar bg-purple"><span id="dashboard-trans-fill"></span></div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <p class="built-dashboard-status" id="built-dashboard-status">Loading dashboard data...</p>
+            </div>
+            <div class="section-copy-flow narrative-copy built-dashboard-copy">
+              <p class="sub-14" data-node-id="54:60">
+                We further examine five built environment variables at each camera location. While no clear overall relationships are observed, which is partly due to the limited number of sites and sampling points, one illustrative case emerges from Location 7, which exhibits the lowest photo frequencies (~1 presence/day). Based on its environmental characteristics, we can form a hypothesis consistent with ecological expectations that wildlife activity may decrease in areas with:
+              </p>
+              <ul>
+                <li>
+                  Closer proximity to transportation infrastructure
+                </li>
+                <li>
+                  Greater distance from water sources
+                </li>
+                <li>
+                  Lower availability of green space
+                </li>
+                <li>
+                  Higher radiant temperature (urban heat effects)
+                </li>
+                <li>
+                  Higher levels of impervious surface
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:377" id="model-building">
+          <h3 class="big-20" data-node-id="54:265">Model building</h3>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:63">
+              We tested linear, GLMM (extends linear by allowing non-normal responses and random effects), and GAMM models (allows nonlinear smooth relationships together with random effects). Since MEAN_IMP (impervious surface) was the only consistently significant predictor and showed signs of non-linearity, we adopted a GAMM framework to capture its smooth effect.
+            </p>
+          </div>
+          <div class="model-grid" data-node-id="62:376">
+            <div class="model-left" data-node-id="62:374">
+              <img src="assets/9a402c5bb6ae562ed68390b0e07f9b80f9614be6.png" alt="imp-rich" data-node-id="54:64" />
+              <img src="assets/13e5224d20648bf5aea7b12d67e4a50495abced2.png" alt="histogram" data-node-id="54:301" />
+            </div>
+            <div class="model-right" data-node-id="62:375">
+              <img src="assets/30f3fff0694790a962a882f1144acacc1ddf9254.png" alt="imp-presence" data-node-id="54:302" />
+              <div class="sub-14" data-node-id="54:61">
+                <p>(1) Nonlinear effect of urbanization (MEAN_IMP)</p>
+                <p>
+                  Both models show a highly significant nonlinear relationship (p &lt; 0.001) between impervious
+                  surface and wildlife.
+                </p>
+                <ul>
+                  <li>
+                    Wildlife activity (presence) and species richness both follow a hump-shaped curve
+                  </li>
+                  <li>
+                    Peak occurs at moderate levels of impervious surface (~25–30%)
+                  </li>
+                  <li>
+                    Both low and high impervious levels have lower values
+                  </li>
+               </ul>
+                <p>(2) Consistent direction across two models</p>
+               <ul>
+                  <li>
+                    Presence model (Negative Bin): Deviance explained = 32.3%
+                  </li>
+                  <li>
+                    Richness model (Poisson): Deviance explained = 24.4%
+                  </li>
+               </ul>
+                <p>(3) Effects of other variables</p>
+                <p>
+                  Across both models, all of the following variables are significant:
+                </p>
+                <ul>
+                  <li>
+                    Distance to transportation (+)
+                  </li>
+                  <li>
+                    Distance to hydrology (+)
+                  </li>
+                  <li>
+                    Radiant temperature (–)
+                  </li>
+                  <li>
+                    Green space area percentage (–)
+                  </li>                  
+               </ul>
+              </div>
+            </div>
+          </div>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:62">
+              Overall, the results suggest that urbanization is not linearly detrimental to wildlife. Instead:
+            </p>
+            <ul>
+                    <li>
+                      Wildlife presence and diversity peak at intermediate urban intensity
+                    </li>
+                    <li>
+                      Extremely urban or extremely natural areas both show lower observed activity
+                    </li>        
+                 </ul>
+            <p class="sub-14">
+              The observed hump-shaped pattern between impervious surface and wildlife presence/richness is likely driven by a common species, the dominance of Eastern Gray Squirrels (~47–50% of observations). This finding is broadly consistent with the Intermediate Disturbance Hypothesis (IDH), which predicts that species diversity is highest at moderate levels of disturbance. [25]
+            </p>
+            <p class="sub-14">
+              Eastern Gray Squirrels are well adapted to mixed urban–natural environments, where tree cover, food availability, and moderate human presence coexist. As a result, their activity tends to peak in intermediate levels of urbanization, which aligns closely with the predicted peak at ~25–30% impervious surface.
+            </p>
+            <p class="sub-14">
+              However, this pattern should not be attributed solely to squirrels. The consistency of the hump-shaped curve across both presence and richness models suggests that this could be a broader ecological signal, likely reflecting suburban or edge habitats that support both urban-adapted and less disturbance-tolerant species.
+            </p>
+            <p class="sub-14">
+              In this sense, squirrel dominance may amplify the observed pattern, but the underlying relationship likely reflects a more general urban–suburban ecological gradient.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:378" id="conclusion">
+          <h2 class="title-24" data-node-id="54:257">Conclusion</h2>
+          <div class="section-copy-flow narrative-copy">
+            <p class="sub-14" data-node-id="54:66">
+              This study provides preliminary evidence that urban wildlife patterns in Philadelphia are shaped by a combination of species composition, temporal behavior, and the urbanization gradient.
+            </p>
+            <ul class="sub-14">
+                <li>
+                  Wildlife presence is highly uneven and strongly dominated by mammals, particularly Eastern Gray Squirrels. Temporal patterns show a clear partitioning between diurnal and nocturnal species, with activity peaks occurring during crepuscular periods, reflecting behavioral adaptation to both ecological conditions and human disturbance.
+                </li>
+                <li>
+                  Strong spatial heterogeneity is observed across sites. Human-adjacent locations are dominated by daytime, squirrel-driven activity, while less disturbed conservation areas support higher nocturnal activity and greater species diversity. This highlights the importance of habitat context in shaping wildlife behavior, although patterns should be interpreted with caution given the limited number of sites.
+                </li>
+                <li>
+                  Modeling results suggest a nonlinear relationship between urbanization (impervious surface) and wildlife activity. Both wildlife presence and species richness follow a hump-shaped pattern, peaking at moderate levels of urbanization (~25–30% impervious surface). This is consistent with the Intermediate Disturbance Hypothesis that wildlife activity may be highest in intermediate, mixed landscapes.
+                </li>
+            </ul>
+            <p class="sub-14">
+              While this pattern is partially influenced by the dominance of urban-adapted species such as squirrels, its consistency across models points toward a broader urban–suburban ecological gradient. However, given the limited sample size (13 camera locations), these findings should be considered more exploratory and hypothesis-generating.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block nav-anchor" data-node-id="62:379" id="planning-implications">
+          <h2 class="title-24" data-node-id="54:254">Planning Implications</h2>
+          <div class="section-copy-flow narrative-copy sub-14" data-node-id="54:65">
+            <p>
+              These findings suggest that urban wildlife may benefit through strategic design of intermediate urban landscapes.
+            </p>
+            <p>
+              1. Prioritize mixed habitats
+            </p>
+            <ul>
+              <li>
+                Wildlife activity and diversity peak in areas where built and natural environments intersect. Planning efforts should consider maintaining and enhancing urban–suburban transition zones, rather than relying exclusively on fully natural spaces.
+              </li>
+              <li>
+                Note: Higher observed diversity in transitional zones may partly reflect habitat heterogeneity and detection bias, as fully natural areas may support distinct communities less captured by camera traps (e.g., birds and herps).
+              </li>
+            </ul>
+            <p>
+              2. Enhance habitat connectivity
+            </p>
+            <ul>
+              <li>
+                The presence of deer, foxes, and other mammals in less disturbed areas highlights the importance of connected green corridors. Strengthening ecological linkages between parks, forests, and suburban green spaces can support both wildlife activities and biodiversity.
+              </li>
+            </ul>
+            <p>
+              3. Mitigate urban stressors in high-intensity areas
+            </p>
+            <ul>
+              <li>
+                Areas with high impervious surface, high radiant temperature, and proximity to transportation are associated with lower observed wildlife activity. Planning interventions such as reducing impervious cover, increasing vegetation, and buffering infrastructure may help improve habitat quality.
+              </li>
+            </ul>
+            <p>
+              4. Design for coexistence in human-dominated spaces
+            </p>
+            <ul>
+              <li>
+                The dominance of squirrels and the presence of adaptable species suggest that wildlife is already integrated into urban environments. Planning should therefore consider coexistence strategies, including safe habitat design, and consideration of human-wildlife interaction patterns.
+              </li>
+            </ul>
+            <p>
+              Overall, while these findings are preliminary, they highlight that biodiversity in cities is not simply a function of “more nature,” but of the right balance between natural and built environments. Designing for this balance is key to supporting resilient urban ecosystems.
+            </p>
+          </div>
+        </section>
+
+        <section class="section-block" data-node-id="62:380">
+          <h2 class="title-24" data-node-id="54:255">Citation</h2>
+          <ol class="citation-list" id="citation-list"></ol>
+        </section>
+
+        <section class="section-block" data-node-id="62:381">
+          <h2 class="title-24" data-node-id="54:256">Acknowledgement</h2>
+          <div class="ack-text" data-node-id="54:305">
+            <p>
+              Three images in the Introduction section are sourced from
+              <a href="https://unsplash.com" target="_blank" rel="noreferrer">Unsplash</a> and are used under the
+              <a href="https://unsplash.com/license" target="_blank" rel="noreferrer">Unsplash License</a>.
+            </p>
+            <p>
+              Images of motion-triggered cameras are from a collaborative project between the
+              <a
+                href="https://www.vet.upenn.edu/research/research-laboratories/accessing-urban-nature-initiative/"
+                target="_blank"
+                rel="noreferrer"
+                >Accessing Urban Nature Initiative</a
+              >
+              (AUNI) and the
+              <a href="https://www.urbanwildlifeinfo.org" target="_blank" rel="noreferrer"
+                >Urban Wildlife Information Network</a
+              >
+              (UWIN).
+            </p>
+            <p>
+              Some icons are adapted from
+              <a href="https://www.iconfont.cn/?lang=en-us" target="_blank" rel="noreferrer">Alibaba Iconfont</a>
+              and are used in accordance with the platform's licensing terms.
+            </p>
+            <p>Data sources:</p>
+            <p>
+              OpenStreetMap:
+              <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer">https://www.openstreetmap.org/</a>
+            </p>
+            <p>
+              OpenDataPhilly:
+              <a href="https://opendataphilly.org" target="_blank" rel="noreferrer">https://opendataphilly.org</a>
+            </p>
+            <p>
+              Urban heat data:
+              <a href="https://xiaojianggis.github.io/pedheat/" target="_blank" rel="noreferrer">https://xiaojianggis.github.io/pedheat/</a>
+            </p>
+            <p>
+              Impervious surface data:
+              <a href="https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip" target="_blank" rel="noreferrer">https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles/Annual_NLCD_FctImp_2024_CU_C1V1.zip</a>
+            </p>
+            <p>
+              Land use data:
+              <a href="https://catalog.dvrpc.org/dataset/land-use-2023" target="_blank" rel="noreferrer">https://catalog.dvrpc.org/dataset/land-use-2023</a>
+            </p>
+            <p>
+              Tools used:
+            </p>
+            <p>
+              Data analysis: RStudio
+            </p>
+            <p>
+              Web design and development: Visual Studio Code, Figma, Codex
+            </p>
+            <p>
+              Website was deployed and hosted using GitHub Pages and Vercel
+            </p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

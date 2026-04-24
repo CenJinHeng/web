@@ -107,6 +107,8 @@ const PORTRAIT_MANIFEST = "assets/portrait_manifest.json";
 const ICON_MANIFEST = "assets/icon_manifest.json";
 const DATA_SYNC_INTERVAL_MS = 3000;
 const PORTRAIT_AUTO_INTERVAL_MS = 8000;
+const PORTRAIT_MAX_VISIBLE_CARDS = 3;
+const HTTP_ASSET_REVALIDATE_INTERVAL_MS = 30000;
 const LOCAL_HANDLE_DB = "site-content-store";
 const LOCAL_HANDLE_KEY = "contents";
 const IS_FILE_PROTOCOL = window.location.protocol === "file:";
@@ -182,6 +184,8 @@ const state = {
   portraitUnseenPool: [],
   portraitAnimating: false,
   portraitAutoTimer: 0,
+  httpAssetListSignature: "",
+  httpAssetLastValidatedAt: 0,
   touchSession: null,
   objectUrls: new Set()
 };
@@ -1083,12 +1087,15 @@ function setupPortraitDeck() {
   if (!cards.length) return;
 
   const total = state.portraits.length;
-  if (!total) {
+  const visibleCount = getVisiblePortraitCardCount(total);
+  const activeCards = cards.slice(0, visibleCount);
+  const hiddenCards = cards.slice(visibleCount);
+  hiddenCards.forEach(hidePortraitCard);
+
+  if (!total || !activeCards.length) {
     stopPortraitAutoRotate();
     cards.forEach((card) => {
-      card.style.backgroundImage = "";
-      card.style.backgroundColor = "#efefef";
-      card.classList.remove("is-animating");
+      hidePortraitCard(card);
     });
     state.portraitLayerByCard = new WeakMap();
     state.portraitIndexByCard = new WeakMap();
@@ -1096,26 +1103,19 @@ function setupPortraitDeck() {
     return;
   }
 
+  const visibleLayers = getPortraitLayersForCount(visibleCount);
   const allIndexes = state.portraits.map((_, index) => index);
   const shuffled = shuffleArray(allIndexes);
-  const initial = shuffled.slice(0, Math.min(3, shuffled.length));
-  while (initial.length < 3) {
+  const initial = shuffled.slice(0, Math.min(visibleCount, shuffled.length));
+  while (initial.length < visibleCount) {
     initial.push(initial[initial.length - 1] ?? 0);
   }
-  state.portraitUnseenPool = shuffled.slice(Math.min(3, shuffled.length));
+  state.portraitUnseenPool = shuffled.slice(Math.min(visibleCount, shuffled.length));
 
-  const initialByLayer = {
-    front: initial[0] ?? 0,
-    middle: initial[1] ?? initial[0] ?? 0,
-    back: initial[2] ?? initial[1] ?? initial[0] ?? 0
-  };
-  const fallbackLayers = ["back", "middle", "front"];
-  cards.forEach((card, index) => {
-    const layerName = String(card.dataset.layer || "").toLowerCase();
-    const layer = (layerName === "front" || layerName === "middle" || layerName === "back")
-      ? layerName
-      : (fallbackLayers[index] || "back");
-    const photoIndex = initialByLayer[layer] ?? initialByLayer.front;
+  activeCards.forEach((card, index) => {
+    const layer = visibleLayers[index] || "front";
+    const photoIndex = initial[index] ?? initial[initial.length - 1] ?? 0;
+    showPortraitCard(card);
     setCardLayer(card, layer);
     state.portraitIndexByCard.set(card, photoIndex);
     paintPortraitCard(card, photoIndex);
@@ -1132,25 +1132,33 @@ function handlePortraitInteraction() {
 function rotatePortraitDeck() {
   if (!portraitFrame || state.portraitAnimating || state.portraits.length < 2) return;
 
-  const cards = Array.from(portraitFrame.querySelectorAll(".portrait-card"));
-  const front = cards.find((card) => getCardLayer(card) === "front");
-  const middle = cards.find((card) => getCardLayer(card) === "middle");
-  const back = cards.find((card) => getCardLayer(card) === "back");
-  if (!front || !middle || !back) return;
+  const cards = getVisiblePortraitCards();
+  if (cards.length < 2) return;
+
+  const layers = getPortraitLayersForCount(cards.length);
+  const orderedCards = layers
+    .map((layer) => cards.find((card) => getCardLayer(card) === layer))
+    .filter(Boolean);
+  if (orderedCards.length !== cards.length) return;
 
   state.portraitAnimating = true;
   cards.forEach((card) => card.classList.add("is-animating"));
 
-  const exclude = new Set();
-  exclude.add(state.portraitIndexByCard.get(middle));
-  exclude.add(state.portraitIndexByCard.get(back));
-  const nextBackIndex = consumeNextPortraitIndex(exclude);
+  const recycledCard = orderedCards[orderedCards.length - 1];
+  const exclude = new Set(
+    orderedCards
+      .slice(0, -1)
+      .map((card) => state.portraitIndexByCard.get(card))
+      .filter((index) => Number.isInteger(index))
+  );
+  const nextIndex = consumeNextPortraitIndex(exclude);
 
-  setCardLayer(front, "back");
-  setCardLayer(middle, "front");
-  setCardLayer(back, "middle");
-  state.portraitIndexByCard.set(front, nextBackIndex);
-  paintPortraitCard(front, nextBackIndex);
+  orderedCards.forEach((card, index) => {
+    const nextLayer = layers[(index + 1) % layers.length] || "front";
+    setCardLayer(card, nextLayer);
+  });
+  state.portraitIndexByCard.set(recycledCard, nextIndex);
+  paintPortraitCard(recycledCard, nextIndex);
 
   window.setTimeout(() => {
     cards.forEach((card) => card.classList.remove("is-animating"));
@@ -1160,7 +1168,7 @@ function rotatePortraitDeck() {
 
 function restartPortraitAutoRotate() {
   stopPortraitAutoRotate();
-  if (state.portraits.length < 2) return;
+  if (state.portraits.length < 2 || getVisiblePortraitCards().length < 2) return;
   state.portraitAutoTimer = window.setInterval(() => {
     rotatePortraitDeck();
   }, PORTRAIT_AUTO_INTERVAL_MS);
@@ -1195,8 +1203,39 @@ function paintPortraitCard(card, index) {
     card.style.backgroundColor = "#efefef";
     return;
   }
+  showPortraitCard(card);
   card.style.backgroundImage = cssUrl(source.src);
   card.style.backgroundColor = "#efefef";
+}
+
+function getVisiblePortraitCardCount(total) {
+  return Math.min(PORTRAIT_MAX_VISIBLE_CARDS, Math.max(0, total));
+}
+
+function getPortraitLayersForCount(count) {
+  if (count >= 3) return ["back", "middle", "front"];
+  if (count === 2) return ["middle", "front"];
+  if (count === 1) return ["front"];
+  return [];
+}
+
+function getVisiblePortraitCards() {
+  if (!portraitFrame) return [];
+  return Array.from(portraitFrame.querySelectorAll(".portrait-card:not([hidden])"));
+}
+
+function showPortraitCard(card) {
+  card.hidden = false;
+  card.removeAttribute("aria-hidden");
+}
+
+function hidePortraitCard(card) {
+  card.hidden = true;
+  card.setAttribute("aria-hidden", "true");
+  card.classList.remove("is-animating");
+  card.style.backgroundImage = "";
+  card.style.backgroundColor = "";
+  card.style.zIndex = "";
 }
 
 function consumeNextPortraitIndex(excludeSet = new Set()) {
@@ -1250,11 +1289,11 @@ async function loadData(isBackgroundSync = false) {
     if (IS_FILE_PROTOCOL) {
       const localLoaded = await loadDataFromLocalHandle(isBackgroundSync);
       if (!localLoaded) {
-        await loadDataFromFetch();
+        await loadDataFromFetch(isBackgroundSync);
       }
       return;
     }
-    await loadDataFromFetch();
+    await loadDataFromFetch(isBackgroundSync);
   } finally {
     state.loadingData = false;
   }
@@ -1327,7 +1366,7 @@ async function loadDataFromLocalHandle(isBackgroundSync) {
   }
 }
 
-async function loadDataFromFetch() {
+async function loadDataFromFetch(isBackgroundSync = false) {
   let lastError = null;
   let hasLoadedFromAnyBase = false;
 
@@ -1343,6 +1382,29 @@ async function loadDataFromFetch() {
         loadHttpImageEntries(buildContentPath(base, ICON_MANIFEST), buildContentPath(base, ICON_DIR))
       ]);
 
+      const rawPortraitNames = portraitEntries.map((item) => item.name).join("|");
+      const rawIconNames = iconEntries.map((item) => item.name).join("|");
+      const httpAssetListSignature = makeDataSignature(base, rawPortraitNames, rawIconNames);
+      const shouldRevalidateHttpAssets = (
+        !isBackgroundSync ||
+        httpAssetListSignature !== state.httpAssetListSignature ||
+        (Date.now() - state.httpAssetLastValidatedAt) >= HTTP_ASSET_REVALIDATE_INTERVAL_MS
+      );
+
+      let resolvedPortraitEntries = portraitEntries;
+      let resolvedIconEntries = iconEntries;
+      if (shouldRevalidateHttpAssets) {
+        [resolvedPortraitEntries, resolvedIconEntries] = await Promise.all([
+          filterLoadableHttpEntries(portraitEntries),
+          filterLoadableHttpEntries(iconEntries)
+        ]);
+        state.httpAssetListSignature = httpAssetListSignature;
+        state.httpAssetLastValidatedAt = Date.now();
+      } else {
+        resolvedPortraitEntries = reuseValidatedHttpEntries(portraitEntries, state.portraits);
+        resolvedIconEntries = reuseValidatedHttpEntries(iconEntries, state.icons);
+      }
+
       const parsedIntro = parseIntroCsv(introText);
       const parsedPositions = parsePositionCsv(positionText);
       const parsedDetails = parseDetailCsv(detailText);
@@ -1352,15 +1414,15 @@ async function loadDataFromFetch() {
         parsedPositions.length ||
         parsedDetails.size ||
         parsedTimeline.length ||
-        portraitEntries.length ||
-        iconEntries.length
+        resolvedPortraitEntries.length ||
+        resolvedIconEntries.length
       );
       if (!hasAnyData) {
         continue;
       }
 
-      const portraitNames = portraitEntries.map((item) => item.name).join("|");
-      const iconNames = iconEntries.map((item) => item.name).join("|");
+      const portraitNames = resolvedPortraitEntries.map((item) => item.name).join("|");
+      const iconNames = resolvedIconEntries.map((item) => item.name).join("|");
       const signature = makeDataSignature(base, introText, positionText, detailText, timelineText, personalizationText, portraitNames, iconNames);
       if (signature === state.dataSignature) {
         return;
@@ -1372,8 +1434,8 @@ async function loadDataFromFetch() {
         detailText,
         timelineText,
         personalizationText,
-        portraits: portraitEntries,
-        icons: iconEntries,
+        portraits: resolvedPortraitEntries,
+        icons: resolvedIconEntries,
         intro: parsedIntro,
         positions: parsedPositions,
         detailsByKey: parsedDetails,
@@ -1459,6 +1521,8 @@ function clearDataState() {
   state.timelineSortMode = "desc";
   state.timelineYear = null;
   state.timelineCateId = null;
+  state.httpAssetListSignature = "";
+  state.httpAssetLastValidatedAt = 0;
   stopPortraitAutoRotate();
   revokeObjectUrls();
 }
@@ -1536,14 +1600,28 @@ async function fetchFirstText(paths, optional = false) {
 }
 
 async function loadHttpImageEntries(manifestPath, directoryPath) {
-  const manifestItems = await loadManifestList(manifestPath);
-  if (manifestItems.length) {
-    return manifestItems.map((name) => ({
-      name,
-      src: `${directoryPath}${encodePathSegments(name)}`
-    }));
-  }
+  const [manifestItems, directoryItems] = await Promise.all([
+    loadManifestList(manifestPath),
+    loadDirectoryImageList(directoryPath)
+  ]);
+  const resolvedItems = directoryItems.length ? directoryItems : manifestItems;
+  return resolvedItems.map((name) => ({
+    name,
+    src: `${directoryPath}${encodePathSegments(name)}`
+  }));
+}
 
+async function loadManifestList(path) {
+  try {
+    const text = await fetchText(path, true);
+    if (!text.trim()) return [];
+    return normalizeManifestJson(text);
+  } catch (error) {
+    return [];
+  }
+}
+
+async function loadDirectoryImageList(directoryPath) {
   try {
     const response = await fetch(directoryPath, { cache: "no-store" });
     if (!response.ok) return [];
@@ -1551,11 +1629,7 @@ async function loadHttpImageEntries(manifestPath, directoryPath) {
     const text = await response.text();
 
     if (contentType.includes("application/json")) {
-      const parsed = normalizeManifestJson(text);
-      return parsed.map((name) => ({
-        name,
-        src: `${directoryPath}${encodePathSegments(name)}`
-      }));
+      return normalizeManifestJson(text);
     }
 
     const doc = new DOMParser().parseFromString(text, "text/html");
@@ -1574,24 +1648,78 @@ async function loadHttpImageEntries(manifestPath, directoryPath) {
       names.add(fileName);
     });
     return Array.from(names)
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }))
-      .map((name) => ({
-        name,
-        src: `${directoryPath}${encodePathSegments(name)}`
-      }));
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
   } catch (error) {
     return [];
   }
 }
 
-async function loadManifestList(path) {
+function reuseValidatedHttpEntries(entries, validatedEntries) {
+  if (!Array.isArray(entries) || !entries.length || !Array.isArray(validatedEntries)) return [];
+  const validNames = new Set(
+    validatedEntries
+      .map((item) => normalizeText(item?.name))
+      .filter(Boolean)
+  );
+  return entries.filter((item) => validNames.has(normalizeText(item?.name)));
+}
+
+async function filterLoadableHttpEntries(entries) {
+  if (!Array.isArray(entries) || !entries.length) return [];
+  const results = await Promise.all(entries.map(async (item) => {
+    const name = normalizeText(item?.name);
+    const src = normalizeText(item?.src);
+    if (!name || !src) return null;
+    const isAvailable = await probeHttpAsset(src);
+    return isAvailable ? { name, src } : null;
+  }));
+  return results.filter(Boolean);
+}
+
+async function probeHttpAsset(src) {
+  const probeSrc = appendProbeQuery(src);
   try {
-    const text = await fetchText(path, true);
-    if (!text.trim()) return [];
-    return normalizeManifestJson(text);
+    const response = await fetch(probeSrc, {
+      method: "HEAD",
+      cache: "no-store"
+    });
+    if (response.ok) return true;
+    if (response.status && response.status !== 405) {
+      return false;
+    }
   } catch (error) {
-    return [];
+    // Fall through to an image probe when HEAD is unavailable.
   }
+  return probeImageSource(probeSrc);
+}
+
+function probeImageSource(src) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      image.onload = null;
+      image.onerror = null;
+      resolve(value);
+    };
+    const timer = window.setTimeout(() => finish(false), 5000);
+    image.onload = () => {
+      window.clearTimeout(timer);
+      finish(true);
+    };
+    image.onerror = () => {
+      window.clearTimeout(timer);
+      finish(false);
+    };
+    image.src = src;
+  });
+}
+
+function appendProbeQuery(src) {
+  const token = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return `${src}${src.includes("?") ? "&" : "?"}__probe=${token}`;
 }
 
 function normalizeManifestJson(text) {

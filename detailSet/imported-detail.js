@@ -16,9 +16,6 @@
     }
   };
 
-  const PERSONALIZATION_FILE = "../../assets/site_personalization.json";
-  const TYPES_FILE = "../../assets/project_types.csv";
-  const PROJECTS_FILE = "../../assets/projects.csv";
   const STYLE_ID = "tpl-shell-detail-style";
 
   const DEFAULT_PERSONALIZATION = Object.freeze({
@@ -35,6 +32,9 @@
     nextProject: null
   };
   let navThemeRaf = 0;
+  const PERSONALIZATION_FILE = resolvePageUrl("../../assets/site_personalization.json");
+  const TYPES_FILE = resolvePageUrl("../../assets/project_types.csv");
+  const PROJECTS_FILE = resolvePageUrl("../../assets/projects.csv");
 
   injectStyle();
   ensureHeader();
@@ -69,6 +69,14 @@
   function sanitizeBrandText(value) {
     const text = String(value || "").trim();
     return PLACEHOLDER_BRAND_TEXTS.has(text) ? "" : text;
+  }
+
+  function resolvePageUrl(relativePath) {
+    try {
+      return new URL(relativePath, window.location.href).href;
+    } catch (error) {
+      return relativePath;
+    }
   }
 
   function normalizePersonalization(raw) {
@@ -196,7 +204,8 @@
         padding: 5px 11px;
         border-radius: 16px;
         font-size: 0.8rem;
-        font-weight: 300;
+        font-weight: 500;
+        line-height: 1.25;
         letter-spacing: 0.06em;
         cursor: pointer;
         transition: color 220ms ease, border-color 220ms ease;
@@ -327,10 +336,10 @@
     const projectsLink = document.getElementById("tpl-shell-nav-projects");
     const aboutLink = document.getElementById("tpl-shell-nav-about");
     if (projectsLink) {
-      projectsLink.href = "../../../index.html";
+      projectsLink.href = resolvePageUrl("../../../index.html");
     }
     if (aboutLink) {
-      aboutLink.href = "../../../contents/aboutme/index.html";
+      aboutLink.href = resolvePageUrl("../../../contents/aboutme/index.html");
     }
   }
 
@@ -372,7 +381,7 @@
     const brand = document.getElementById("tpl-shell-brand");
     if (brand) {
       brand.addEventListener("click", () => {
-        window.location.href = "../../../index.html";
+        window.location.href = resolvePageUrl("../../../index.html");
       });
     }
 
@@ -581,8 +590,11 @@
 
   function getDetailLink(project) {
     const backToAll = new URLSearchParams(window.location.search).get("from") === "all";
-    const base = `../${project.id}/index.html`;
-    return backToAll ? `${base}?from=all` : base;
+    const url = new URL(`../${encodeURIComponent(String(project?.id || "").trim())}/index.html`, window.location.href);
+    if (backToAll) {
+      url.searchParams.set("from", "all");
+    }
+    return url.toString();
   }
 
   function getTypeLabel(typeId) {
