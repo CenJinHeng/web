@@ -47,33 +47,20 @@ const showAiTranslationNotice = () => {
 
     const note = document.createElement("div");
     note.className = "lang-ai-note";
-    note.textContent = "原文英文，AI生成中文翻译";
+    note.textContent = "中文翻译AI生成";
     document.body.appendChild(note);
 
-    const placeNote = () => {
-      const rect = langButton.getBoundingClientRect();
-      const edgeGap = window.matchMedia("(max-width: 760px)").matches ? 24 : 36;
-      note.style.left = "auto";
-      note.style.right = `${edgeGap}px`;
-      note.style.top = `${rect.bottom + edgeGap}px`;
-    };
-
     const teardown = () => {
-      window.removeEventListener("resize", placeNote);
-      window.removeEventListener("scroll", placeNote);
       note.classList.remove("is-visible");
       window.setTimeout(() => {
         note.remove();
       }, 220);
     };
 
-    placeNote();
     window.requestAnimationFrame(() => {
       note.classList.add("is-visible");
     });
 
-    window.addEventListener("resize", placeNote);
-    window.addEventListener("scroll", placeNote, { passive: true });
     window.setTimeout(teardown, 10000);
   };
 

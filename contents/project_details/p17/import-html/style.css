@@ -1,6 +1,6 @@
 :root {
   --content-w: min(993px, calc(100vw - 48px));
-  --nav-h: 52px;
+  --nav-h: 44px;
   --detail-outline-panel-width: min(360px, calc(100vw - 28px));
   --detail-outline-panel-top: calc(var(--nav-h) + 18px);
   --text: #2c2c29;
@@ -2692,7 +2692,7 @@ body.image-viewer-open {
 
 @media (max-width: 760px) {
   :root {
-    --nav-h: 62px;
+    --nav-h: 44px;
     --detail-outline-panel-width: min(320px, calc(100vw - 10px));
     --detail-outline-panel-top: calc(var(--nav-h) + 8px);
   }
@@ -3155,6 +3155,8 @@ body.image-viewer-open {
 
 .lang-ai-note {
   position: fixed;
+  left: 50%;
+  bottom: calc(4.375vh + env(safe-area-inset-bottom));
   z-index: 120;
   max-width: min(360px, calc(100vw - 24px));
   padding: 10px 18px;
@@ -3166,15 +3168,16 @@ body.image-viewer-open {
   font-size: 13px;
   line-height: var(--lh-tight);
   letter-spacing: 0;
+  text-align: center;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
   white-space: normal;
   opacity: 0;
-  transform: translateY(10px);
+  transform: translate(-50%, 10px);
   transition: opacity 220ms ease, transform 220ms ease;
   pointer-events: none;
 }
 
 .lang-ai-note.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, 0);
 }

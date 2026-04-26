@@ -264,30 +264,41 @@
       }
       @media (max-width: 760px) {
         .tpl-shell-detail-page {
-          --tpl-nav-height: 88px;
+          --tpl-nav-height: 44px;
         }
         .tpl-shell-header {
           padding-top: env(safe-area-inset-top);
         }
         .tpl-shell-header-inner {
           width: min(1200px, 100% - 24px);
-          align-items: flex-end;
+          align-items: center;
           min-height: var(--tpl-nav-height);
-          padding-bottom: 4px;
+          padding-bottom: 0;
         }
         .tpl-shell-brand-wrap {
-          align-items: flex-end;
+          align-items: center;
         }
         .tpl-shell-brand {
           font-size: 0.95rem;
           font-weight: 600;
-          line-height: 1;
+          line-height: 1.25;
           letter-spacing: 0.02em;
           padding: 8px 0;
         }
+        .tpl-shell-nav {
+          align-self: stretch;
+        }
         .tpl-shell-nav-link {
+          display: inline-flex;
+          align-items: center;
+          height: 100%;
+          padding-top: 0;
+          padding-bottom: 0;
           font-size: 0.95rem;
-          line-height: 1;
+          line-height: 1.25;
+        }
+        .tpl-shell-nav-link::after {
+          bottom: 0;
         }
         .tpl-shell-pagination {
           grid-template-columns: repeat(2, minmax(0, 1fr));
