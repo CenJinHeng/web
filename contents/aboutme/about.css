@@ -157,36 +157,50 @@ body[data-page="about"] {
 
 .view-filter {
   width: min(960px, 100%);
-  margin: clamp(30px, 4vw, 48px) auto 0;
+  margin: clamp(15px, 2vw, 24px) auto 0;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .view-filter-btn {
-  padding: 8px 34px;
-  font-size: 0.92rem;
-  font-weight: 600;
+  padding: 0 0 3px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.5;
   color: var(--muted);
-  background: #ffffff;
-  border-radius: 20px;
-  transition: transform 150ms ease, background 150ms ease, color 150ms ease;
+  background: transparent;
+  border-radius: 0;
+  position: relative;
+  transition: color 150ms ease;
 }
 
-.view-filter-btn:hover,
-.view-filter-btn:focus-visible {
-  transform: translateY(-1px);
+.view-filter-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #000000;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 150ms ease;
 }
 
 .view-filter-btn.is-active {
-  background: var(--accent);
-  color: #ffffff;
+  background: transparent;
+  color: #000000;
+}
+
+.view-filter-btn.is-active::after {
+  transform: scaleX(1);
 }
 
 .about-view {
   width: min(680px, 100%);
-  margin: 56px auto 0;
+  margin: 28px auto 0;
 }
 
 .about-page > .site-footer-copy {
@@ -675,7 +689,7 @@ body[data-page="about"] {
   }
 
   .about-view {
-    margin-top: 44px;
+    margin-top: 22px;
   }
 
   .view-filter {
@@ -734,12 +748,12 @@ body[data-page="about"] {
   }
 
   .view-filter {
-    gap: 10px;
+    gap: 18px;
   }
 
   .view-filter-btn {
-    padding: 7px 26px;
-    font-size: 0.88rem;
+    padding: 0 0 3px;
+    font-size: 0.82rem;
   }
 
   .position-item {

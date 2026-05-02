@@ -2,11 +2,11 @@
   const I18N = {
     zh: {
       navProjects: "项目",
-      navAbout: "关于我",
+      navAbout: "履历",
       langToggleAria: "切换语言"
     },
     en: {
-      navProjects: "Projects",
+      navProjects: "Work",
       navAbout: "About",
       langToggleAria: "Switch language"
     }
@@ -24,6 +24,7 @@
     footerBgRangesZh: [],
     footerBgRangesEn: []
   });
+  const NAV_BRAND_TEXT = "劲衡";
   const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
   const state = {
@@ -70,6 +71,14 @@
     return PLACEHOLDER_BRAND_TEXTS.has(text) ? "" : text;
   }
 
+  function resolvePageUrl(relativePath) {
+    try {
+      return new URL(relativePath, window.location.href).href;
+    } catch (error) {
+      return relativePath;
+    }
+  }
+
   function normalizePersonalization(raw) {
     const next = cloneDefaultPersonalization();
     if (!raw || typeof raw !== "object") return next;
@@ -102,25 +111,24 @@
     style.id = STYLE_ID;
     style.textContent = `
       .tpl-shell-about-page {
-        --tpl-nav-height: 44px;
+        --tpl-nav-height: 52px;
       }
       .tpl-shell-header {
-        background: rgba(255, 255, 255, 0.78);
-        border-bottom: 1px solid rgba(229, 224, 217, 0.6);
-        box-shadow: 0 6px 16px rgba(16, 24, 40, 0.06);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
+        background: #ffffff;
+        border-bottom: 0;
+        box-shadow: none;
         position: sticky;
         top: 0;
         z-index: 10;
-        font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
+        font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", sans-serif;
       }
       .tpl-shell-header-inner {
-        width: min(1200px, 100% - 32px);
+        width: 100%;
         margin: 0 auto;
+        padding: 0 24px;
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
         min-height: var(--tpl-nav-height);
         gap: 24px;
       }
@@ -131,62 +139,66 @@
         align-items: center;
       }
       .tpl-shell-brand {
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
         max-width: 100%;
         border: 0;
         background: transparent;
-        color: #6f6a64;
-        font-size: 0.95rem;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        line-height: 1;
+        color: #2b2b2b;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: normal;
         cursor: pointer;
         padding: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .tpl-shell-brand::before {
+        content: "";
+        flex: 0 0 25px;
+        width: 25px;
+        height: 25px;
+        background: url("${resolvePageUrl("../../contents/assets/nav-brand-icon.svg")}") center / contain no-repeat;
+      }
       .tpl-shell-nav {
         display: flex;
         align-items: center;
-        gap: 36px;
+        gap: 48px;
       }
       .tpl-shell-nav-link {
         position: relative;
-        padding: 8px 0;
-        font-weight: 600;
-        font-size: 1rem;
-        line-height: 1.4;
-        letter-spacing: 0.02em;
+        padding: 0;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: normal;
+        letter-spacing: 0;
         color: #6f6a64;
         text-decoration: none;
       }
       .tpl-shell-nav-link::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -4px;
-        height: 2px;
-        background: #000000;
-        transform: scaleX(0);
-        transform-origin: center;
+        display: none;
       }
       .tpl-shell-nav-link.is-active {
         color: #000000;
       }
       .tpl-shell-nav-link.is-active::after {
-        transform: scaleX(1);
+        transform: none;
       }
       .tpl-shell-lang-toggle {
         border: 1px solid #6f6a64;
         background: transparent;
         color: #6f6a64;
-        padding: 5px 11px;
-        border-radius: 16px;
-        font-size: 0.8rem;
-        font-weight: 300;
-        letter-spacing: 0.06em;
+        width: 47px;
+        height: 25px;
+        padding: 0;
+        border-radius: 10px;
+        font-size: 12.8px;
+        font-weight: 400;
+        line-height: 23px;
+        letter-spacing: 0;
         cursor: pointer;
       }
       .tpl-shell-footer { max-width: 1200px; margin: 36px auto 20px; padding: 0 24px; color: #6d6d6d; font-size: 0.95rem; line-height: 1.7; }
@@ -216,41 +228,68 @@
       }
       @media (max-width: 1000px) {
         .tpl-shell-nav {
-          gap: 24px;
+          gap: 32px;
         }
       }
       @media (max-width: 760px) {
         .tpl-shell-about-page {
-          --tpl-nav-height: 88px;
+          --tpl-nav-height: 52px;
         }
         .tpl-shell-header {
           padding-top: env(safe-area-inset-top);
         }
         .tpl-shell-header-inner {
-          width: min(1200px, 100% - 24px);
-          align-items: flex-end;
+          align-items: center;
           min-height: var(--tpl-nav-height);
-          padding-bottom: 4px;
+          gap: 16px;
+          padding: 0 16px;
+          padding-bottom: 0;
         }
         .tpl-shell-brand-wrap {
-          align-items: flex-end;
+          align-items: center;
         }
         .tpl-shell-brand {
-          font-size: 0.95rem;
-          font-weight: 600;
-          line-height: 1;
-          letter-spacing: 0.02em;
-          padding: 8px 0;
+          gap: 9px;
+          font-size: 15px;
+          font-weight: 400;
+          line-height: normal;
+          letter-spacing: 0;
+          padding: 0;
+        }
+        .tpl-shell-nav {
+          gap: 24px;
         }
         .tpl-shell-nav-link {
-          font-size: 0.95rem;
-          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          height: 100%;
+          padding-top: 0;
+          padding-bottom: 0;
+          font-size: 15px;
+          line-height: normal;
+        }
+        .tpl-shell-lang-toggle {
+          width: 44px;
+          height: 25px;
+          font-size: 12px;
+          line-height: 23px;
         }
         .tpl-shell-footer { padding: 0 12px; margin-top: 24px; }
       }
       @media (max-width: 520px) {
+        .tpl-shell-header-inner {
+          padding: 0 12px;
+        }
         .tpl-shell-nav {
-          gap: 18px;
+          gap: 14px;
+        }
+        .tpl-shell-brand {
+          gap: 6px;
+        }
+        .tpl-shell-brand::before {
+          flex-basis: 22px;
+          width: 22px;
+          height: 22px;
         }
       }
     `;
@@ -336,11 +375,7 @@
       langBtn.setAttribute("aria-label", strings.langToggleAria);
     }
     if (brand) {
-      const currentLabel = sanitizeBrandText(brand.textContent);
-      const label = state.lang === "zh"
-        ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
-        : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
-      brand.textContent = label;
+      brand.textContent = NAV_BRAND_TEXT;
     }
   }
 

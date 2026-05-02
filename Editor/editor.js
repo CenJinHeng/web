@@ -2,7 +2,7 @@ const i18n = {
   zh: {
     nav: {
       projects: "项目",
-      about: "关于我",
+      about: "履历",
       ariaLabel: "主导航",
       langToggleAria: "切换语言"
     },
@@ -219,11 +219,6 @@ const i18n = {
     },
     personalize: {
       title: "个性化设置",
-      brandGroupTitle: "导航栏左侧标题",
-      brandLabelZh: "导航栏左侧标题（中文）",
-      brandLabelEn: "导航栏左侧标题（英文）",
-      brandPlaceholderZh: "XXX的个人空间",
-      brandPlaceholderEn: "XXX's Space",
       footerEnable: "启用项目页底部文案",
       footerPlaceholder: "在这里编辑底部文案...",
       fontIncrease: "字号增大",
@@ -247,7 +242,7 @@ const i18n = {
   },
   en: {
     nav: {
-      projects: "Projects",
+      projects: "Work",
       about: "About",
       ariaLabel: "Primary",
       langToggleAria: "Switch language"
@@ -465,11 +460,6 @@ const i18n = {
     },
     personalize: {
       title: "Personalization",
-      brandGroupTitle: "Left Navbar Title",
-      brandLabelZh: "Left Navbar Title (ZH)",
-      brandLabelEn: "Left Navbar Title (EN)",
-      brandPlaceholderZh: "XXX's Chinese Space",
-      brandPlaceholderEn: "XXX's Space",
       footerEnable: "Enable footer text on project page",
       footerPlaceholder: "Write footer text here...",
       fontIncrease: "Increase Size",
@@ -503,14 +493,13 @@ const PERSONALIZATION_FILE = "site_personalization.json";
 const ABOUT_DATA_FILE = "about-data.js";
 const ABOUT_CONTENT_FILE = "index.html";
 const DEFAULT_PERSONALIZATION = Object.freeze({
-  navBrandTextZh: "",
-  navBrandTextEn: "",
   footerEnabled: false,
   footerHtmlZh: "",
   footerHtmlEn: "",
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
+const NAV_BRAND_TEXT = "劲衡";
 const DEFAULT_ABOUT_I18N = Object.freeze({
   zh: {
     page: {
@@ -518,7 +507,7 @@ const DEFAULT_ABOUT_I18N = Object.freeze({
     },
     nav: {
       projects: "项目",
-      about: "关于我",
+      about: "履历",
       ariaLabel: "主导航",
       langToggleAria: "切换语言"
     },
@@ -532,7 +521,7 @@ const DEFAULT_ABOUT_I18N = Object.freeze({
       title: "About"
     },
     nav: {
-      projects: "Projects",
+      projects: "Work",
       about: "About",
       ariaLabel: "Primary",
       langToggleAria: "Switch language"
@@ -599,8 +588,6 @@ function getLegacyDetailFolder(project) {
 
 function cloneDefaultPersonalization() {
   return {
-    navBrandTextZh: DEFAULT_PERSONALIZATION.navBrandTextZh,
-    navBrandTextEn: DEFAULT_PERSONALIZATION.navBrandTextEn,
     footerEnabled: DEFAULT_PERSONALIZATION.footerEnabled,
     footerHtmlZh: DEFAULT_PERSONALIZATION.footerHtmlZh,
     footerHtmlEn: DEFAULT_PERSONALIZATION.footerHtmlEn,
@@ -3025,12 +3012,6 @@ function normalizePersonalization(raw) {
   const next = cloneDefaultPersonalization();
   if (!raw || typeof raw !== "object") return next;
 
-  const legacyBrand = String(raw.navBrandText ?? raw.brandText ?? raw.nav_brand_text ?? "").trim();
-  const brandZh = String(raw.navBrandTextZh ?? raw.nav_brand_text_zh ?? legacyBrand).trim();
-  const brandEn = String(raw.navBrandTextEn ?? raw.nav_brand_text_en ?? legacyBrand).trim();
-  next.navBrandTextZh = brandZh || DEFAULT_PERSONALIZATION.navBrandTextZh;
-  next.navBrandTextEn = brandEn || DEFAULT_PERSONALIZATION.navBrandTextEn;
-
   const footerFlag = raw.footerEnabled ?? raw.footer_enabled;
   next.footerEnabled = typeof footerFlag === "boolean" ? footerFlag : Boolean(footerFlag);
 
@@ -3061,12 +3042,6 @@ async function loadPersonalization() {
 }
 
 function renderPersonalizationForm() {
-  if (elements.personalizeBrandTextZh) {
-    elements.personalizeBrandTextZh.value = state.personalization.navBrandTextZh || DEFAULT_PERSONALIZATION.navBrandTextZh;
-  }
-  if (elements.personalizeBrandTextEn) {
-    elements.personalizeBrandTextEn.value = state.personalization.navBrandTextEn || DEFAULT_PERSONALIZATION.navBrandTextEn;
-  }
   if (elements.personalizeFooterEnabled) {
     elements.personalizeFooterEnabled.checked = Boolean(state.personalization.footerEnabled);
   }
@@ -4895,18 +4870,12 @@ function enterColumnsEditMode(context, block, preferredCell = null) {
 
 function collectPersonalizationFromForm() {
   persistPersonalizationDraftFromEditor();
-  const navBrandTextZh = String(elements.personalizeBrandTextZh?.value || "").trim()
-    || DEFAULT_PERSONALIZATION.navBrandTextZh;
-  const navBrandTextEn = String(elements.personalizeBrandTextEn?.value || "").trim()
-    || DEFAULT_PERSONALIZATION.navBrandTextEn;
   const footerEnabled = Boolean(elements.personalizeFooterEnabled?.checked);
-    const footerHtmlZh = normalizeDetailLikeHtml(state.personalizeFooterDraftHtml.zh || "");
-    const footerHtmlEn = normalizeDetailLikeHtml(state.personalizeFooterDraftHtml.en || "");
+  const footerHtmlZh = normalizeDetailLikeHtml(state.personalizeFooterDraftHtml.zh || "");
+  const footerHtmlEn = normalizeDetailLikeHtml(state.personalizeFooterDraftHtml.en || "");
   const footerBgRangesZh = normalizeLineRanges(state.personalizeFooterBgRanges.zh || []);
   const footerBgRangesEn = normalizeLineRanges(state.personalizeFooterBgRanges.en || []);
   return {
-    navBrandTextZh,
-    navBrandTextEn,
     footerEnabled,
     footerHtmlZh,
     footerHtmlEn,
@@ -6096,7 +6065,7 @@ function buildAboutContentPage(contentByLang) {
       </div>
       <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
         <a class="nav-btn" href="../../index.html" data-i18n="nav.projects">项目</a>
-        <a class="nav-btn is-active" aria-current="page" href="index.html" data-i18n="nav.about">关于我</a>
+        <a class="nav-btn is-active" aria-current="page" href="index.html" data-i18n="nav.about">履历</a>
         <button class="lang-toggle" type="button" data-lang-toggle data-i18n-attr="aria-label:nav.langToggleAria">EN</button>
       </nav>
     </div>
@@ -8852,7 +8821,7 @@ function buildDetailHtml(project, contentHtml) {
       </div>
       <nav class="top-nav" data-i18n-attr="aria-label:nav.ariaLabel">
         <a class="nav-btn is-active" aria-current="page" href="../../../index.html" data-i18n="nav.projects">项目</a>
-        <a class="nav-btn" href="../../../contents/aboutme/index.html" data-i18n="nav.about">关于我</a>
+        <a class="nav-btn" href="../../../contents/aboutme/index.html" data-i18n="nav.about">履历</a>
         <button class="lang-toggle" type="button" data-lang-toggle data-i18n-attr="aria-label:nav.langToggleAria">EN</button>
       </nav>
     </div>
@@ -11152,9 +11121,7 @@ async function openDetailPreview() {
   const navProjects = escapeHtml(previewLang === "zh" ? i18n.zh.nav.projects : i18n.en.nav.projects);
   const navAbout = escapeHtml(previewLang === "zh" ? i18n.zh.nav.about : i18n.en.nav.about);
   const navAria = escapeHtmlAttribute(previewLang === "zh" ? i18n.zh.nav.ariaLabel : i18n.en.nav.ariaLabel);
-  const navBrandText = previewLang === "zh"
-    ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || DEFAULT_PERSONALIZATION.navBrandTextZh)
-    : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || DEFAULT_PERSONALIZATION.navBrandTextEn);
+  const navBrandText = NAV_BRAND_TEXT;
   const navInitialTheme = normalizeNavInitialTheme(state.detailNavInitialTheme);
   const previewRanges = getRangeListByLangWithFallback(
     state.detailBgRanges,
@@ -11701,9 +11668,7 @@ async function openAboutPreview() {
   const navProjects = escapeHtml(DEFAULT_ABOUT_I18N[previewLang].nav.projects);
   const navAbout = escapeHtml(DEFAULT_ABOUT_I18N[previewLang].nav.about);
   const navAria = escapeHtmlAttribute(DEFAULT_ABOUT_I18N[previewLang].nav.ariaLabel);
-  const previewBrandText = previewLang === "zh"
-    ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || DEFAULT_PERSONALIZATION.navBrandTextZh)
-    : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || DEFAULT_PERSONALIZATION.navBrandTextEn);
+  const previewBrandText = NAV_BRAND_TEXT;
   const footerHtmlRaw = previewLang === "zh"
     ? (state.personalization.footerHtmlZh || state.personalization.footerHtmlEn || "")
     : (state.personalization.footerHtmlEn || state.personalization.footerHtmlZh || "");

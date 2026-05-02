@@ -7,13 +7,13 @@
 - `editor.html`：项目编辑器入口。
 - `Editor/editor.css`：编辑器样式。
 - `Editor/editor.js`：编辑器逻辑（连接目录、项目 CRUD、类型管理、详情页编辑与保存）。
-- `aboutme/about.css`、`aboutme/about.js`：About 公共样式与脚本（导航栏左侧标题、底部文案与多语言内容渲染）。
+- `aboutme/about.css`、`aboutme/about.js`：About 公共样式与脚本（底部文案与多语言内容渲染）。
 - `detailSet/detail.css`、`detailSet/detail.js`：详情页公共模板样式与逻辑。
 - `contents/aboutme/index.html`：About 内容文件（编辑器保存关于我时固定写入这里）。
 - `contents/aboutme/assets/`：About 资源目录（图片/附件等）。
 - `contents/assets/projects.csv`：项目主数据表。
 - `contents/assets/project_types.csv`：项目类型数据表。
-- `contents/assets/site_personalization.json`：导航左侧标题（中英文）与项目页底部文案配置。
+- `contents/assets/site_personalization.json`：项目页底部文案配置。
 - `contents/project_details/<项目ID>/index.html`：项目详情页文件。
 - `contents/project_details/<项目ID>/assets/`：项目详情和封面等资源目录。
 
@@ -32,7 +32,7 @@
 ## 4. 编辑器行为
 - 编辑器有三个页签：
   - `编辑项目`：项目和详情内容管理。
-  - `编辑主页`：导航栏左侧标题（中英文）与项目页底部文案编辑。
+  - `编辑主页`：项目页底部文案编辑。
   - `编辑关于我`：关于我内容编辑（中英文）。
 - 编辑器不会在“仅连接目录”时自动创建 `contents/`。
 - 只有执行保存（项目、类型、详情）时才按需创建目录/文件。

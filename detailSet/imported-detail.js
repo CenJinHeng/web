@@ -2,13 +2,13 @@
   const I18N = {
     zh: {
       navProjects: "项目",
-      navAbout: "关于我",
+      navAbout: "履历",
       prev: "上一个项目",
       next: "下一个项目",
       langToggleAria: "切换语言"
     },
     en: {
-      navProjects: "Projects",
+      navProjects: "Work",
       navAbout: "About",
       prev: "Previous Project",
       next: "Next Project",
@@ -22,6 +22,7 @@
     navBrandTextZh: "",
     navBrandTextEn: ""
   });
+  const NAV_BRAND_TEXT = "劲衡";
   const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
   const state = {
@@ -98,33 +99,34 @@
     style.id = STYLE_ID;
     style.textContent = `
       .tpl-shell-detail-page {
-        --tpl-nav-height: 44px;
+        --tpl-nav-height: 52px;
       }
       .tpl-shell-header {
-        background: rgba(255, 255, 255, 0.78);
-        border-bottom: 1px solid rgba(229, 224, 217, 0.6);
-        box-shadow: 0 6px 16px rgba(16, 24, 40, 0.06);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
+        background: #ffffff;
+        border-bottom: 0;
+        box-shadow: none;
         position: sticky;
         top: 0;
         z-index: 10;
-        font-family: "Space Grotesk", "Noto Sans SC", sans-serif;
-        transition: background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+        font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", "Hiragino Sans GB", sans-serif;
+        transition: background-color 220ms ease, transform 240ms ease;
+        will-change: transform;
+      }
+      .tpl-shell-header.is-nav-hidden {
+        transform: translateY(-100%);
       }
       .tpl-shell-header.is-nav-dark {
         background: rgb(44, 44, 41);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.24);
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
+        border-bottom: 0;
+        box-shadow: none;
       }
       .tpl-shell-header-inner {
-        width: min(1200px, 100% - 32px);
+        width: 100%;
         margin: 0 auto;
+        padding: 0 24px;
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
         min-height: var(--tpl-nav-height);
         gap: 24px;
       }
@@ -135,15 +137,17 @@
         align-items: center;
       }
       .tpl-shell-brand {
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
         max-width: 100%;
         border: 0;
         background: transparent;
-        color: #6f6a64;
-        font-size: 0.95rem;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        line-height: 1;
+        color: #2b2b2b;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: 0;
+        line-height: normal;
         cursor: pointer;
         padding: 0;
         white-space: nowrap;
@@ -151,42 +155,40 @@
         text-overflow: ellipsis;
         transition: color 220ms ease;
       }
+      .tpl-shell-brand::before {
+        content: "";
+        flex: 0 0 25px;
+        width: 25px;
+        height: 25px;
+        background: url("${resolvePageUrl("../../../contents/assets/nav-brand-icon.svg")}") center / contain no-repeat;
+      }
       .tpl-shell-header.is-nav-dark .tpl-shell-brand {
         color: #f2f2f2;
       }
       .tpl-shell-nav {
         display: flex;
         align-items: center;
-        gap: 36px;
+        gap: 48px;
       }
       .tpl-shell-nav-link {
         position: relative;
-        padding: 8px 0;
-        font-weight: 600;
-        font-size: 1rem;
-        line-height: 1.4;
-        letter-spacing: 0.02em;
+        padding: 0;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: normal;
+        letter-spacing: 0;
         color: #6f6a64;
         text-decoration: none;
         transition: color 220ms ease;
       }
       .tpl-shell-nav-link::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -4px;
-        height: 2px;
-        background: #000000;
-        transform: scaleX(0);
-        transform-origin: center;
-        transition: background-color 220ms ease, transform 220ms ease;
+        display: none;
       }
       .tpl-shell-nav-link.is-active {
         color: #000000;
       }
       .tpl-shell-nav-link.is-active::after {
-        transform: scaleX(1);
+        transform: none;
       }
       .tpl-shell-header.is-nav-dark .tpl-shell-nav-link {
         color: rgba(242, 242, 242, 0.78);
@@ -201,12 +203,14 @@
         border: 1px solid #6f6a64;
         background: transparent;
         color: #6f6a64;
-        padding: 5px 11px;
-        border-radius: 16px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        line-height: 1.25;
-        letter-spacing: 0.06em;
+        width: 47px;
+        height: 25px;
+        padding: 0;
+        border-radius: 10px;
+        font-size: 12.8px;
+        font-weight: 400;
+        line-height: 23px;
+        letter-spacing: 0;
         cursor: pointer;
         transition: color 220ms ease, border-color 220ms ease;
       }
@@ -259,34 +263,37 @@
       .tpl-shell-nav-meta { display: block; color: #6f6a64; font-size: 0.9rem; }
       @media (max-width: 1000px) {
         .tpl-shell-nav {
-          gap: 24px;
+          gap: 32px;
         }
       }
       @media (max-width: 760px) {
         .tpl-shell-detail-page {
-          --tpl-nav-height: 44px;
+          --tpl-nav-height: 52px;
         }
         .tpl-shell-header {
           padding-top: env(safe-area-inset-top);
         }
         .tpl-shell-header-inner {
-          width: min(1200px, 100% - 24px);
           align-items: center;
           min-height: var(--tpl-nav-height);
+          gap: 16px;
+          padding: 0 16px;
           padding-bottom: 0;
         }
         .tpl-shell-brand-wrap {
           align-items: center;
         }
         .tpl-shell-brand {
-          font-size: 0.95rem;
-          font-weight: 600;
-          line-height: 1.25;
-          letter-spacing: 0.02em;
-          padding: 8px 0;
+          gap: 9px;
+          font-size: 15px;
+          font-weight: 400;
+          line-height: normal;
+          letter-spacing: 0;
+          padding: 0;
         }
         .tpl-shell-nav {
           align-self: stretch;
+          gap: 24px;
         }
         .tpl-shell-nav-link {
           display: inline-flex;
@@ -294,11 +301,14 @@
           height: 100%;
           padding-top: 0;
           padding-bottom: 0;
-          font-size: 0.95rem;
-          line-height: 1.25;
+          font-size: 15px;
+          line-height: normal;
         }
-        .tpl-shell-nav-link::after {
-          bottom: 0;
+        .tpl-shell-lang-toggle {
+          width: 44px;
+          height: 25px;
+          font-size: 12px;
+          line-height: 23px;
         }
         .tpl-shell-pagination {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -311,8 +321,24 @@
         }
       }
       @media (max-width: 520px) {
+        .tpl-shell-header-inner {
+          padding: 0 12px;
+        }
         .tpl-shell-nav {
-          gap: 18px;
+          gap: 14px;
+        }
+        .tpl-shell-brand {
+          gap: 6px;
+        }
+        .tpl-shell-brand::before {
+          flex-basis: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tpl-shell-header {
+          transition: none;
         }
       }
     `;
@@ -396,8 +422,46 @@
       });
     }
 
+    setupNavAutoHide();
     window.addEventListener("resize", queueNavThemeUpdate);
     window.addEventListener("scroll", queueNavThemeUpdate, { passive: true });
+  }
+
+  function setupNavAutoHide() {
+    const header = document.querySelector("[data-template-shell='detail-header']");
+    if (!header || header.dataset.autoHideBound === "1") return;
+    header.dataset.autoHideBound = "1";
+
+    let lastScrollY = Math.max(0, window.scrollY || 0);
+    let ticking = false;
+    const minDelta = 6;
+
+    const update = () => {
+      const currentScrollY = Math.max(0, window.scrollY || 0);
+      const delta = currentScrollY - lastScrollY;
+      const navHeight = header.offsetHeight || 52;
+
+      if (currentScrollY <= navHeight) {
+        header.classList.remove("is-nav-hidden");
+      } else if (delta > minDelta) {
+        header.classList.add("is-nav-hidden");
+      } else if (delta < -minDelta) {
+        header.classList.remove("is-nav-hidden");
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }, { passive: true });
+
+    header.addEventListener("focusin", () => {
+      header.classList.remove("is-nav-hidden");
+    });
   }
 
   function queueNavThemeUpdate() {
@@ -502,11 +566,7 @@
       langBtn.setAttribute("aria-label", strings.langToggleAria);
     }
     if (brand) {
-      const currentLabel = sanitizeBrandText(brand.textContent);
-      const label = state.lang === "zh"
-        ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
-        : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
-      brand.textContent = label;
+      brand.textContent = NAV_BRAND_TEXT;
     }
   }
 

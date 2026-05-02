@@ -2,7 +2,7 @@ const detailI18n = {
   zh: {
     nav: {
       projects: "项目",
-      about: "关于我",
+      about: "履历",
       ariaLabel: "主导航",
       langToggleAria: "切换语言"
     },
@@ -19,7 +19,7 @@ const detailI18n = {
   },
   en: {
     nav: {
-      projects: "Projects",
+      projects: "Work",
       about: "About",
       ariaLabel: "Primary",
       langToggleAria: "Switch language"
@@ -47,6 +47,7 @@ const DEFAULT_PERSONALIZATION = Object.freeze({
   navBrandTextZh: "",
   navBrandTextEn: ""
 });
+const NAV_BRAND_TEXT = "劲衡";
 const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
 const langToggle = document.querySelector("[data-lang-toggle]");
@@ -108,6 +109,7 @@ let lightboxPrevHtmlOverflow = "";
 
 normalizeNavTemplate();
 setupBrandNavigation();
+setupDetailNavAutoHide();
 setupOutline();
 setupImageLightbox();
 applyI18n(state.lang);
@@ -1201,6 +1203,40 @@ function setupBrandNavigation() {
   siteBrandText.addEventListener("click", openProjectsPage);
 }
 
+function setupDetailNavAutoHide() {
+  if (!siteHeader) return;
+  let lastScrollY = Math.max(0, window.scrollY || 0);
+  let ticking = false;
+  const minDelta = 6;
+
+  const update = () => {
+    const currentScrollY = Math.max(0, window.scrollY || 0);
+    const delta = currentScrollY - lastScrollY;
+    const navHeight = siteHeader.offsetHeight || 52;
+
+    if (currentScrollY <= navHeight) {
+      siteHeader.classList.remove("is-nav-hidden");
+    } else if (delta > minDelta) {
+      siteHeader.classList.add("is-nav-hidden");
+    } else if (delta < -minDelta) {
+      siteHeader.classList.remove("is-nav-hidden");
+    }
+
+    lastScrollY = currentScrollY;
+    ticking = false;
+  };
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+
+  siteHeader.addEventListener("focusin", () => {
+    siteHeader.classList.remove("is-nav-hidden");
+  });
+}
+
 function normalizeNavTemplate() {
   const brand = document.querySelector(".header-inner .brand");
   if (brand && !siteBrandText) {
@@ -1272,11 +1308,7 @@ async function loadPersonalization() {
 
 function applyPersonalization() {
   if (!siteBrandText) return;
-  const currentLabel = sanitizeBrandText(siteBrandText.textContent);
-  const label = state.lang === "zh"
-    ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
-    : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
-  siteBrandText.textContent = label;
+  siteBrandText.textContent = NAV_BRAND_TEXT;
 }
 
 async function loadTypes() {

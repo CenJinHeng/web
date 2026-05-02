@@ -9,6 +9,7 @@ const DEFAULT_PERSONALIZATION = Object.freeze({
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
+const NAV_BRAND_TEXT = "劲衡";
 const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
 const langToggle = document.querySelector("[data-lang-toggle]");
@@ -28,7 +29,7 @@ const DEFAULT_ABOUT_I18N = {
     page: { title: "关于我" },
     nav: {
       projects: "项目",
-      about: "关于我",
+      about: "履历",
       ariaLabel: "主导航",
       langToggleAria: "切换语言"
     },
@@ -40,7 +41,7 @@ const DEFAULT_ABOUT_I18N = {
   en: {
     page: { title: "About" },
     nav: {
-      projects: "Projects",
+      projects: "Work",
       about: "About",
       ariaLabel: "Primary",
       langToggleAria: "Switch language"
@@ -371,11 +372,7 @@ async function loadPersonalization() {
 
 function applyPersonalization() {
   if (siteBrandText) {
-    const currentLabel = sanitizeBrandText(siteBrandText.textContent);
-    const label = state.lang === "zh"
-      ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
-      : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
-    siteBrandText.textContent = label;
+    siteBrandText.textContent = NAV_BRAND_TEXT;
   }
 
   if (!siteFooterCopy) return;

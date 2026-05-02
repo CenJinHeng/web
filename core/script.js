@@ -5,7 +5,7 @@ const i18n = {
     },
     nav: {
       projects: "项目",
-      about: "关于我",
+      about: "履历",
       ariaLabel: "主导航",
       langToggleAria: "切换语言"
     },
@@ -24,7 +24,7 @@ const i18n = {
       title: "Jinheng Portfolio"
     },
     nav: {
-      projects: "Projects",
+      projects: "Work",
       about: "About",
       ariaLabel: "Primary",
       langToggleAria: "Switch language"
@@ -59,6 +59,7 @@ const DEFAULT_PERSONALIZATION = Object.freeze({
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
+const NAV_BRAND_TEXT = "劲衡";
 const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
 function cloneDefaultPersonalization() {
@@ -81,14 +82,12 @@ function sanitizeBrandText(value) {
 const state = {
   lang: detectLanguage(),
   filter: getInitialFilterFromUrl(),
-  mobileFiltersOpen: false,
   contentBase: "contents",
   dataSignature: "",
   loadingData: false,
   localContentsHandle: null,
   personalization: cloneDefaultPersonalization()
 };
-let isCompactFilters = window.matchMedia("(max-width: 720px)").matches;
 
 const grid = document.getElementById("project-grid");
 const emptyState = document.getElementById("empty-state");
@@ -121,19 +120,11 @@ if (langToggle) {
 
 if (filterContainer) {
   filterContainer.addEventListener("click", (event) => {
-    const toggle = event.target.closest(".filter-menu-toggle");
-    if (toggle) {
-      state.mobileFiltersOpen = !state.mobileFiltersOpen;
-      renderFilters();
-      return;
-    }
-
     const button = event.target.closest(".filter-btn");
     if (!button) return;
     const filter = button.dataset.filter || "all";
     if (filter === state.filter) return;
     state.filter = filter;
-    state.mobileFiltersOpen = false;
     renderFilters();
     renderProjects();
   });
@@ -280,11 +271,7 @@ function parsePersonalizationText(text) {
 
 function applyPersonalization() {
   if (siteBrandText) {
-    const currentLabel = sanitizeBrandText(siteBrandText.textContent);
-    const label = state.lang === "zh"
-      ? (state.personalization.navBrandTextZh || state.personalization.navBrandTextEn || currentLabel)
-      : (state.personalization.navBrandTextEn || state.personalization.navBrandTextZh || currentLabel);
-    siteBrandText.textContent = label;
+    siteBrandText.textContent = NAV_BRAND_TEXT;
   }
 
   if (!siteFooterCopy) return;
@@ -1005,11 +992,6 @@ function renderFilters() {
   filterContainer.innerHTML = "";
 
   const strings = i18n[state.lang] || i18n.en;
-  if (isCompactFilters) {
-    renderCompactFilters(strings);
-    return;
-  }
-
   const allButton = createFilterButton("all", strings.filters.all, state.filter === "all");
   filterContainer.appendChild(allButton);
 
@@ -1025,51 +1007,6 @@ function renderFilters() {
 function handleWindowResize() {
   scheduleMasonryLayout();
   updateFooterBackgroundExtent();
-  const nextCompact = window.matchMedia("(max-width: 720px)").matches;
-  if (nextCompact === isCompactFilters) return;
-  isCompactFilters = nextCompact;
-  if (!isCompactFilters) {
-    state.mobileFiltersOpen = false;
-  }
-  renderFilters();
-}
-
-function renderCompactFilters(strings) {
-  const row = document.createElement("div");
-  row.className = "filter-compact-row";
-
-  const allButton = createFilterButton("all", strings.filters.all, state.filter === "all");
-  row.appendChild(allButton);
-
-  const visibleTypes = getVisibleProjectTypes();
-  if (visibleTypes.length) {
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "filter-menu-toggle";
-    toggle.classList.toggle("is-active", state.mobileFiltersOpen || state.filter !== "all");
-    toggle.setAttribute("aria-expanded", state.mobileFiltersOpen ? "true" : "false");
-    toggle.setAttribute("aria-label", state.mobileFiltersOpen ? strings.filters.close : strings.filters.more);
-    toggle.title = state.mobileFiltersOpen ? strings.filters.close : strings.filters.more;
-    toggle.textContent = state.mobileFiltersOpen ? "✕" : "☰";
-    row.appendChild(toggle);
-  }
-
-  filterContainer.appendChild(row);
-
-  if (!visibleTypes.length || !state.mobileFiltersOpen) return;
-
-  const menu = document.createElement("div");
-  menu.className = "filter-mobile-menu";
-
-  visibleTypes.forEach((type) => {
-    const text = state.lang === "zh"
-      ? (type.name_zh || type.name_en || type.id)
-      : (type.name_en || type.name_zh || type.id);
-    const button = createFilterButton(type.id, text, state.filter === type.id);
-    menu.appendChild(button);
-  });
-
-  filterContainer.appendChild(menu);
 }
 
 function createFilterButton(filter, text, isActive) {
