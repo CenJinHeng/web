@@ -2,18 +2,19 @@ id,name_zh,name_en,type,date,rank,tags,image,hidden
 p01,面向岛民的洪水风险决策工具,Flood Risk Dashboard for Residents,t1,2025-09,2,,contents/project_details/p01/assets/cover.jpg,
 p02,宾大导航页和选课系统优化,Path@Penn Redesign,t1,2025-10,1,,contents/project_details/p02/assets/cover.jpg,
 p03,Petpet: 宠物记录App设计,Petpet—Pet Comunity App Design,t1,2025-12,3,,contents/project_details/p03/assets/cover.jpg,
-p04,“场景化+游戏化”的社区参与画板,Engagement Dashboard for Trail Planning,t1,2026-01,4,,contents/project_details/p04/assets/cover.jpg,1
-p05,深圳创新空间支持要素研究,Research on Support Factors for Innovation Spaces in Shenzhen,t2,2024-04,5,,contents/project_details/p05/assets/cover.png,
-p06,社交媒体舆情分析,Can we measure public perception during disasters using social media data?,t2,2023-11,6,,contents/project_details/p06/assets/cover.jpg,
-p07,基于大众点评数据的广州食街评价体系构建和研究,Discover the Authenic Food,t2,2023-11,8,,contents/project_details/p07/assets/cover.png,1
-p08,生境织网，龙船环游——根植于珠江水系和村落龙舟文化的城市设计,Urban design focusing on reconstructing ecological networks and preserving dragon boat culture,t3,2023-05,11,,contents/project_details/p08/assets/cover.png,
-p09,“显形发展”——基于市场共识的广州火车站北片区设计与开发方案,“Shaping Development”——Design and Development Plan for the Northern Area of Guangzhou Railway Station Based on Market Consensus,t3,2024-08,10,,contents/project_details/p09/assets/cover.png,
-p10,基于百万出行数据的城市区域分析,Travel Simulation Based on Millions O-D Travel Data,t2,2023-01,9,,contents/project_details/p10/assets/cover.jpg,
-p11,书店设计“泛波”,"Bookstore Design——""Rippling Waves""",t3,2021-04,16,,contents/project_details/p11/assets/cover.jpg,
-p12,客运站设计“轻帆”,"Station Design——""Light Sail""",t3,2021-12,14,,contents/project_details/p12/assets/cover.png,
-p13,博物馆设计,Museum Design,t3,2022-03,13,,contents/project_details/p13/assets/cover.png,
-p14,竹构作品“竹盏”,Bamboo Work,t4,2021-09,15,,contents/project_details/p14/assets/cover.png,1
-p15,Minecraft游戏建模作品“城市”,Minecraft Work——City,t4,2020-01,17,,contents/project_details/p15/assets/cover.png,
-p16,Minecraft游戏建模作品“水鸟世界”,Minecraft Work——Waterbird World,t4,2020-09,18,,contents/project_details/p16/assets/cover.png,1
-p17,城市环境对野生动物活动的影响研究,Wildlife in the City,t2,2026-04,7,,contents/project_details/p17/assets/cover.png,
-p18,绿链山居——缝合城乡的未来社区综合体探索,StitchVille: A Future Community Bridging Urban and Rural,t3,2022-07,12,,contents/project_details/p18/assets/cover.png,
+p04,“场景化+游戏化”的社区参与画板,Engagement Dashboard for Trail Planning,t1,2026-01,5,,contents/project_details/p04/assets/cover.jpg,1
+p05,深圳创新空间支持要素研究,Research on Support Factors for Innovation Spaces in Shenzhen,t2,2024-04,6,,contents/project_details/p05/assets/cover.png,
+p06,社交媒体舆情分析,Can we measure public perception during disasters using social media data?,t2,2023-11,7,,contents/project_details/p06/assets/cover.jpg,
+p07,基于大众点评数据的广州食街评价体系构建和研究,Discover the Authenic Food,t2,2023-11,9,,contents/project_details/p07/assets/cover.png,1
+p08,生境织网，龙船环游——根植于珠江水系和村落龙舟文化的城市设计,Urban design focusing on reconstructing ecological networks and preserving dragon boat culture,t3,2023-05,12,,contents/project_details/p08/assets/cover.png,
+p09,“显形发展”——基于市场共识的广州火车站北片区设计与开发方案,“Shaping Development”——Design and Development Plan for the Northern Area of Guangzhou Railway Station Based on Market Consensus,t3,2024-08,11,,contents/project_details/p09/assets/cover.png,
+p10,基于百万出行数据的城市区域分析,Travel Simulation Based on Millions O-D Travel Data,t2,2023-01,10,,contents/project_details/p10/assets/cover.jpg,
+p11,书店设计“泛波”,"Bookstore Design——""Rippling Waves""",t3,2021-04,17,,contents/project_details/p11/assets/cover.jpg,
+p12,客运站设计“轻帆”,"Station Design——""Light Sail""",t3,2021-12,15,,contents/project_details/p12/assets/cover.png,
+p13,博物馆设计,Museum Design,t3,2022-03,14,,contents/project_details/p13/assets/cover.png,
+p14,竹构作品“竹盏”,Bamboo Work,t4,2021-09,16,,contents/project_details/p14/assets/cover.png,1
+p15,Minecraft游戏建模作品“城市”,Minecraft Work——City,t4,2020-01,18,,contents/project_details/p15/assets/cover.png,
+p16,Minecraft游戏建模作品“水鸟世界”,Minecraft Work——Waterbird World,t4,2020-09,19,,contents/project_details/p16/assets/cover.png,1
+p17,城市环境对野生动物活动的影响研究,Wildlife in the City,t2,2026-04,8,,contents/project_details/p17/assets/cover.png,
+p18,绿链山居——缝合城乡的未来社区综合体探索,StitchVille: A Future Community Bridging Urban and Rural,t3,2022-07,13,,contents/project_details/p18/assets/cover.png,
+p19,ICECACHE: “一步取冰”冰格,ICECACHE: One-step ice release,t1,2026-05,4,,contents/project_details/p19/assets/cover.png,
