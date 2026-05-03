@@ -116,7 +116,7 @@ button {
   align-items: center;
   gap: 12px;
   max-width: 100%;
-  color: #2b2b2b;
+  color: var(--muted);
   font-size: 16px;
   font-weight: 400;
   letter-spacing: 0;
@@ -206,6 +206,7 @@ button {
 }
 
 .filters {
+  position: relative;
   padding: 16px 0 26px;
 }
 
@@ -653,12 +654,35 @@ button {
   .filter-buttons {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 16px 18px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 18px;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 max(12px, 5%) 0 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-buttons::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filters::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 5%;
+    min-width: 20px;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), #ffffff 82%);
   }
 
   .filter-btn {
+    flex: 0 0 auto;
     padding: 0 0 3px;
     font-size: 0.82rem;
   }

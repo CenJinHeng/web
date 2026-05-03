@@ -59,7 +59,7 @@ const DEFAULT_PERSONALIZATION = Object.freeze({
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
-const NAV_BRAND_TEXT = "劲衡";
+const NAV_BRAND_TEXT = Object.freeze({ zh: "劲衡", en: "Jinheng" });
 const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
 function cloneDefaultPersonalization() {
@@ -271,7 +271,7 @@ function parsePersonalizationText(text) {
 
 function applyPersonalization() {
   if (siteBrandText) {
-    siteBrandText.textContent = NAV_BRAND_TEXT;
+    siteBrandText.textContent = state.lang === "zh" ? NAV_BRAND_TEXT.zh : NAV_BRAND_TEXT.en;
   }
 
   if (!siteFooterCopy) return;

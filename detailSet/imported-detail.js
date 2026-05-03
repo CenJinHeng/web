@@ -22,7 +22,7 @@
     navBrandTextZh: "",
     navBrandTextEn: ""
   });
-  const NAV_BRAND_TEXT = "劲衡";
+  const NAV_BRAND_TEXT = Object.freeze({ zh: "劲衡", en: "Jinheng" });
   const PLACEHOLDER_BRAND_TEXTS = new Set(["XXX的个人空间", "XXX's Space"]);
 
   const state = {
@@ -143,7 +143,7 @@
         max-width: 100%;
         border: 0;
         background: transparent;
-        color: #2b2b2b;
+        color: #6f6a64;
         font-size: 16px;
         font-weight: 400;
         letter-spacing: 0;
@@ -566,7 +566,7 @@
       langBtn.setAttribute("aria-label", strings.langToggleAria);
     }
     if (brand) {
-      brand.textContent = NAV_BRAND_TEXT;
+      brand.textContent = state.lang === "zh" ? NAV_BRAND_TEXT.zh : NAV_BRAND_TEXT.en;
     }
   }
 

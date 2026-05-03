@@ -499,7 +499,7 @@ const DEFAULT_PERSONALIZATION = Object.freeze({
   footerBgRangesZh: [],
   footerBgRangesEn: []
 });
-const NAV_BRAND_TEXT = "劲衡";
+const NAV_BRAND_TEXT = Object.freeze({ zh: "劲衡", en: "Jinheng" });
 const DEFAULT_ABOUT_I18N = Object.freeze({
   zh: {
     page: {
@@ -11121,7 +11121,7 @@ async function openDetailPreview() {
   const navProjects = escapeHtml(previewLang === "zh" ? i18n.zh.nav.projects : i18n.en.nav.projects);
   const navAbout = escapeHtml(previewLang === "zh" ? i18n.zh.nav.about : i18n.en.nav.about);
   const navAria = escapeHtmlAttribute(previewLang === "zh" ? i18n.zh.nav.ariaLabel : i18n.en.nav.ariaLabel);
-  const navBrandText = NAV_BRAND_TEXT;
+  const navBrandText = previewLang === "zh" ? NAV_BRAND_TEXT.zh : NAV_BRAND_TEXT.en;
   const navInitialTheme = normalizeNavInitialTheme(state.detailNavInitialTheme);
   const previewRanges = getRangeListByLangWithFallback(
     state.detailBgRanges,
@@ -11668,7 +11668,7 @@ async function openAboutPreview() {
   const navProjects = escapeHtml(DEFAULT_ABOUT_I18N[previewLang].nav.projects);
   const navAbout = escapeHtml(DEFAULT_ABOUT_I18N[previewLang].nav.about);
   const navAria = escapeHtmlAttribute(DEFAULT_ABOUT_I18N[previewLang].nav.ariaLabel);
-  const previewBrandText = NAV_BRAND_TEXT;
+  const previewBrandText = previewLang === "zh" ? NAV_BRAND_TEXT.zh : NAV_BRAND_TEXT.en;
   const footerHtmlRaw = previewLang === "zh"
     ? (state.personalization.footerHtmlZh || state.personalization.footerHtmlEn || "")
     : (state.personalization.footerHtmlEn || state.personalization.footerHtmlZh || "");

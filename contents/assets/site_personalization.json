@@ -1,13 +1,7 @@
 {
   "footerEnabled": true,
-  "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><span style=\"color: rgb(217, 217, 217); font-size: 15.2px;\">© Copyright Jinheng Cen 2026</span></p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
+  "footerHtmlZh": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><span style=\"color: rgb(127, 127, 127);\"><font size=\"2\">© Copyright Jinheng Cen 2026</font></span></p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
   "footerHtmlEn": "<div style=\"text-align: center;\"><br></div><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><span style=\"color: rgb(217, 217, 217); font-size: 15.2px;\">© Copyright Jinheng Cen 2026</span></p><p style=\"text-align: center;\"><br></p><p style=\"text-align: center;\"><br></p>",
-  "footerBgRangesZh": [
-    {
-      "start": 1,
-      "end": 5,
-      "color": "#242424"
-    }
-  ],
+  "footerBgRangesZh": [],
   "footerBgRangesEn": []
 }
